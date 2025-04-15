@@ -1,7 +1,22 @@
 {
-    "welcome": "أهلاً بك في موقعنا الإلكتروني",
-    "settings": {
-        "theme": "تغيير المظهر",
-        "language": "اختيار اللغة"
+    "header": {
+        "appName": "تطبيقي",
+        "selectLanguage": "اختر اللغة",
+        "profile": "الملف الشخصي",
+        "settings": "الإعدادات",
+        "logout": "تسجيل الخروج",
+        "username": "اسم المستخدم"
+    },
+    "sidebar": {
+        "menu": "القائمة",
+        "admin": "لوحة التحكم",
+        "dashboard": "لوحة القيادة",
+        "store": "المتجر",
+        "notifications": "الإشعارات",
+        "reviews": "المراجعات",
+        "images": "الصور",
+        "services": "الخدمات",
+        "payments": "المدفوعات",
+        "profile": "الملف الشخصي"
     }
 }

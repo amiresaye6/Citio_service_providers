@@ -2,28 +2,32 @@ import { Layout, Menu, Drawer } from 'antd';
 import { UserOutlined, SettingOutlined, DashboardOutlined, ShopOutlined, BellOutlined, StarOutlined, PictureOutlined, CreditCardOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useDirection } from '../../context/DirectionContext';
 
 const { Sider } = Layout;
 
 const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => {
+    const { t } = useTranslation('common');
     const [collapsed, setCollapsed] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const {isRtl } = useDirection();
 
     const menuItems = [
         {
             key: '1',
             icon: <DashboardOutlined />,
-            label: 'Dashboard',
+            label: t('sidebar.dashboard'),
             onClick: () => {
                 navigate('/');
-                if (isMobile) onClose(); // Close Drawer on mobile after click
+                if (isMobile) onClose();
             },
         },
         {
             key: '2',
             icon: <ShopOutlined />,
-            label: 'Store',
+            label: t('sidebar.store'),
             onClick: () => {
                 navigate('/store');
                 if (isMobile) onClose();
@@ -32,7 +36,7 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
         {
             key: '3',
             icon: <BellOutlined />,
-            label: 'Notifications',
+            label: t('sidebar.notifications'),
             onClick: () => {
                 navigate('/notifications');
                 if (isMobile) onClose();
@@ -41,7 +45,7 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
         {
             key: '4',
             icon: <StarOutlined />,
-            label: 'Reviews',
+            label: t('sidebar.reviews'),
             onClick: () => {
                 navigate('/reviews');
                 if (isMobile) onClose();
@@ -50,7 +54,7 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
         {
             key: '5',
             icon: <PictureOutlined />,
-            label: 'Images',
+            label: t('sidebar.images'),
             onClick: () => {
                 navigate('/images');
                 if (isMobile) onClose();
@@ -59,7 +63,7 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
         {
             key: '6',
             icon: <SettingOutlined />,
-            label: 'Services',
+            label: t('sidebar.services'),
             onClick: () => {
                 navigate('/services');
                 if (isMobile) onClose();
@@ -68,7 +72,7 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
         {
             key: '7',
             icon: <CreditCardOutlined />,
-            label: 'Payments',
+            label: t('sidebar.payments'),
             onClick: () => {
                 navigate('/payments');
                 if (isMobile) onClose();
@@ -77,7 +81,7 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
         {
             key: '8',
             icon: <UserOutlined />,
-            label: 'My Profile',
+            label: t('sidebar.profile'),
             onClick: () => {
                 navigate('/profile');
                 if (isMobile) onClose();
@@ -98,7 +102,7 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
                     paddingLeft: collapsed && !isMobile ? 0 : 8,
                 }}
             >
-                Admin
+                {t('sidebar.admin')}
             </div>
             <Menu
                 theme="light"
@@ -111,12 +115,12 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
 
     return isMobile ? (
         <Drawer
-            title="Menu"
-            placement="left"
+            title={t('sidebar.menu')}
             onClose={onClose}
             open={visible}
             width={200}
             bodyStyle={{ padding: 0 }}
+            placement={isRtl ? "right" : "left"}
         >
             {menuContent}
         </Drawer>

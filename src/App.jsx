@@ -1,12 +1,14 @@
 import { BrowserRouter } from 'react-router-dom';
+import { DirectionProvider } from './context/DirectionContext';
 import AppRoutes from './routes/index';
-
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <DirectionProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </DirectionProvider>
   );
 }
 

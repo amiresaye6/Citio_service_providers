@@ -1,8 +1,10 @@
 import { Layout, Button } from 'antd';
 import { MenuOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import SideBar from '../../components/common/Sidebar';
+import HeaderComponent from '../../components/common/Header';
+
 
 const { Content } = Layout;
 
@@ -11,9 +13,14 @@ const MainLayout = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     // Update isMobile on window resize
-    window.addEventListener('resize', () => {
-        setIsMobile(window.innerWidth < 768);
-    });
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const toggleDrawer = () => {
         setDrawerVisible(!drawerVisible);
@@ -28,10 +35,11 @@ const MainLayout = () => {
                         position: 'fixed',
                         top: 16,
                         left: 16,
-                        zIndex: 1000,
+                        zIndex: 1001,
                     }}
                     icon={<MenuOutlined />}
                     onClick={toggleDrawer}
+                    aria-label="Toggle menu"
                 />
             )}
 
@@ -46,11 +54,15 @@ const MainLayout = () => {
                 <SideBar />
             )}
 
-            {/* Content area */}
+            {/* Main content layout */}
             <Layout>
+                {/* Header with language selector */}
+                <HeaderComponent />
+
+                {/* Content area */}
                 <Content
                     style={{
-                        margin: isMobile ? '16px' : '16px 16px 16px 16px',
+                        margin: '16px',
                         background: '#fff',
                         padding: 24,
                         borderRadius: 12,
