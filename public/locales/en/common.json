@@ -1,2 +1,7 @@
 {
+    "welcome": "Welcome to my website!",
+    "settings": {
+        "theme": "Toggle Theme",
+        "language": "Change Language"
+    }
 }
