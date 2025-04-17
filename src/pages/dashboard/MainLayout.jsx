@@ -63,7 +63,7 @@ const MainLayout = () => {
                 <Content
                     style={{
                         margin: '16px',
-                        background: '#fff',
+                        // background: '#fff',
                         padding: 24,
                         borderRadius: 12,
                     }}

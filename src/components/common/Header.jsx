@@ -1,7 +1,8 @@
-import { Layout, Select, Avatar, Dropdown, Space, Badge } from 'antd';
+import { Layout, Select, Avatar, Dropdown, Space, Badge, Switch } from 'antd';
 import { UserOutlined, BellOutlined, GlobalOutlined, DownOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 const { Header } = Layout;
 const { Option } = Select;
@@ -9,8 +10,8 @@ const { Option } = Select;
 const HeaderComponent = () => {
     const { t, i18n } = useTranslation('common');
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const { themeMode, toggleTheme } = useTheme();
 
-    // Update isMobile on window resize
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
@@ -48,7 +49,6 @@ const HeaderComponent = () => {
         <Header
             style={{
                 padding: '0 16px',
-                background: '#fff',
                 boxShadow: '0 1px 4px rgba(0, 0, 0, 0.12)',
                 display: 'flex',
                 alignItems: 'center',
@@ -81,6 +81,13 @@ const HeaderComponent = () => {
                 <Badge count={5} size="small">
                     <BellOutlined style={{ fontSize: '20px', cursor: 'pointer' }} />
                 </Badge>
+
+                <Switch
+                    checked={themeMode === 'dark'}
+                    onChange={toggleTheme}
+                    checkedChildren="Dark"
+                    unCheckedChildren="Light"
+                />
 
                 <Dropdown
                     menu={{ items: userMenuItems }}
