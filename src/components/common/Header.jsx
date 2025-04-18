@@ -3,6 +3,9 @@ import { UserOutlined, BellOutlined, GlobalOutlined, DownOutlined } from '@ant-d
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useSelector } from 'react-redux';
+// import { logout } from '../../redux/slices/authSlice'; // Import logout action from authSlice
+import { useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
 const { Option } = Select;
@@ -11,6 +14,9 @@ const HeaderComponent = () => {
     const { t, i18n } = useTranslation('common');
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const { themeMode, toggleTheme } = useTheme();
+    const { user, isAuthenticated } = useSelector((state) => state.auth); // Get user and auth status from Redux
+    // const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const handleResize = () => {
@@ -27,8 +33,19 @@ const HeaderComponent = () => {
 
     const languages = [
         { code: 'en', name: 'English' },
-        { code: 'ar', name: 'العربية' }
+        { code: 'ar', name: 'العربية' },
     ];
+
+    const handleMenuClick = ({ key }) => {
+        if (key === '3') { // Logout
+            // dispatch(logout());
+            navigate('/login'); // Redirect to login page after logout
+        } else if (key === '1') {
+            navigate('/profile'); // Example: Navigate to profile page
+        } else if (key === '2') {
+            navigate('/settings'); // Example: Navigate to settings page
+        }
+    };
 
     const userMenuItems = [
         {
@@ -42,8 +59,11 @@ const HeaderComponent = () => {
         {
             key: '3',
             label: t('header.logout'),
-        }
+        },
     ];
+
+    // Display username or fallback to generic label
+    const displayName = isAuthenticated && user?.fullName ? user.fullName : t('header.username');
 
     return (
         <Header
@@ -57,10 +77,15 @@ const HeaderComponent = () => {
                 position: 'sticky',
                 top: 0,
                 zIndex: 1000,
+                background: themeMode === 'light'
+                    ? '#FFFFFF'
+                    : '#1D3A3C', // Match ThemeProvider's colorBgBase
             }}
         >
             <div className="logo" style={{ width: isMobile ? 0 : 200, transition: 'width 0.3s' }}>
-                {!isMobile && <h2 style={{ margin: 0 }}>{t('header.appName')}</h2>}
+                {!isMobile && <h2 style={{ margin: 0, color: themeMode === 'light' ? '#000000' : '#E0E0E0' }}>
+                    {t('header.appName')}
+                </h2>}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -90,14 +115,15 @@ const HeaderComponent = () => {
                 />
 
                 <Dropdown
-                    menu={{ items: userMenuItems }}
+                    menu={{ items: userMenuItems, onClick: handleMenuClick }}
                     placement="bottomRight"
                     arrow
+                    disabled={!isAuthenticated} // Disable dropdown if not authenticated
                 >
                     <a onClick={(e) => e.preventDefault()}>
                         <Space>
                             <Avatar icon={<UserOutlined />} />
-                            {!isMobile && <span>{t('header.username')}</span>}
+                            {!isMobile && <span>{displayName}</span>}
                             <DownOutlined />
                         </Space>
                     </a>
