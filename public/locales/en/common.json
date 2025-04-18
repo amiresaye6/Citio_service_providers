@@ -1,0 +1,22 @@
+{
+    "header": {
+        "appName": "My Application",
+        "selectLanguage": "Select Language",
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout",
+        "username": "User Name"
+    },
+    "sidebar": {
+        "menu": "Menu",
+        "admin": "Admin Panel",
+        "dashboard": "Dashboard",
+        "store": "Store",
+        "notifications": "Notifications",
+        "reviews": "Reviews",
+        "images": "Images",
+        "services": "Services",
+        "payments": "Payments",
+        "profile": "Profile"
+    }
+}

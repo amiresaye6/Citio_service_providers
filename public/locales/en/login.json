@@ -1,0 +1,14 @@
+{
+    "login": {
+        "title": "Welcome Back",
+        "email": "Email Address",
+        "password": "Password",
+        "rememberMe": "Remember me",
+        "forgotPassword": "Forgot password?",
+        "submit": "Log In",
+        "emailRequired": "Please enter your email address.",
+        "passwordRequired": "Please enter your password.",
+        "invalidEmail": "Please enter a valid email address.",
+        "invalidCredentials": "Invalid email or password. Please try again."
+    }
+}

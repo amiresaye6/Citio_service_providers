@@ -1,0 +1,42 @@
+[dir="rtl"] {
+    text-align: right;
+}
+
+/* global-styles.css */
+:root {
+    /* Default light theme variables will be set by ThemeProvider */
+    --color-primary: #2973B2;
+    --color-text: #777777;
+    --color-text-secondary: #54595F;
+    --color-success: #17B978;
+    --color-info: #1696E7;
+    --color-warning: #E0B252;
+    --color-link: #333333;
+    --color-link-hover: #242424;
+    --color-bg-base: #F2EFE7;
+    --color-accent: #61CE70;
+    --color-error: #CF2E2E;
+}
+
+/* For any custom components that don't use Ant Design */
+.custom-component {
+    color: var(--color-text);
+    background-color: var(--color-bg-base);
+    border-color: var(--color-primary);
+}
+
+.custom-button {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* You can also use the data-theme attribute for theme-specific styling */
+[data-theme='dark'] .component-with-custom-dark-styling {
+    /* Dark-specific overrides */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='light'] .component-with-custom-light-styling {
+    /* Light-specific overrides */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
