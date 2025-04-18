@@ -1,18 +1,40 @@
+import React from 'react';
 import { Layout, Menu, Drawer } from 'antd';
-import { UserOutlined, SettingOutlined, DashboardOutlined, ShopOutlined, BellOutlined, StarOutlined, PictureOutlined, CreditCardOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import {
+    UserOutlined,
+    SettingOutlined,
+    DashboardOutlined,
+    ShopOutlined,
+    BellOutlined,
+    StarOutlined,
+    PictureOutlined,
+    CreditCardOutlined
+} from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../context/DirectionContext';
+import { useTheme } from '../../context/ThemeContext';
 
 const { Sider } = Layout;
 
-const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => {
+const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = false }) => {
     const { t } = useTranslation('common');
-    const [collapsed, setCollapsed] = useState(false);
+    const { isRtl } = useDirection();
+    const { themeMode } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
-    const {isRtl } = useDirection();
+
+    // Map routes to menu keys for accurate selectedKeys
+    const routeToKey = {
+        '/': '1',
+        '/store': '2',
+        '/notifications': '3',
+        '/reviews': '4',
+        '/images': '5',
+        '/services': '6',
+        '/payments': '7',
+        '/profile': '8',
+    };
 
     const menuItems = [
         {
@@ -91,23 +113,29 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
 
     const menuContent = (
         <>
-            <div
-                style={{
-                    height: 32,
-                    margin: 16,
-                    color: isMobile ? '#000' : '#000',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
-                    paddingLeft: collapsed && !isMobile ? 0 : 8,
-                }}
-            >
-                {t('sidebar.admin')}
+            <div className="demo-logo-vertical" style={{
+                height: 64,
+                // margin: '16px 16px 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                // justifyContent: collapsed && !isMobile ? 'center' : isRtl ? 'flex-end' : 'flex-start',
+            }}>
+                <img
+                    src="/citio.svg"
+                    alt={t('sidebar.logoAlt')}
+                    style={{
+                        maxWidth: collapsed && !isMobile ? '60px' : '150px',
+                        maxHeight: '100px',
+                        objectFit: 'contain',
+                        transition: 'max-width 0.3s',
+                    }}
+                />
             </div>
             <Menu
-                theme="light"
+                theme={themeMode === 'light' ? 'light' : 'dark'}
                 mode="inline"
-                selectedKeys={[menuItems.find(item => item.onClick.toString().includes(location.pathname))?.key || '1']}
+                selectedKeys={[routeToKey[location.pathname] || '1']}
                 items={menuItems}
             />
         </>
@@ -115,21 +143,31 @@ const SideBar = ({ visible = false, onClose = () => { }, isMobile = false }) => 
 
     return isMobile ? (
         <Drawer
-            title={t('sidebar.menu')}
+            title={
+                <img
+                    src="/citio.svg"
+                    alt={t('sidebar.logoAlt')}
+                    style={{
+                        maxWidth: '100px',
+                        maxHeight: '32px',
+                        objectFit: 'contain',
+                    }}
+                />
+            }
             onClose={onClose}
             open={visible}
             width={200}
             bodyStyle={{ padding: 0 }}
-            placement={isRtl ? "right" : "left"}
+            placement={isRtl ? 'right' : 'left'}
         >
             {menuContent}
         </Drawer>
     ) : (
         <Sider
+            trigger={null}
             collapsible
             collapsed={collapsed}
-            onCollapse={setCollapsed}
-            theme="light"
+            theme={themeMode === 'light' ? 'light' : 'dark'}
             width={200}
         >
             {menuContent}
