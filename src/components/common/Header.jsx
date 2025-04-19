@@ -61,23 +61,20 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
     const displayName = isAuthenticated && user?.fullName ? user.fullName : t('header.username');
 
     return (
-        <Header style={{
-            padding: 0,
-            background: token.colorBgContainer,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-        }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Header
+            className="p-0 flex items-center justify-between"
+            style={{ background: token.colorBgContainer }}
+        >
+            <div className="flex items-center">
                 <Button
                     type="text"
                     icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                     onClick={toggleCollapsed}
-                    style={{ fontSize: '16px', width: 64, height: 64 }}
+                    className="text-base w-16 h-16"
                 />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginRight: '20px' }}>
+            <div className="flex items-center gap-4 mr-5">
                 <Select
                     defaultValue={i18n.language}
                     style={{ width: isMobile ? 80 : 120 }}
@@ -93,7 +90,7 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
                 </Select>
 
                 <Badge count={5} size="small">
-                    <BellOutlined style={{ fontSize: '20px', cursor: 'pointer' }} />
+                    <BellOutlined className="text-xl cursor-pointer" />
                 </Badge>
 
                 <Switch
@@ -109,7 +106,7 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
                     arrow
                     disabled={!isAuthenticated}
                 >
-                    <a onClick={(e) => e.preventDefault()}>
+                    <a onClick={(e) => e.preventDefault()} className="flex items-center">
                         <Space>
                             <Avatar icon={<UserOutlined />} />
                             {!isMobile && <span>{displayName}</span>}

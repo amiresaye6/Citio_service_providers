@@ -113,23 +113,13 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
 
     const menuContent = (
         <>
-            <div className="demo-logo-vertical" style={{
-                height: 64,
-                // margin: '16px 16px 0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                // justifyContent: collapsed && !isMobile ? 'center' : isRtl ? 'flex-end' : 'flex-start',
-            }}>
+            <div className="h-16 flex items-center justify-center">
                 <img
                     src="/citio.svg"
                     alt={t('sidebar.logoAlt')}
-                    style={{
-                        maxWidth: collapsed && !isMobile ? '60px' : '150px',
-                        maxHeight: '100px',
-                        objectFit: 'contain',
-                        transition: 'max-width 0.3s',
-                    }}
+                    className={`max-h-[100px] object-contain transition-all duration-300 ${
+                        collapsed && !isMobile ? 'max-w-[60px]' : 'max-w-[150px]'
+                    }`}
                 />
             </div>
             <Menu
@@ -147,11 +137,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 <img
                     src="/citio.svg"
                     alt={t('sidebar.logoAlt')}
-                    style={{
-                        maxWidth: '100px',
-                        maxHeight: '32px',
-                        objectFit: 'contain',
-                    }}
+                    className="max-w-[100px] max-h-8 object-contain"
                 />
             }
             onClose={onClose}
