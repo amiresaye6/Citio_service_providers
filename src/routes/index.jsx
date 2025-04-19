@@ -3,6 +3,10 @@ import MainLayout from '../pages/dashboard/MainLayout';
 import NotFound from '../pages/errors/NotFound';
 import ProtectedRoute from '../components/common/ProtectedRoute';
 import LoginPage from '../pages/auth/Login';
+import OverviewPage from '../pages/dashboard/adminDashboards/OverviewPage';
+import AllTransactionsTable from '../components/Admin/AllTransactionsTable';
+import UsersPage from '../pages/dashboard/adminDashboards/UsersPage';
+
 const AppRoutes = () => (
     <Routes>
         {/* Standalone routes for login and signup (no MainLayout/Sidebar) */}
@@ -15,7 +19,7 @@ const AppRoutes = () => (
                 path="/"
                 element={
                     <ProtectedRoute>
-                        <NotFound />
+                        <OverviewPage />
                     </ProtectedRoute>
                 }
             />
@@ -23,7 +27,7 @@ const AppRoutes = () => (
                 path="/store"
                 element={
                     <ProtectedRoute>
-                        <NotFound />
+                        <AllTransactionsTable />
                     </ProtectedRoute>
                 }
             />
@@ -31,7 +35,7 @@ const AppRoutes = () => (
                 path="/notifications"
                 element={
                     <ProtectedRoute>
-                        <NotFound />
+                        <UsersPage />
                     </ProtectedRoute>
                 }
             />
