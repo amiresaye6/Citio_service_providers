@@ -1,14 +1,16 @@
 import React from 'react';
 import { Layout, Menu, Drawer } from 'antd';
 import {
-    UserOutlined,
-    SettingOutlined,
     DashboardOutlined,
-    ShopOutlined,
-    BellOutlined,
+    TeamOutlined,
+    FileDoneOutlined,
+    AppstoreOutlined,
     StarOutlined,
-    PictureOutlined,
-    CreditCardOutlined
+    ShoppingCartOutlined,
+    UserOutlined,
+    CreditCardOutlined,
+    IdcardOutlined,
+    BookOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -24,16 +26,20 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Map routes to menu keys for accurate selectedKeys
     const routeToKey = {
         '/': '1',
-        '/store': '2',
-        '/notifications': '3',
-        '/reviews': '4',
-        '/images': '5',
-        '/services': '6',
-        '/payments': '7',
-        '/profile': '8',
+        '/admin/vendors': '2',
+        '/admin/vendor-requests': '3',
+        '/admin/menus': '4',
+        '/admin/ratings': '5',
+        '/admin/orders': '6',
+        '/admin/users': '7',
+        '/admin/transactions': '8',
+        '/vendor': '9',
+        '/vendor/profile': '10',
+        '/vendor/menu': '11',
+        '/vendor/orders': '12',
+        '/vendor/ratings': '13',
     };
 
     const menuItems = [
@@ -48,64 +54,118 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
         },
         {
             key: '2',
-            icon: <ShopOutlined />,
-            label: t('sidebar.store'),
+            icon: <TeamOutlined />,
+            label: t('sidebar.vendors'),
             onClick: () => {
-                navigate('/store');
+                navigate('/admin/vendors');
                 if (isMobile) onClose();
             },
         },
         {
             key: '3',
-            icon: <BellOutlined />,
-            label: t('sidebar.notifications'),
+            icon: <FileDoneOutlined />,
+            label: t('sidebar.vendorRequests'),
             onClick: () => {
-                navigate('/notifications');
+                navigate('/admin/vendor-requests');
                 if (isMobile) onClose();
             },
         },
         {
             key: '4',
-            icon: <StarOutlined />,
-            label: t('sidebar.reviews'),
+            icon: <AppstoreOutlined />,
+            label: t('sidebar.menus'),
             onClick: () => {
-                navigate('/reviews');
+                navigate('/admin/menus');
                 if (isMobile) onClose();
             },
         },
         {
             key: '5',
-            icon: <PictureOutlined />,
-            label: t('sidebar.images'),
+            icon: <StarOutlined />,
+            label: t('sidebar.ratings'),
             onClick: () => {
-                navigate('/images');
+                navigate('/admin/ratings');
                 if (isMobile) onClose();
             },
         },
         {
             key: '6',
-            icon: <SettingOutlined />,
-            label: t('sidebar.services'),
+            icon: <ShoppingCartOutlined />,
+            label: t('sidebar.orders'),
             onClick: () => {
-                navigate('/services');
+                navigate('/admin/orders');
                 if (isMobile) onClose();
             },
         },
         {
             key: '7',
-            icon: <CreditCardOutlined />,
-            label: t('sidebar.payments'),
+            icon: <UserOutlined />,
+            label: t('sidebar.users'),
             onClick: () => {
-                navigate('/payments');
+                navigate('/admin/users');
                 if (isMobile) onClose();
             },
         },
         {
             key: '8',
-            icon: <UserOutlined />,
-            label: t('sidebar.profile'),
+            icon: <CreditCardOutlined />,
+            label: t('sidebar.transactions'),
             onClick: () => {
-                navigate('/profile');
+                navigate('/admin/transactions');
+                if (isMobile) onClose();
+            },
+        },
+        {
+            key: '9',
+            icon: <DashboardOutlined />,
+            label: t('sidebar.vendorDashboard'),
+            onClick: () => {
+                navigate('/vendor');
+                if (isMobile) onClose();
+            },
+        },
+        {
+            key: '14',
+            icon: <FileDoneOutlined />,
+            label: t('sidebar.manageStore'),
+            onClick: () => {
+                navigate('/vendor/manage-store');
+                if (isMobile) onClose();
+            },
+        },
+        {
+            key: '10',
+            icon: <IdcardOutlined />,
+            label: t('sidebar.vendorProfile'),
+            onClick: () => {
+                navigate('/vendor/profile');
+                if (isMobile) onClose();
+            },
+        },
+        {
+            key: '11',
+            icon: <AppstoreOutlined />,
+            label: t('sidebar.vendorMenu'),
+            onClick: () => {
+                navigate('/vendor/menu');
+                if (isMobile) onClose();
+            },
+        },
+        {
+            key: '12',
+            icon: <ShoppingCartOutlined />,
+            label: t('sidebar.vendorOrders'),
+            onClick: () => {
+                navigate('/vendor/orders');
+                if (isMobile) onClose();
+            },
+        },
+        {
+            key: '13',
+            icon: <BookOutlined />,
+            label: t('sidebar.vendorRatings'),
+            onClick: () => {
+                navigate('/vendor/ratings');
                 if (isMobile) onClose();
             },
         },
@@ -117,9 +177,8 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 <img
                     src="/citio.svg"
                     alt={t('sidebar.logoAlt')}
-                    className={`max-h-[100px] object-contain transition-all duration-300 ${
-                        collapsed && !isMobile ? 'max-w-[60px]' : 'max-w-[150px]'
-                    }`}
+                    className={`max-h-[100px] object-contain transition-all duration-300 ${collapsed && !isMobile ? 'max-w-[60px]' : 'max-w-[150px]'
+                        }`}
                 />
             </div>
             <Menu

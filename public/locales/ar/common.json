@@ -8,15 +8,19 @@
         "username": "اسم المستخدم"
     },
     "sidebar": {
-        "menu": "القائمة",
-        "admin": "لوحة التحكم",
         "dashboard": "لوحة القيادة",
-        "store": "المتجر",
-        "notifications": "الإشعارات",
-        "reviews": "المراجعات",
-        "images": "الصور",
-        "services": "الخدمات",
-        "payments": "المدفوعات",
-        "profile": "الملف الشخصي"
+        "vendors": "البائعون",
+        "vendorRequests": "طلبات البائعين",
+        "menus": "القوائم",
+        "ratings": "التقييمات",
+        "orders": "الطلبات",
+        "users": "المستخدمون",
+        "transactions": "المعاملات",
+        "vendorProfile": "ملف البائع",
+        "vendorMenu": "قائمة البائع",
+        "vendorOrders": "طلبات البائع",
+        "vendorRatings": "تقييمات البائع",
+        "vendorDashboard": "لوحة القيادة للبائع",
+        "manageStore": "إدارة المتجر"
     }
 }

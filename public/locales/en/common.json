@@ -8,15 +8,19 @@
         "username": "User Name"
     },
     "sidebar": {
-        "menu": "Menu",
-        "admin": "Admin Panel",
         "dashboard": "Dashboard",
-        "store": "Store",
-        "notifications": "Notifications",
-        "reviews": "Reviews",
-        "images": "Images",
-        "services": "Services",
-        "payments": "Payments",
-        "profile": "Profile"
+        "vendors": "Vendors",
+        "vendorRequests": "Vendor Requests",
+        "menus": "Menus",
+        "ratings": "Ratings",
+        "orders": "Orders",
+        "users": "Users",
+        "transactions": "Transactions",
+        "vendorProfile": "Vendor Profile",
+        "vendorMenu": "Vendor Menu",
+        "vendorOrders": "Vendor Orders",
+        "vendorRatings": "Vendor Ratings",
+        "vendorDashboard": "Vendor Dashboard",
+        "manageStore": "Manage Store"
     }
 }

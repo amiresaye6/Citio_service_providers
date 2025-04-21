@@ -3,18 +3,30 @@ import MainLayout from '../pages/dashboard/MainLayout';
 import NotFound from '../pages/errors/NotFound';
 import ProtectedRoute from '../components/common/ProtectedRoute';
 import LoginPage from '../pages/auth/Login';
-import OverviewPage from '../pages/dashboard/adminDashboards/OverviewPage';
-import AllTransactionsTable from '../components/Admin/AllTransactionsTable';
-import UsersPage from '../pages/dashboard/adminDashboards/UsersPage';
+
+import VendorOrdersPage from '../pages/VendorOrdersPage';
+import VendorMenuPage from '../pages/VendorMenuPage';
+import OverviewPage from '../pages/OverviewPage';
+import UsersPage from '../pages/UsersPage';
+import AllTransactionsPage from '../pages/AllTransactionsPage';
+import VendorManagementPage from '../pages/VendorManagementPage';
+import VendorRatingsPage from '../pages/VendorRatingsPage';
+import AdminVendorRequestsPage from '../pages/AdminVendorRequestsPage';
+import AdminMenusPage from '../pages/AdminMenusPage';
+import AdminRatingsPage from '../pages/AdminRatingsPage';
+import AdminOrdersPage from '../pages/AdminOrdersPage';
+import VendorAccountPage from '../pages/VendorAccountPage';
+import VendorDashboardPage from '../pages/VendorDashboardPage';
+import ManageStorePage from '../pages/VendorProfilePage';
 
 const AppRoutes = () => (
     <Routes>
-        {/* Standalone routes for login and signup (no MainLayout/Sidebar) */}
+        {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<NotFound />} />
 
-        {/* Parent route with MainLayout and Sidebar */}
+        {/* Protected Routes */}
         <Route element={<MainLayout />}>
+            {/* Admin Dashboard */}
             <Route
                 path="/"
                 element={
@@ -24,15 +36,47 @@ const AppRoutes = () => (
                 }
             />
             <Route
-                path="/store"
+                path="/admin/vendors"
                 element={
                     <ProtectedRoute>
-                        <AllTransactionsTable />
+                        <VendorManagementPage />
                     </ProtectedRoute>
                 }
             />
             <Route
-                path="/notifications"
+                path="/admin/vendor-requests"
+                element={
+                    <ProtectedRoute>
+                        <AdminVendorRequestsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/menus"
+                element={
+                    <ProtectedRoute>
+                        <AdminMenusPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/ratings"
+                element={
+                    <ProtectedRoute>
+                        <AdminRatingsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/orders"
+                element={
+                    <ProtectedRoute>
+                        <AdminOrdersPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/users"
                 element={
                     <ProtectedRoute>
                         <UsersPage />
@@ -40,47 +84,66 @@ const AppRoutes = () => (
                 }
             />
             <Route
-                path="/reviews"
+                path="/admin/transactions"
                 element={
                     <ProtectedRoute>
-                        <NotFound />
+                        <AllTransactionsPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Vendor Dashboard */}
+            <Route
+                path="/vendor"
+                element={
+                    <ProtectedRoute>
+                        <VendorDashboardPage />
                     </ProtectedRoute>
                 }
             />
             <Route
-                path="/images"
+                path="/vendor/manage-store"
                 element={
                     <ProtectedRoute>
-                        <NotFound />
+                        <ManageStorePage />
                     </ProtectedRoute>
                 }
             />
             <Route
-                path="/services"
+                path="/vendor/profile"
                 element={
                     <ProtectedRoute>
-                        <NotFound />
+                        <VendorAccountPage />
                     </ProtectedRoute>
                 }
             />
             <Route
-                path="/payments"
+                path="/vendor/menu"
                 element={
                     <ProtectedRoute>
-                        <NotFound />
+                        <VendorMenuPage />
                     </ProtectedRoute>
                 }
             />
             <Route
-                path="/profile"
+                path="/vendor/orders"
                 element={
                     <ProtectedRoute>
-                        <NotFound />
+                        <VendorOrdersPage />
                     </ProtectedRoute>
                 }
             />
-            {/* Catch-all route for undefined paths */}
-            {/* <Route path="*" element={<NotFound />} /> */}
+            <Route
+                path="/vendor/ratings"
+                element={
+                    <ProtectedRoute>
+                        <VendorRatingsPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
         </Route>
     </Routes>
 );
