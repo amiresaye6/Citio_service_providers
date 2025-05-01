@@ -9,6 +9,12 @@ export const login = createAsyncThunk(
     async (credentials, { rejectWithValue }) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/Auth`, credentials);
+
+            // Save token immediately after login success
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+            }
+
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || 'Login failed');
@@ -33,8 +39,8 @@ const authSlice = createSlice({
     name: 'auth',
     initialState: {
         user: null,
-        token: null,
-        isAuthenticated: false,
+        token: localStorage.getItem('token') || null, // Load token from storage initially
+        isAuthenticated: !!localStorage.getItem('token'), // If token exists, assume authenticated
         loading: false,
         error: null,
     },
@@ -44,14 +50,15 @@ const authSlice = createSlice({
             state.token = null;
             state.isAuthenticated = false;
             state.error = null;
+            localStorage.removeItem('token'); // Remove token from storage when logging out
         },
         clearError: (state) => {
             state.error = null;
         },
     },
     extraReducers: (builder) => {
-        // Login cases
         builder
+            // Login
             .addCase(login.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -72,7 +79,7 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-            // Register cases
+            // Register
             .addCase(register.pending, (state) => {
                 state.loading = true;
                 state.error = null;
