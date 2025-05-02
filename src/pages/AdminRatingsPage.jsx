@@ -60,9 +60,9 @@ const AdminRatingsPage = () => {
             sorter: true,
         },
         {
-            title: 'Vendor',
-            dataIndex: 'vendor',
-            key: 'vendor',
+            title: 'Product',
+            dataIndex: 'product',
+            key: 'product',
             sorter: true,
         },
         {
@@ -98,7 +98,7 @@ const AdminRatingsPage = () => {
                     <Button
                         type="link"
                         onClick={() => handleRespond(record)}
-                        disabled={record.response}
+                        disabled={true}
                     >
                         Respond
                     </Button>
@@ -115,40 +115,11 @@ const AdminRatingsPage = () => {
         },
     ];
 
-    // Filters
-    // const filters = [
-    //     {
-    //         key: 'status',
-    //         placeholder: 'Select Status',
-    //         options: [
-    //             { label: 'Active', value: true },
-    //             { label: 'Flagged', value: false },
-    //         ],
-    //     },
-    // ];
-
     // Handle search
     const handleSearch = (value) => {
         setSearchValue(value);
         setCurrentPage(1);
     };
-
-    // Handle filter change
-    // const handleFilterChange = (key, value) => {
-    //     if (key === 'status') {
-    //         setStatusFilter(value !== undefined ? value : null);
-    //     }
-    //     setCurrentPage(1);
-    // };
-
-    // Handle reset filters
-    // const handleResetFilters = () => {
-    //     setSearchValue('');
-    //     setStatusFilter(null);
-    //     setSortColumn('');
-    //     setSortDirection('');
-    //     setCurrentPage(1);
-    // };
 
     // Handle table change (pagination and sorting)
     const handleTableChange = (pagination, filters, sorter) => {
@@ -240,17 +211,10 @@ const AdminRatingsPage = () => {
             />
 
             <SearchInput
-                placeholder="Search by reviewer, vendor, or comment..."
+                placeholder="Search by reviewer, product, or comment..."
                 onSearch={handleSearch}
                 className="mb-4"
             />
-
-            {/* <FilterBar
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onReset={handleResetFilters}
-                loading={loading}
-            /> */}
 
             {loading ? (
                 <LoadingSpinner text="Loading ratings..." />

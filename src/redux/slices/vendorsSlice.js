@@ -170,13 +170,14 @@ export const fetchVendorRatings = createAsyncThunk(
             }
 
             data.items = data.items.map(item => ({
-                ...item,
-                reviewer: item.email,
-                vendor: item.businessName,
+                id: item.reviewId,
+                reviewer: item.customerName,
+                product: item.productNameEn,
+                rating: item.rating,
                 comment: item.comment || '',
-                status: item.status || 'active',
-                date: item.date || new Date().toISOString().split('T')[0],
-                response: item.response || '',
+                status: 'active', // API doesn't provide status; default to 'active'
+                date: item.createdAt.split('T')[0],
+                response: '', // API doesn't provide response field; initialize as empty
             }));
 
             return data;

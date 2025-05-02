@@ -157,7 +157,9 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
 
     // Filter menu items based on businessType
     const filteredMenuItems = isAuthenticated && user?.businessType
-        ? menuItems.filter(item => item.type === user.businessType.toLowerCase())
+        ? (user.businessType.toLowerCase() === 'admin' 
+            ? menuItems.filter(item => item.type === 'admin')
+            : menuItems.filter(item => item.type === 'vendor'))
         : [];
 
     const menuContent = (
