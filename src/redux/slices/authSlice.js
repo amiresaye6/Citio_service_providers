@@ -39,8 +39,8 @@ const authSlice = createSlice({
     name: 'auth',
     initialState: {
         user: null,
-        token: localStorage.getItem('token') || null, // Load token from storage initially
-        isAuthenticated: !!localStorage.getItem('token'), // If token exists, assume authenticated
+        token: localStorage.getItem('token') || null,
+        isAuthenticated: !!localStorage.getItem('token'),
         loading: false,
         error: null,
     },
@@ -50,7 +50,7 @@ const authSlice = createSlice({
             state.token = null;
             state.isAuthenticated = false;
             state.error = null;
-            localStorage.removeItem('token'); // Remove token from storage when logging out
+            localStorage.removeItem('token');
         },
         clearError: (state) => {
             state.error = null;

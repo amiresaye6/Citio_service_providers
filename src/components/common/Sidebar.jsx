@@ -16,6 +16,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../context/DirectionContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useSelector } from 'react-redux';
 
 const { Sider } = Layout;
 
@@ -25,18 +26,17 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
     const { themeMode } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
+    const { user, isAuthenticated } = useSelector((state) => state.auth);
 
     const routeToKey = {
         '/': '1',
         '/admin/vendors': '2',
-        // '/admin/vendor-requests': '3',
-        // '/admin/menus': '4',
         '/admin/ratings': '5',
         '/admin/orders': '6',
         '/admin/users': '7',
         '/admin/transactions': '8',
         '/vendor': '9',
-        // '/vendor/profile': '10',
+        '/vendor/manage-store': '14',
         '/vendor/menu': '11',
         '/vendor/orders': '12',
         '/vendor/ratings': '13',
@@ -51,6 +51,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/');
                 if (isMobile) onClose();
             },
+            type: 'admin',
         },
         {
             key: '2',
@@ -60,25 +61,8 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/admin/vendors');
                 if (isMobile) onClose();
             },
+            type: 'admin',
         },
-        // {
-        //     key: '3',
-        //     icon: <FileDoneOutlined />,
-        //     label: t('sidebar.vendorRequests'),
-        //     onClick: () => {
-        //         navigate('/admin/vendor-requests');
-        //         if (isMobile) onClose();
-        //     },
-        // },
-        // {
-        //     key: '4',
-        //     icon: <AppstoreOutlined />,
-        //     label: t('sidebar.menus'),
-        //     onClick: () => {
-        //         navigate('/admin/menus');
-        //         if (isMobile) onClose();
-        //     },
-        // },
         {
             key: '5',
             icon: <StarOutlined />,
@@ -87,6 +71,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/admin/ratings');
                 if (isMobile) onClose();
             },
+            type: 'admin',
         },
         {
             key: '6',
@@ -96,6 +81,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/admin/orders');
                 if (isMobile) onClose();
             },
+            type: 'admin',
         },
         {
             key: '7',
@@ -105,6 +91,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/admin/users');
                 if (isMobile) onClose();
             },
+            type: 'admin',
         },
         {
             key: '8',
@@ -114,6 +101,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/admin/transactions');
                 if (isMobile) onClose();
             },
+            type: 'admin',
         },
         {
             key: '9',
@@ -123,6 +111,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/vendor');
                 if (isMobile) onClose();
             },
+            type: 'vendor',
         },
         {
             key: '14',
@@ -132,16 +121,8 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/vendor/manage-store');
                 if (isMobile) onClose();
             },
+            type: 'vendor',
         },
-        // {
-        //     key: '10',
-        //     icon: <IdcardOutlined />,
-        //     label: t('sidebar.vendorProfile'),
-        //     onClick: () => {
-        //         navigate('/vendor/profile');
-        //         if (isMobile) onClose();
-        //     },
-        // },
         {
             key: '11',
             icon: <AppstoreOutlined />,
@@ -150,6 +131,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/vendor/menu');
                 if (isMobile) onClose();
             },
+            type: 'vendor',
         },
         {
             key: '12',
@@ -159,6 +141,7 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/vendor/orders');
                 if (isMobile) onClose();
             },
+            type: 'vendor',
         },
         {
             key: '13',
@@ -168,8 +151,14 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 navigate('/vendor/ratings');
                 if (isMobile) onClose();
             },
+            type: 'vendor',
         },
     ];
+
+    // Filter menu items based on businessType
+    const filteredMenuItems = isAuthenticated && user?.businessType
+        ? menuItems.filter(item => item.type === user.businessType.toLowerCase())
+        : [];
 
     const menuContent = (
         <>
@@ -177,15 +166,14 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 <img
                     src="/citio.svg"
                     alt={t('sidebar.logoAlt')}
-                    className={`max-h-[100px] object-contain transition-all duration-300 ${collapsed && !isMobile ? 'max-w-[60px]' : 'max-w-[150px]'
-                        }`}
+                    className={`max-h-[100px] object-contain transition-all duration-300 ${collapsed && !isMobile ? 'max-w-[60px]' : 'max-w-[150px]'}`}
                 />
             </div>
             <Menu
                 theme={themeMode === 'light' ? 'light' : 'dark'}
                 mode="inline"
                 selectedKeys={[routeToKey[location.pathname] || '1']}
-                items={menuItems}
+                items={filteredMenuItems}
             />
         </>
     );
