@@ -89,21 +89,21 @@ export const fetchVendorMenu = createAsyncThunk(
     }
 );
 
-export const addMenuItem = createAsyncThunk(
-    'vendors/addMenuItem',
-    async ({ vendorId, item }, { rejectWithValue }) => {
+export const addProduct = createAsyncThunk(
+    'vendors/addProduct',
+    async (product, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(`${API_BASE_URL}/Vendors/${vendorId}/menu`, item, {
+            const response = await axios.post(`${API_BASE_URL}/Products`, product, {
                 headers: {
                     accept: '*/*',
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
-            return { vendorId, item: response.data };
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Failed to add menu item');
+            return rejectWithValue(error.response?.data || 'Failed to add product');
         }
     }
 );
@@ -259,6 +259,27 @@ export const fetchSubcategories = createAsyncThunk(
     }
 );
 
+export const fetchVendorDashboard = createAsyncThunk(
+    'vendors/fetchVendorDashboard',
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+            const response = await axios.get(`${API_BASE_URL}/Vendors/vendor-dashboard`, {
+                headers: {
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch vendor dashboard');
+        }
+    }
+);
+
 const vendorsSlice = createSlice({
     name: 'vendors',
     initialState: {
@@ -283,6 +304,7 @@ const vendorsSlice = createSlice({
             hasNextPage: false,
         },
         subcategories: [],
+        dashboard: null,
         loading: false,
         error: null,
     },
@@ -357,22 +379,24 @@ const vendorsSlice = createSlice({
             })
             .addCase(fetchVendorMenu.fulfilled, (state, action) => {
                 state.loading = false;
-                state.vendorMenu = action.payload;
+                state.vendorMenu = {
+                    vendorId: action.payload.vendorId,
+                    items: action.payload.items,
+                };
             })
             .addCase(fetchVendorMenu.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
-            .addCase(addMenuItem.pending, (state) => {
+            .addCase(addProduct.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(addMenuItem.fulfilled, (state, action) => {
+            .addCase(addProduct.fulfilled, (state, action) => {
                 state.loading = false;
-                const { item } = action.payload;
-                state.vendorMenu.items.push(item);
+                state.vendorMenu.items.push(action.payload);
             })
-            .addCase(addMenuItem.rejected, (state, action) => {
+            .addCase(addProduct.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
@@ -476,6 +500,18 @@ const vendorsSlice = createSlice({
                 state.subcategories = action.payload;
             })
             .addCase(fetchSubcategories.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(fetchVendorDashboard.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchVendorDashboard.fulfilled, (state, action) => {
+                state.loading = false;
+                state.dashboard = action.payload;
+            })
+            .addCase(fetchVendorDashboard.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });

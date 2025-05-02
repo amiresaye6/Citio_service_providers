@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, Form, Input, InputNumber } from 'antd';
+import { Button, Modal, Form, Input, InputNumber, Select, Avatar } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     fetchVendorMenu,
-    addMenuItem,
+    addProduct,
     updateMenuItem,
     deactivateMenuItem,
+    fetchSubcategories,
     clearError,
 } from '../redux/slices/vendorsSlice';
 import PageHeader from '../components/common/PageHeader';
@@ -17,7 +18,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const VendorMenuPage = () => {
     const dispatch = useDispatch();
-    const { vendorMenu, loading, error } = useSelector((state) => state.vendors);
+    const { vendorMenu, subcategories, loading, error } = useSelector((state) => state.vendors);
     const { user } = useSelector((state) => state.auth); // Assumes authSlice with user info
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -30,10 +31,11 @@ const VendorMenuPage = () => {
     const [form] = Form.useForm();
     const vendorId = user?.id; // Vendor ID from auth state
 
-    // Fetch menu items
+    // Fetch menu items and subcategories
     useEffect(() => {
         if (vendorId) {
             dispatch(fetchVendorMenu({ vendorId }));
+            dispatch(fetchSubcategories());
         }
     }, [dispatch, vendorId]);
 
@@ -65,9 +67,29 @@ const VendorMenuPage = () => {
     // Table columns
     const columns = [
         {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
+            title: 'Image',
+            dataIndex: 'mainImageUrl',
+            key: 'mainImageUrl',
+            render: (url) => (
+                <Avatar
+                    src={`https://service-provider.runasp.net${url}`}
+                    size={40}
+                    shape="square"
+                    alt="Product Image"
+                    style={{ objectFit: 'cover' }}
+                />
+            ),
+        },
+        {
+            title: 'Name (EN)',
+            dataIndex: 'nameEn',
+            key: 'nameEn',
+            sorter: true,
+        },
+        {
+            title: 'Name (AR)',
+            dataIndex: 'nameAr',
+            key: 'nameAr',
             sorter: true,
         },
         {
@@ -87,7 +109,7 @@ const VendorMenuPage = () => {
             dataIndex: 'status',
             key: 'status',
             sorter: true,
-            render: (status) => <StatusTag status={status} />,
+            render: (status) => <StatusTag status={status || 'active'} />,
         },
         {
             title: 'Actions',
@@ -114,13 +136,13 @@ const VendorMenuPage = () => {
         },
     ];
 
-    // Handle add menu item
-    const handleAddItem = () => {
+    // Handle add product
+    const handleAddProduct = () => {
         form.validateFields().then((values) => {
-            dispatch(addMenuItem({ vendorId, item: { ...values, status: 'active' } }))
+            dispatch(addProduct(values))
                 .then((result) => {
                     if (result.meta.requestStatus === 'fulfilled') {
-                        ToastNotifier.success('Item Added', `${values.name} has been added to the menu.`);
+                        ToastNotifier.success('Product Added', `${values.nameEn} has been added to the menu.`);
                         dispatch(fetchVendorMenu({ vendorId }));
                     }
                 });
@@ -134,7 +156,14 @@ const VendorMenuPage = () => {
     // Handle edit menu item
     const handleEdit = (item) => {
         setSelectedItem(item);
-        form.setFieldsValue(item);
+        form.setFieldsValue({
+            nameEn: item.nameEn,
+            nameAr: item.nameAr,
+            description: item.description,
+            mainImageUrl: item.mainImageUrl,
+            price: item.price,
+            subCategoryId: item.subCategoryId,
+        });
         setIsEditModalVisible(true);
     };
 
@@ -146,7 +175,7 @@ const VendorMenuPage = () => {
                 item: values,
             })).then((result) => {
                 if (result.meta.requestStatus === 'fulfilled') {
-                    ToastNotifier.success('Item Updated', `${values.name} has been updated.`);
+                    ToastNotifier.success('Item Updated', `${values.nameEn} has been updated.`);
                     dispatch(fetchVendorMenu({ vendorId }));
                 }
             });
@@ -169,7 +198,7 @@ const VendorMenuPage = () => {
             menuItemId: selectedItem.id,
         })).then((result) => {
             if (result.meta.requestStatus === 'fulfilled') {
-                ToastNotifier.success('Item Deactivated', `${selectedItem.name} has been deactivated.`);
+                ToastNotifier.success('Item Deactivated', `${selectedItem.nameEn} has been deactivated.`);
                 dispatch(fetchVendorMenu({ vendorId }));
             }
         });
@@ -196,7 +225,7 @@ const VendorMenuPage = () => {
                 subtitle="Manage your menu items"
                 actions={
                     <Button type="primary" onClick={() => setIsAddModalVisible(true)}>
-                        Add Menu Item
+                        Add Product
                     </Button>
                 }
             />
@@ -224,9 +253,9 @@ const VendorMenuPage = () => {
             )}
 
             <Modal
-                title="Add Menu Item"
+                title="Add Product"
                 open={isAddModalVisible}
-                onOk={handleAddItem}
+                onOk={handleAddProduct}
                 onCancel={() => {
                     setIsAddModalVisible(false);
                     form.resetFields();
@@ -234,9 +263,30 @@ const VendorMenuPage = () => {
             >
                 <Form form={form} layout="vertical">
                     <Form.Item
-                        name="name"
-                        label="Item Name"
-                        rules={[{ required: true, message: 'Please enter item name' }]}
+                        name="nameEn"
+                        label="Name (English)"
+                        rules={[{ required: true, message: 'Please enter English name' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        name="nameAr"
+                        label="Name (Arabic)"
+                        rules={[{ required: true, message: 'Please enter Arabic name' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        name="description"
+                        label="Description"
+                        rules={[{ required: true, message: 'Please enter description' }]}
+                    >
+                        <Input.TextArea />
+                    </Form.Item>
+                    <Form.Item
+                        name="mainImageUrl"
+                        label="Image URL"
+                        rules={[{ required: true, message: 'Please enter image URL' }]}
                     >
                         <Input />
                     </Form.Item>
@@ -248,11 +298,17 @@ const VendorMenuPage = () => {
                         <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
                     </Form.Item>
                     <Form.Item
-                        name="description"
-                        label="Description"
-                        rules={[{ required: true, message: 'Please enter description' }]}
+                        name="subCategoryId"
+                        label="Subcategory"
+                        rules={[{ required: true, message: 'Please select a subcategory' }]}
                     >
-                        <Input.TextArea />
+                        <Select
+                            placeholder="Select a subcategory"
+                            options={subcategories.map((subcat) => ({
+                                value: subcat.id,
+                                label: subcat.nameEn,
+                            }))}
+                        />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -268,9 +324,30 @@ const VendorMenuPage = () => {
             >
                 <Form form={form} layout="vertical">
                     <Form.Item
-                        name="name"
-                        label="Item Name"
-                        rules={[{ required: true, message: 'Please enter item name' }]}
+                        name="nameEn"
+                        label="Name (English)"
+                        rules={[{ required: true, message: 'Please enter English name' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        name="nameAr"
+                        label="Name (Arabic)"
+                        rules={[{ required: true, message: 'Please enter Arabic name' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        name="description"
+                        label="Description"
+                        rules={[{ required: true, message: 'Please enter description' }]}
+                    >
+                        <Input.TextArea />
+                    </Form.Item>
+                    <Form.Item
+                        name="mainImageUrl"
+                        label="Image URL"
+                        rules={[{ required: true, message: 'Please enter image URL' }]}
                     >
                         <Input />
                     </Form.Item>
@@ -282,11 +359,17 @@ const VendorMenuPage = () => {
                         <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
                     </Form.Item>
                     <Form.Item
-                        name="description"
-                        label="Description"
-                        rules={[{ required: true, message: 'Please enter description' }]}
+                        name="subCategoryId"
+                        label="Subcategory"
+                        rules={[{ required: true, message: 'Please select a subcategory' }]}
                     >
-                        <Input.TextArea />
+                        <Select
+                            placeholder="Select a subcategory"
+                            options={subcategories.map((subcat) => ({
+                                value: subcat.id,
+                                label: subcat.nameEn,
+                            }))}
+                        />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -296,7 +379,7 @@ const VendorMenuPage = () => {
                 onConfirm={handleConfirmDeactivate}
                 onCancel={() => setIsConfirmModalVisible(false)}
                 title="Deactivate Menu Item"
-                content={`Are you sure you want to deactivate ${selectedItem?.name}?`}
+                content={`Are you sure you want to deactivate ${selectedItem?.nameEn}?`}
                 isDanger
             />
         </div>
