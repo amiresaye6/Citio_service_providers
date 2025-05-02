@@ -1,72 +1,113 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Modal, Form, Input, InputNumber } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    fetchVendorMenu,
+    addMenuItem,
+    updateMenuItem,
+    deactivateMenuItem,
+    clearError,
+} from '../redux/slices/vendorsSlice';
 import PageHeader from '../components/common/PageHeader';
 import TableWrapper from '../components/common/TableWrapper';
+import StatusTag from '../components/common/StatusTag';
 import ConfirmModal from '../components/common/ConfirmModal';
 import ToastNotifier from '../components/common/ToastNotifier';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const VendorMenuPage = () => {
-    const [menuItems, setMenuItems] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
+    const { vendorMenu, loading, error } = useSelector((state) => state.vendors);
+    const { user } = useSelector((state) => state.auth); // Assumes authSlice with user info
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [sortColumn, setSortColumn] = useState('');
+    const [sortDirection, setSortDirection] = useState('');
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [form] = Form.useForm();
+    const vendorId = user?.id; // Vendor ID from auth state
 
-    // Fake menu item data (replace with API call in a real app)
-    const fakeMenuItems = [
-        {
-            id: '1',
-            name: 'Cheeseburger',
-            price: 9.99,
-            description: 'Classic beef burger with cheese',
-        },
-        {
-            id: '2',
-            name: 'Margherita Pizza',
-            price: 12.50,
-            description: 'Tomato, mozzarella, and basil',
-        },
-        {
-            id: '3',
-            name: 'Caesar Salad',
-            price: 7.25,
-            description: 'Romaine lettuce with Caesar dressing',
-        },
-    ];
-
-    // Simulate fetching menu items
+    // Fetch menu items
     useEffect(() => {
-        setLoading(true);
-        setTimeout(() => {
-            setMenuItems(fakeMenuItems);
-            setLoading(false);
-            ToastNotifier.success('Menu Loaded', 'Successfully fetched menu items.');
-        }, 1000);
-    }, []);
+        if (vendorId) {
+            dispatch(fetchVendorMenu({ vendorId }));
+        }
+    }, [dispatch, vendorId]);
+
+    // Handle errors
+    useEffect(() => {
+        if (error) {
+            ToastNotifier.error('Operation Failed', error);
+            dispatch(clearError());
+        }
+    }, [error, dispatch]);
+
+    // Sort and paginate items
+    const sortedItems = [...vendorMenu.items].sort((a, b) => {
+        if (!sortColumn || !sortDirection) return 0;
+        const valueA = a[sortColumn] || '';
+        const valueB = b[sortColumn] || '';
+        const direction = sortDirection === 'asc' ? 1 : -1;
+        if (typeof valueA === 'string') {
+            return valueA.localeCompare(valueB) * direction;
+        }
+        return (valueA - valueB) * direction;
+    });
+
+    const paginatedItems = sortedItems.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
 
     // Table columns
     const columns = [
-        { title: 'Name', dataIndex: 'name', key: 'name' },
+        {
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
+            sorter: true,
+        },
         {
             title: 'Price',
             dataIndex: 'price',
             key: 'price',
+            sorter: true,
             render: (price) => `$${price.toFixed(2)}`,
         },
-        { title: 'Description', dataIndex: 'description', key: 'description' },
+        {
+            title: 'Description',
+            dataIndex: 'description',
+            key: 'description',
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            sorter: true,
+            render: (status) => <StatusTag status={status} />,
+        },
         {
             title: 'Actions',
             key: 'actions',
             render: (_, record) => (
                 <div className="space-x-2">
-                    <Button type="link" onClick={() => handleEdit(record)}>
+                    <Button
+                        type="link"
+                        onClick={() => handleEdit(record)}
+                        disabled={record.status === 'inactive'}
+                    >
                         Edit
                     </Button>
-                    <Button type="link" danger onClick={() => handleDelete(record)}>
-                        Delete
+                    <Button
+                        type="link"
+                        danger
+                        onClick={() => handleDeactivate(record)}
+                        disabled={record.status === 'inactive'}
+                    >
+                        Deactivate
                     </Button>
                 </div>
             ),
@@ -76,14 +117,15 @@ const VendorMenuPage = () => {
     // Handle add menu item
     const handleAddItem = () => {
         form.validateFields().then((values) => {
-            const newItem = {
-                id: String(menuItems.length + 1),
-                ...values,
-            };
-            setMenuItems([...menuItems, newItem]);
+            dispatch(addMenuItem({ vendorId, item: { ...values, status: 'active' } }))
+                .then((result) => {
+                    if (result.meta.requestStatus === 'fulfilled') {
+                        ToastNotifier.success('Item Added', `${values.name} has been added to the menu.`);
+                        dispatch(fetchVendorMenu({ vendorId }));
+                    }
+                });
             setIsAddModalVisible(false);
             form.resetFields();
-            ToastNotifier.success('Item Added', `${values.name} has been added to the menu.`);
         }).catch(() => {
             ToastNotifier.error('Validation Failed', 'Please fill in all required fields.');
         });
@@ -98,29 +140,53 @@ const VendorMenuPage = () => {
 
     const handleUpdateItem = () => {
         form.validateFields().then((values) => {
-            const updatedItems = menuItems.map((item) =>
-                item.id === selectedItem.id ? { ...item, ...values } : item
-            );
-            setMenuItems(updatedItems);
+            dispatch(updateMenuItem({
+                vendorId,
+                menuItemId: selectedItem.id,
+                item: values,
+            })).then((result) => {
+                if (result.meta.requestStatus === 'fulfilled') {
+                    ToastNotifier.success('Item Updated', `${values.name} has been updated.`);
+                    dispatch(fetchVendorMenu({ vendorId }));
+                }
+            });
             setIsEditModalVisible(false);
             form.resetFields();
-            ToastNotifier.success('Item Updated', `${values.name} has been updated.`);
         }).catch(() => {
             ToastNotifier.error('Validation Failed', 'Please fill in all required fields.');
         });
     };
 
-    // Handle delete menu item
-    const handleDelete = (item) => {
+    // Handle deactivate menu item
+    const handleDeactivate = (item) => {
         setSelectedItem(item);
         setIsConfirmModalVisible(true);
     };
 
-    const handleConfirmDelete = () => {
-        const updatedItems = menuItems.filter((item) => item.id !== selectedItem.id);
-        setMenuItems(updatedItems);
+    const handleConfirmDeactivate = () => {
+        dispatch(deactivateMenuItem({
+            vendorId,
+            menuItemId: selectedItem.id,
+        })).then((result) => {
+            if (result.meta.requestStatus === 'fulfilled') {
+                ToastNotifier.success('Item Deactivated', `${selectedItem.name} has been deactivated.`);
+                dispatch(fetchVendorMenu({ vendorId }));
+            }
+        });
         setIsConfirmModalVisible(false);
-        ToastNotifier.success('Item Deleted', `${selectedItem.name} has been deleted.`);
+    };
+
+    // Handle table change (pagination and sorting)
+    const handleTableChange = (pagination, filters, sorter) => {
+        setCurrentPage(pagination.current);
+        setPageSize(pagination.pageSize);
+        if (sorter.field && sorter.order) {
+            setSortColumn(sorter.field);
+            setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
+        } else {
+            setSortColumn('');
+            setSortDirection('');
+        }
     };
 
     return (
@@ -139,14 +205,24 @@ const VendorMenuPage = () => {
                 <LoadingSpinner text="Loading menu items..." />
             ) : (
                 <TableWrapper
-                    dataSource={menuItems}
+                    dataSource={paginatedItems}
                     columns={columns}
                     loading={loading}
                     rowKey="id"
+                    pagination={{
+                        current: currentPage,
+                        pageSize: pageSize,
+                        total: vendorMenu.items.length,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50'],
+                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                        position: ['bottomCenter'],
+                        showQuickJumper: true,
+                    }}
+                    onChange={handleTableChange}
                 />
             )}
 
-            {/* Add Menu Item Modal */}
             <Modal
                 title="Add Menu Item"
                 open={isAddModalVisible}
@@ -181,7 +257,6 @@ const VendorMenuPage = () => {
                 </Form>
             </Modal>
 
-            {/* Edit Menu Item Modal */}
             <Modal
                 title="Edit Menu Item"
                 open={isEditModalVisible}
@@ -216,13 +291,12 @@ const VendorMenuPage = () => {
                 </Form>
             </Modal>
 
-            {/* Confirm Delete Modal */}
             <ConfirmModal
                 open={isConfirmModalVisible}
-                onConfirm={handleConfirmDelete}
+                onConfirm={handleConfirmDeactivate}
                 onCancel={() => setIsConfirmModalVisible(false)}
-                title="Delete Menu Item"
-                content={`Are you sure you want to delete ${selectedItem?.name}?`}
+                title="Deactivate Menu Item"
+                content={`Are you sure you want to deactivate ${selectedItem?.name}?`}
                 isDanger
             />
         </div>

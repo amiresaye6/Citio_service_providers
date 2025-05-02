@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Modal, Rate, Input, Form } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Button, Modal, Rate, Form } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    fetchVendorRatings,
+    flagRating,
+    respondToRating,
+    clearError,
+} from '../redux/slices/vendorsSlice';
 import PageHeader from '../components/common/PageHeader';
 import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
@@ -8,80 +15,81 @@ import ConfirmModal from '../components/common/ConfirmModal';
 import ToastNotifier from '../components/common/ToastNotifier';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-const { TextArea } = Input;
+const { TextArea } = Form.Item;
 
 const AdminRatingsPage = () => {
-    const [ratings, setRatings] = useState([]);
-    const [filteredRatings, setFilteredRatings] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
+    const { vendorRatings, loading, error } = useSelector((state) => state.vendors);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [searchValue, setSearchValue] = useState('');
+    const [sortColumn, setSortColumn] = useState('');
+    const [sortDirection, setSortDirection] = useState('');
+    const [statusFilter, setStatusFilter] = useState(null);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [isResponseModalVisible, setIsResponseModalVisible] = useState(false);
     const [selectedRating, setSelectedRating] = useState(null);
     const [form] = Form.useForm();
 
-    // Fake rating data (replace with API call in a real app)
-    const fakeRatings = [
-        {
-            id: '1',
-            reviewer: 'John Doe',
-            vendor: 'Acme Corp',
-            rating: 4,
-            comment: 'Great service, fast delivery!',
-            status: 'active',
-            date: '2025-04-18',
-            response: '',
-        },
-        {
-            id: '2',
-            reviewer: 'Jane Smith',
-            vendor: 'Beta LLC',
-            rating: 2,
-            comment: 'Food was cold on arrival.',
-            status: 'active',
-            date: '2025-04-17',
-            response: '',
-        },
-        {
-            id: '3',
-            reviewer: 'Bob Johnson',
-            vendor: 'Gamma Inc',
-            rating: 5,
-            comment: 'Excellent quality, will order again!',
-            status: 'active',
-            date: '2025-04-16',
-            response: 'Thank you for your feedback!',
-        },
-    ];
-
-    // Simulate fetching ratings
+    // Fetch ratings
     useEffect(() => {
-        setLoading(true);
-        setTimeout(() => {
-            setRatings(fakeRatings);
-            setFilteredRatings(fakeRatings);
-            setLoading(false);
-            ToastNotifier.success('Ratings Loaded', 'Successfully fetched ratings.');
-        }, 1000);
-    }, []);
+        dispatch(fetchVendorRatings({
+            PageNumer: currentPage,
+            PageSize: pageSize,
+            SearchValue: searchValue,
+            SortColumn: sortColumn,
+            SortDirection: sortDirection,
+            Status: statusFilter,
+        }));
+    }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter]);
+
+    // Handle errors
+    useEffect(() => {
+        if (error) {
+            ToastNotifier.error('Failed to load ratings', error);
+            dispatch(clearError());
+        }
+    }, [error, dispatch]);
 
     // Table columns
     const columns = [
-        { title: 'Reviewer', dataIndex: 'reviewer', key: 'reviewer' },
-        { title: 'Vendor', dataIndex: 'vendor', key: 'vendor' },
+        {
+            title: 'Reviewer',
+            dataIndex: 'reviewer',
+            key: 'reviewer',
+            sorter: true,
+        },
+        {
+            title: 'Vendor',
+            dataIndex: 'vendor',
+            key: 'vendor',
+            sorter: true,
+        },
         {
             title: 'Rating',
             dataIndex: 'rating',
             key: 'rating',
+            sorter: true,
             render: (rating) => <Rate disabled defaultValue={rating} />,
         },
-        { title: 'Comment', dataIndex: 'comment', key: 'comment' },
+        {
+            title: 'Comment',
+            dataIndex: 'comment',
+            key: 'comment',
+        },
         {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
+            sorter: true,
             render: (status) => <StatusTag status={status} />,
         },
-        { title: 'Date', dataIndex: 'date', key: 'date' },
+        {
+            title: 'Date',
+            dataIndex: 'date',
+            key: 'date',
+            sorter: true,
+        },
         {
             title: 'Actions',
             key: 'actions',
@@ -107,15 +115,52 @@ const AdminRatingsPage = () => {
         },
     ];
 
+    // Filters
+    // const filters = [
+    //     {
+    //         key: 'status',
+    //         placeholder: 'Select Status',
+    //         options: [
+    //             { label: 'Active', value: true },
+    //             { label: 'Flagged', value: false },
+    //         ],
+    //     },
+    // ];
+
     // Handle search
     const handleSearch = (value) => {
-        const filtered = ratings.filter(
-            (rating) =>
-                rating.reviewer.toLowerCase().includes(value.toLowerCase()) ||
-                rating.vendor.toLowerCase().includes(value.toLowerCase()) ||
-                rating.comment.toLowerCase().includes(value.toLowerCase())
-        );
-        setFilteredRatings(filtered);
+        setSearchValue(value);
+        setCurrentPage(1);
+    };
+
+    // Handle filter change
+    // const handleFilterChange = (key, value) => {
+    //     if (key === 'status') {
+    //         setStatusFilter(value !== undefined ? value : null);
+    //     }
+    //     setCurrentPage(1);
+    // };
+
+    // Handle reset filters
+    // const handleResetFilters = () => {
+    //     setSearchValue('');
+    //     setStatusFilter(null);
+    //     setSortColumn('');
+    //     setSortDirection('');
+    //     setCurrentPage(1);
+    // };
+
+    // Handle table change (pagination and sorting)
+    const handleTableChange = (pagination, filters, sorter) => {
+        setCurrentPage(pagination.current);
+        setPageSize(pagination.pageSize);
+        if (sorter.field && sorter.order) {
+            setSortColumn(sorter.field);
+            setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
+        } else {
+            setSortColumn('');
+            setSortDirection('');
+        }
     };
 
     // Handle flag review
@@ -125,13 +170,20 @@ const AdminRatingsPage = () => {
     };
 
     const handleConfirmFlag = () => {
-        const updatedRatings = ratings.map((rating) =>
-            rating.id === selectedRating.id ? { ...rating, status: 'error' } : rating
-        );
-        setRatings(updatedRatings);
-        setFilteredRatings(updatedRatings);
+        dispatch(flagRating(selectedRating.id)).then((result) => {
+            if (result.meta.requestStatus === 'fulfilled') {
+                ToastNotifier.success('Review Flagged', `${selectedRating.reviewer}'s review has been flagged.`);
+                dispatch(fetchVendorRatings({
+                    PageNumer: currentPage,
+                    PageSize: pageSize,
+                    SearchValue: searchValue,
+                    SortColumn: sortColumn,
+                    SortDirection: sortDirection,
+                    Status: statusFilter,
+                }));
+            }
+        });
         setIsConfirmModalVisible(false);
-        ToastNotifier.success('Review Flagged', `${selectedRating.reviewer}'s review has been flagged.`);
     };
 
     // Handle respond to review
@@ -142,14 +194,24 @@ const AdminRatingsPage = () => {
     };
 
     const handleSubmitResponse = (values) => {
-        const updatedRatings = ratings.map((rating) =>
-            rating.id === selectedRating.id ? { ...rating, response: values.response } : rating
-        );
-        setRatings(updatedRatings);
-        setFilteredRatings(updatedRatings);
+        dispatch(respondToRating({
+            ratingId: selectedRating.id,
+            response: values.response,
+        })).then((result) => {
+            if (result.meta.requestStatus === 'fulfilled') {
+                ToastNotifier.success('Response Submitted', `Response to ${selectedRating.reviewer}'s review has been submitted.`);
+                dispatch(fetchVendorRatings({
+                    PageNumer: currentPage,
+                    PageSize: pageSize,
+                    SearchValue: searchValue,
+                    SortColumn: sortColumn,
+                    SortDirection: sortDirection,
+                    Status: statusFilter,
+                }));
+            }
+        });
         setIsResponseModalVisible(false);
         form.resetFields();
-        ToastNotifier.success('Response Submitted', `Response to ${selectedRating.reviewer}'s review has been submitted.`);
     };
 
     return (
@@ -160,7 +222,17 @@ const AdminRatingsPage = () => {
                 actions={
                     <Button
                         type="primary"
-                        onClick={() => ToastNotifier.info('Refresh', 'Ratings refreshed.')}
+                        onClick={() => {
+                            dispatch(fetchVendorRatings({
+                                PageNumer: currentPage,
+                                PageSize: pageSize,
+                                SearchValue: searchValue,
+                                SortColumn: sortColumn,
+                                SortDirection: sortDirection,
+                                Status: statusFilter,
+                            }));
+                            ToastNotifier.info('Refresh', 'Ratings refreshed.');
+                        }}
                     >
                         Refresh
                     </Button>
@@ -170,20 +242,38 @@ const AdminRatingsPage = () => {
             <SearchInput
                 placeholder="Search by reviewer, vendor, or comment..."
                 onSearch={handleSearch}
+                className="mb-4"
             />
+
+            {/* <FilterBar
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onReset={handleResetFilters}
+                loading={loading}
+            /> */}
 
             {loading ? (
                 <LoadingSpinner text="Loading ratings..." />
             ) : (
                 <TableWrapper
-                    dataSource={filteredRatings}
+                    dataSource={vendorRatings.items}
                     columns={columns}
                     loading={loading}
                     rowKey="id"
+                    pagination={{
+                        current: currentPage,
+                        pageSize: pageSize,
+                        total: vendorRatings.totalCount,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50'],
+                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} ratings`,
+                        position: ['bottomCenter'],
+                        showQuickJumper: true,
+                    }}
+                    onChange={handleTableChange}
                 />
             )}
 
-            {/* Confirm Flag Modal */}
             <ConfirmModal
                 open={isConfirmModalVisible}
                 onConfirm={handleConfirmFlag}
@@ -193,7 +283,6 @@ const AdminRatingsPage = () => {
                 isDanger
             />
 
-            {/* Response Modal */}
             <Modal
                 title={`Respond to ${selectedRating?.reviewer}'s Review`}
                 open={isResponseModalVisible}

@@ -23,7 +23,6 @@ export const fetchVendors = createAsyncThunk(
                 },
             });
 
-            // Calculate totalCount if not provided
             const data = response.data;
             if (!data.totalCount && data.totalPages && data.items) {
                 data.totalCount = data.totalPages * PageSize;
@@ -74,7 +73,7 @@ export const fetchVendorDetails = createAsyncThunk(
 
 export const fetchVendorMenu = createAsyncThunk(
     'vendors/fetchVendorMenu',
-    async (vendorId, { rejectWithValue }) => {
+    async ({ vendorId }, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(`${API_BASE_URL}/Vendors/${vendorId}/menu`, {
@@ -83,28 +82,143 @@ export const fetchVendorMenu = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 },
             });
-            return response.data;
+            return { vendorId, items: response.data };
         } catch (error) {
             return rejectWithValue(error.response?.data || 'Failed to fetch vendor menu');
         }
     }
 );
 
-export const fetchVendorRatings = createAsyncThunk(
-    'vendors/fetchVendorRatings',
-    async ({ PageNumer = 1, PageSize = 10 }, { rejectWithValue }) => {
+export const addMenuItem = createAsyncThunk(
+    'vendors/addMenuItem',
+    async ({ vendorId, item }, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_BASE_URL}/Vendors/vendors-rating`, {
-                params: { PageNumer, PageSize },
+            const response = await axios.post(`${API_BASE_URL}/Vendors/${vendorId}/menu`, item, {
+                headers: {
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return { vendorId, item: response.data };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to add menu item');
+        }
+    }
+);
+
+export const updateMenuItem = createAsyncThunk(
+    'vendors/updateMenuItem',
+    async ({ vendorId, menuItemId, item }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(`${API_BASE_URL}/Vendors/${vendorId}/menu/${menuItemId}`, item, {
+                headers: {
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return { vendorId, menuItemId, item: response.data };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to update menu item');
+        }
+    }
+);
+
+export const deactivateMenuItem = createAsyncThunk(
+    'vendors/deactivateMenuItem',
+    async ({ vendorId, menuItemId }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${API_BASE_URL}/Vendors/${vendorId}/menu/${menuItemId}/deactivate`, null, {
                 headers: {
                     accept: '*/*',
                     Authorization: `Bearer ${token}`,
                 },
             });
-            return response.data;
+            return { vendorId, menuItemId };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to deactivate menu item');
+        }
+    }
+);
+
+export const fetchVendorRatings = createAsyncThunk(
+    'vendors/fetchVendorRatings',
+    async ({ PageNumer = 1, PageSize = 10, SearchValue = '', SortColumn = '', SortDirection = '', Status = null }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const params = { PageNumer, PageSize };
+            if (SearchValue) params.SearchValue = SearchValue;
+            if (SortColumn) params.SortColumn = SortColumn;
+            if (SortDirection) params.SortDirection = SortDirection;
+            if (Status !== null) params.Status = Status;
+
+            const response = await axios.get(`${API_BASE_URL}/Vendors/vendors-rating`, {
+                params,
+                headers: {
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = response.data;
+            if (!data.totalCount && data.totalPages && data.items) {
+                data.totalCount = data.totalPages * PageSize;
+            }
+
+            data.items = data.items.map(item => ({
+                ...item,
+                reviewer: item.email,
+                vendor: item.businessName,
+                comment: item.comment || '',
+                status: item.status || 'active',
+                date: item.date || new Date().toISOString().split('T')[0],
+                response: item.response || '',
+            }));
+
+            return data;
         } catch (error) {
             return rejectWithValue(error.response?.data || 'Failed to fetch vendor ratings');
+        }
+    }
+);
+
+export const flagRating = createAsyncThunk(
+    'vendors/flagRating',
+    async (ratingId, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${API_BASE_URL}/Vendors/vendors-rating/${ratingId}/flag`, null, {
+                headers: {
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return ratingId;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to flag rating');
+        }
+    }
+);
+
+export const respondToRating = createAsyncThunk(
+    'vendors/respondToRating',
+    async ({ ratingId, response }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${API_BASE_URL}/Vendors/vendors-rating/${ratingId}/respond`, { response }, {
+                headers: {
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return { ratingId, response };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to respond to rating');
         }
     }
 );
@@ -157,15 +271,18 @@ const vendorsSlice = createSlice({
             hasNextPage: false,
         },
         vendorDetails: null,
-        vendorMenu: null,
-        subcategories: [],
+        vendorMenu: {
+            items: [],
+        },
         vendorRatings: {
             items: [],
             pageNumber: 1,
             totalPages: 0,
+            totalCount: 0,
             hasPreviousPage: false,
             hasNextPage: false,
         },
+        subcategories: [],
         loading: false,
         error: null,
     },
@@ -246,6 +363,49 @@ const vendorsSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
+            .addCase(addMenuItem.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(addMenuItem.fulfilled, (state, action) => {
+                state.loading = false;
+                const { item } = action.payload;
+                state.vendorMenu.items.push(item);
+            })
+            .addCase(addMenuItem.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(updateMenuItem.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateMenuItem.fulfilled, (state, action) => {
+                state.loading = false;
+                const { menuItemId, item } = action.payload;
+                state.vendorMenu.items = state.vendorMenu.items.map((menuItem) =>
+                    menuItem.id === menuItemId ? { ...menuItem, ...item } : menuItem
+                );
+            })
+            .addCase(updateMenuItem.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(deactivateMenuItem.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deactivateMenuItem.fulfilled, (state, action) => {
+                state.loading = false;
+                const { menuItemId } = action.payload;
+                state.vendorMenu.items = state.vendorMenu.items.map((item) =>
+                    item.id === menuItemId ? { ...item, status: 'inactive' } : item
+                );
+            })
+            .addCase(deactivateMenuItem.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
             .addCase(fetchVendorRatings.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -255,6 +415,36 @@ const vendorsSlice = createSlice({
                 state.vendorRatings = action.payload;
             })
             .addCase(fetchVendorRatings.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(flagRating.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(flagRating.fulfilled, (state, action) => {
+                state.loading = false;
+                const ratingId = action.payload;
+                state.vendorRatings.items = state.vendorRatings.items.map((rating) =>
+                    rating.id === ratingId ? { ...rating, status: 'error' } : rating
+                );
+            })
+            .addCase(flagRating.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(respondToRating.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(respondToRating.fulfilled, (state, action) => {
+                state.loading = false;
+                const { ratingId, response } = action.payload;
+                state.vendorRatings.items = state.vendorRatings.items.map((rating) =>
+                    rating.id === ratingId ? { ...rating, response } : rating
+                );
+            })
+            .addCase(respondToRating.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })

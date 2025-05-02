@@ -43,22 +43,22 @@ const AppRoutes = () => (
                     </ProtectedRoute>
                 }
             />
-            <Route
+            {/* <Route
                 path="/admin/vendor-requests"
                 element={
                     <ProtectedRoute>
                         <AdminVendorRequestsPage />
                     </ProtectedRoute>
                 }
-            />
-            <Route
+            /> */}
+            {/* <Route
                 path="/admin/menus"
                 element={
                     <ProtectedRoute>
                         <AdminMenusPage />
                     </ProtectedRoute>
                 }
-            />
+            /> */}
             <Route
                 path="/admin/ratings"
                 element={

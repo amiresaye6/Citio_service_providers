@@ -29,14 +29,14 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
     const routeToKey = {
         '/': '1',
         '/admin/vendors': '2',
-        '/admin/vendor-requests': '3',
-        '/admin/menus': '4',
+        // '/admin/vendor-requests': '3',
+        // '/admin/menus': '4',
         '/admin/ratings': '5',
         '/admin/orders': '6',
         '/admin/users': '7',
         '/admin/transactions': '8',
         '/vendor': '9',
-        '/vendor/profile': '10',
+        // '/vendor/profile': '10',
         '/vendor/menu': '11',
         '/vendor/orders': '12',
         '/vendor/ratings': '13',
@@ -61,24 +61,24 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 if (isMobile) onClose();
             },
         },
-        {
-            key: '3',
-            icon: <FileDoneOutlined />,
-            label: t('sidebar.vendorRequests'),
-            onClick: () => {
-                navigate('/admin/vendor-requests');
-                if (isMobile) onClose();
-            },
-        },
-        {
-            key: '4',
-            icon: <AppstoreOutlined />,
-            label: t('sidebar.menus'),
-            onClick: () => {
-                navigate('/admin/menus');
-                if (isMobile) onClose();
-            },
-        },
+        // {
+        //     key: '3',
+        //     icon: <FileDoneOutlined />,
+        //     label: t('sidebar.vendorRequests'),
+        //     onClick: () => {
+        //         navigate('/admin/vendor-requests');
+        //         if (isMobile) onClose();
+        //     },
+        // },
+        // {
+        //     key: '4',
+        //     icon: <AppstoreOutlined />,
+        //     label: t('sidebar.menus'),
+        //     onClick: () => {
+        //         navigate('/admin/menus');
+        //         if (isMobile) onClose();
+        //     },
+        // },
         {
             key: '5',
             icon: <StarOutlined />,
@@ -133,15 +133,15 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
                 if (isMobile) onClose();
             },
         },
-        {
-            key: '10',
-            icon: <IdcardOutlined />,
-            label: t('sidebar.vendorProfile'),
-            onClick: () => {
-                navigate('/vendor/profile');
-                if (isMobile) onClose();
-            },
-        },
+        // {
+        //     key: '10',
+        //     icon: <IdcardOutlined />,
+        //     label: t('sidebar.vendorProfile'),
+        //     onClick: () => {
+        //         navigate('/vendor/profile');
+        //         if (isMobile) onClose();
+        //     },
+        // },
         {
             key: '11',
             icon: <AppstoreOutlined />,
