@@ -10,9 +10,11 @@ import {
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux'; // Import useDispatch
 import { useNavigate } from 'react-router-dom';
 import { theme } from 'antd';
+import { logout } from '../../redux/slices/authSlice';
+// import { logout } from '../../path-to-your-authSlice'; // Import the logout action
 
 const { Header } = Layout;
 const { Option } = Select;
@@ -21,6 +23,7 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
     const { t, i18n } = useTranslation('common');
     const { themeMode, toggleTheme } = useTheme();
     const { user, isAuthenticated } = useSelector((state) => state.auth);
+    const dispatch = useDispatch(); // Initialize dispatch
     const navigate = useNavigate();
     const { token } = theme.useToken();
 
@@ -35,7 +38,8 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
 
     const handleMenuClick = ({ key }) => {
         if (key === '3') {
-            navigate('/login');
+            dispatch(logout()); // Dispatch logout action
+            navigate('/login'); // Navigate to login page
         } else if (key === '1') {
             navigate('/profile');
         } else if (key === '2') {
