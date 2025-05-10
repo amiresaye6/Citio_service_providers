@@ -85,8 +85,8 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
 
     return (
         <Header
-            className="p-0 flex items-center justify-between"
-            style={{ background: antdToken.colorBgContainer }}
+            className="flex items-center justify-between"
+            style={{ background: antdToken.colorBgContainer, padding: '0 0 0 15px' }}
         >
             <div className="flex items-center">
                 <Button
