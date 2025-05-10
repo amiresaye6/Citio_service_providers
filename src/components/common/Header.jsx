@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout, Button, Select, Avatar, Dropdown, Space, Badge, Switch } from 'antd';
 import {
     MenuUnfoldOutlined,
@@ -10,11 +10,11 @@ import {
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
-import { useSelector, useDispatch } from 'react-redux'; // Import useDispatch
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { theme } from 'antd';
 import { logout } from '../../redux/slices/authSlice';
-// import { logout } from '../../path-to-your-authSlice'; // Import the logout action
+import { jwtDecode } from 'jwt-decode';
 
 const { Header } = Layout;
 const { Option } = Select;
@@ -22,10 +22,29 @@ const { Option } = Select;
 const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
     const { t, i18n } = useTranslation('common');
     const { themeMode, toggleTheme } = useTheme();
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
-    const dispatch = useDispatch(); // Initialize dispatch
+    const { isAuthenticated } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { token } = theme.useToken();
+    const { token: antdToken } = theme.useToken();
+    const [userName, setUserName] = useState(t('header.username'));
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const decodedToken = jwtDecode(token);
+                    const name = decodedToken.given_name || t('header.username');
+                    setUserName(name);
+                }
+            } catch (error) {
+                console.error("Error decoding token:", error);
+                setUserName(t('header.username'));
+            }
+        } else {
+            setUserName(t('header.username'));
+        }
+    }, [isAuthenticated, t]);
 
     const handleLanguageChange = (value) => {
         i18n.changeLanguage(value);
@@ -38,8 +57,8 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
 
     const handleMenuClick = ({ key }) => {
         if (key === '3') {
-            dispatch(logout()); // Dispatch logout action
-            navigate('/login'); // Navigate to login page
+            dispatch(logout());
+            navigate('/login');
         } else if (key === '1') {
             navigate('/profile');
         } else if (key === '2') {
@@ -62,12 +81,12 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
         },
     ];
 
-    const displayName = isAuthenticated && user?.fullName ? user.fullName : t('header.username');
+    const displayName = userName;
 
     return (
         <Header
             className="p-0 flex items-center justify-between"
-            style={{ background: token.colorBgContainer }}
+            style={{ background: antdToken.colorBgContainer }}
         >
             <div className="flex items-center">
                 <Button

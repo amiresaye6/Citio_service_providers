@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout, Menu, Drawer } from 'antd';
 import {
     DashboardOutlined,
@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../context/DirectionContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSelector } from 'react-redux';
+import {jwtDecode} from 'jwt-decode';
 
 const { Sider } = Layout;
 
@@ -26,7 +27,26 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
     const { themeMode } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
+    const { isAuthenticated } = useSelector((state) => state.auth);
+    const [userRoles, setUserRoles] = useState([]);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const decodedToken = jwtDecode(token);
+                    const roles = decodedToken.roles || [];
+                    setUserRoles(roles);
+                }
+            } catch (error) {
+                console.error("Error decoding token:", error);
+                setUserRoles([]);
+            }
+        } else {
+            setUserRoles([]);
+        }
+    }, [isAuthenticated]);
 
     const routeToKey = {
         '/': '1',
@@ -155,9 +175,9 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
         },
     ];
 
-    // Filter menu items based on businessType
-    const filteredMenuItems = isAuthenticated && user?.businessType
-        ? (user.businessType.toLowerCase() === 'admin' 
+    // Filter menu items based on roles from the token
+    const filteredMenuItems = isAuthenticated
+        ? (userRoles.includes("Admin")
             ? menuItems.filter(item => item.type === 'admin')
             : menuItems.filter(item => item.type === 'vendor'))
         : [];
