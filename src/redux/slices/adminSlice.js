@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const API_BASE_URL = "https://service-provider.runasp.net/api/Admin";
+const REVIEWS_API_URL = "https://service-provider.runasp.net/api/Reviews";
 
 // Async thunk for fetching today's stats
 export const fetchTodayStats = createAsyncThunk(
@@ -88,28 +89,46 @@ export const fetchAllTransactions = createAsyncThunk(
     }
 );
 
-// Async thunk for fetching all users count
-export const fetchAllUsersCount = createAsyncThunk(
-    'admin/fetchAllUsersCount',
-    async (_, { rejectWithValue }) => {
+// Async thunk for fetching user-vendor reviews
+export const fetchUserVendorReviews = createAsyncThunk(
+    'admin/fetchUserVendorReviews',
+    async (params, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/all-users-count`);
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data || 'Failed to fetch users count');
-        }
-    }
-);
+            const token = localStorage.getItem('token');
+            const {
+                pageNumber = 1,
+                pageSize = 10,
+                searchValue,
+                sortColumn,
+                sortDirection,
+                businessTypes,
+                minRating,
+                maxRating,
+                status,
+                statuses
+            } = params || {};
 
-// Async thunk for fetching all transactions count
-export const fetchAllTransactionsCount = createAsyncThunk(
-    'admin/fetchAllTransactionsCount',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/all-transactions-count`);
+            const response = await axios.get(`${REVIEWS_API_URL}/user-vendor-reviews`, {
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    PageNumer: pageNumber,
+                    PageSize: pageSize,
+                    SearchValue: searchValue,
+                    SortColumn: sortColumn,
+                    SortDirection: sortDirection,
+                    BusinessTypes: businessTypes,
+                    MinRating: minRating,
+                    MaxRating: maxRating,
+                    Status: status,
+                    Statuses: statuses
+                }
+            });
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Failed to fetch transactions count');
+            return rejectWithValue(error.response?.data || 'Failed to fetch user-vendor reviews');
         }
     }
 );
@@ -136,6 +155,13 @@ const adminSlice = createSlice({
         },
         transactions: {
             items: []
+        },
+        reviews: {
+            items: [],
+            pageNumber: 1,
+            totalPages: 1,
+            hasPreviousPage: false,
+            hasNextPage: false
         },
         usersCount: {
             totalApplicationUsers: 0
@@ -220,32 +246,25 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-            // All Users Count
-            .addCase(fetchAllUsersCount.pending, (state) => {
+            // User Vendor Reviews
+            .addCase(fetchUserVendorReviews.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchAllUsersCount.fulfilled, (state, action) => {
+            .addCase(fetchUserVendorReviews.fulfilled, (state, action) => {
                 state.loading = false;
-                state.usersCount = action.payload;
+                state.reviews = {
+                    items: action.payload.items,
+                    pageNumber: action.payload.pageNumber,
+                    totalPages: action.payload.totalPages,
+                    hasPreviousPage: action.payload.hasPreviousPage,
+                    hasNextPage: action.payload.hasNextPage
+                };
             })
-            .addCase(fetchAllUsersCount.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
-            // All Transactions Count
-            .addCase(fetchAllTransactionsCount.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(fetchAllTransactionsCount.fulfilled, (state, action) => {
-                state.loading = false;
-                state.transactionsCount = action.payload;
-            })
-            .addCase(fetchAllTransactionsCount.rejected, (state, action) => {
+            .addCase(fetchUserVendorReviews.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
-            });
+            })
     }
 });
 

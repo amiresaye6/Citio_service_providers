@@ -137,8 +137,8 @@ const AppRoutes = () => (
                 path="/vendor/ratings"
                 element={
                     <ProtectedRoute>
-                        <AdminRatingsPage />
-                        {/* <VendorRatingsPage /> */}
+                        {/* <AdminRatingsPage /> */}
+                        <VendorRatingsPage />
                     </ProtectedRoute>
                 }
             />
