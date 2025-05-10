@@ -9,7 +9,10 @@ import {
   Select,
   Divider,
   Tooltip,
-  Tabs
+  Row,
+  Col,
+  Avatar,
+  DatePicker
 } from 'antd';
 import {
   UserAddOutlined,
@@ -17,9 +20,12 @@ import {
   DeleteOutlined,
   LockOutlined,
   ExclamationCircleOutlined,
-  FilterOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  UserOutlined
 } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllUsers, clearError } from '../redux/slices/adminSlice';
+import moment from 'moment';
 
 // Import reusable components
 import PageHeader from '../components/common/PageHeader';
@@ -29,19 +35,26 @@ import ConfirmModal from '../components/common/ConfirmModal';
 import ToastNotifier from '../components/common/ToastNotifier';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import StatusTag from '../components/common/StatusTag';
-import UserCard from '../components/common/UserCard';
-import FilterBar from '../components/common/FilterBar';
 
 const { Option } = Select;
-const { TabPane } = Tabs;
+const { RangePicker } = DatePicker;
 
 const UsersPage = () => {
-  // State for users data
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [searchText, setSearchText] = useState('');
-  const [activeFilters, setActiveFilters] = useState({});
+  const dispatch = useDispatch();
+  const { users, loading, error } = useSelector(state => state.admin);
+
+  // State for pagination and filters
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+  const [searchValue, setSearchValue] = useState('');
+  const [sortColumn, setSortColumn] = useState('');
+  const [sortDirection, setSortDirection] = useState('');
+  const [roleFilter, setRoleFilter] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [dateRange, setDateRange] = useState(null);
+
+  // State for local filtering (for date range which API doesn't support)
+  const [localFiltered, setLocalFiltered] = useState([]);
 
   // State for modals
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -61,214 +74,119 @@ const UsersPage = () => {
   const [userForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
 
-  // Mock user data
-  const mockUsers = [
-    {
-      id: 1,
-      name: 'John Smith',
-      email: 'john.smith@example.com',
-      role: 'Admin',
-      status: 'active',
-      lastLogin: '2025-04-20T15:30:45',
-      createdAt: '2024-08-15'
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      email: 'sarah.johnson@example.com',
-      role: 'Editor',
-      status: 'active',
-      lastLogin: '2025-04-19T09:12:33',
-      createdAt: '2024-09-22'
-    },
-    {
-      id: 3,
-      name: 'Michael Brown',
-      email: 'michael.brown@example.com',
-      role: 'Viewer',
-      status: 'inactive',
-      lastLogin: '2025-04-01T16:45:22',
-      createdAt: '2024-07-30'
-    },
-    {
-      id: 4,
-      name: 'Emily Davis',
-      email: 'emily.davis@example.com',
-      role: 'Admin',
-      status: 'active',
-      lastLogin: '2025-04-20T11:23:51',
-      createdAt: '2024-10-05'
-    },
-    {
-      id: 5,
-      name: 'Robert Wilson',
-      email: 'robert.wilson@example.com',
-      role: 'Editor',
-      status: 'pending',
-      lastLogin: null,
-      createdAt: '2025-04-18'
-    },
-    {
-      id: 6,
-      name: 'Jessica Miller',
-      email: 'jessica.miller@example.com',
-      role: 'Viewer',
-      status: 'active',
-      lastLogin: '2025-04-15T14:12:09',
-      createdAt: '2024-11-12'
-    },
-    {
-      id: 7,
-      name: 'David Clark',
-      email: 'david.clark@example.com',
-      role: 'Editor',
-      status: 'active',
-      lastLogin: '2025-04-19T17:30:45',
-      createdAt: '2024-12-03'
-    },
-    {
-      id: 8,
-      name: 'Lisa Moore',
-      email: 'lisa.moore@example.com',
-      role: 'Viewer',
-      status: 'inactive',
-      lastLogin: '2025-03-25T10:15:33',
-      createdAt: '2024-08-28'
-    },
-    {
-      id: 9,
-      name: 'Kevin Taylor',
-      email: 'kevin.taylor@example.com',
-      role: 'Admin',
-      status: 'active',
-      lastLogin: '2025-04-20T08:45:12',
-      createdAt: '2025-01-10'
-    },
-    {
-      id: 10,
-      name: 'Amanda White',
-      email: 'amanda.white@example.com',
-      role: 'Editor',
-      status: 'active',
-      lastLogin: '2025-04-18T13:20:41',
-      createdAt: '2025-02-15'
-    }
-  ];
-
   // Load users data
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        setUsers(mockUsers);
-        setFilteredUsers(mockUsers);
-        setLoading(false);
-      } catch (error) {
-        console.error('Failed to load users:', error);
-        ToastNotifier.error('Failed to load users');
-        setLoading(false);
-      }
-    };
+    dispatch(fetchAllUsers({
+      pageNumber: currentPage,
+      pageSize: pageSize,
+      searchValue: searchValue,
+      sortColumn: sortColumn,
+      sortDirection: sortDirection,
+      statuses: statusFilter ? [statusFilter] : undefined
+    }));
+  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter]);
 
-    loadUsers();
-  }, []);
-
-  // Filter options for the filter bar
-  const filterOptions = [
-    {
-      key: 'role',
-      placeholder: 'Role',
-      options: [
-        { label: 'Admin', value: 'Admin' },
-        { label: 'Editor', value: 'Editor' },
-        { label: 'Viewer', value: 'Viewer' }
-      ]
-    },
-    {
-      key: 'status',
-      placeholder: 'Status',
-      options: [
-        { label: 'Active', value: 'active' },
-        { label: 'Inactive', value: 'inactive' },
-        { label: 'Pending', value: 'pending' }
-      ]
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      ToastNotifier.error('Failed to load users', error);
+      dispatch(clearError());
     }
-  ];
+  }, [error, dispatch]);
 
-  // Search and filter functions
-  const handleSearch = (value) => {
-    setSearchText(value);
-    applyFilters(value, activeFilters);
-  };
-
-  const handleFilter = (key, value) => {
-    const newFilters = { ...activeFilters };
-    if (value) {
-      newFilters[key] = value;
-    } else {
-      delete newFilters[key];
+  // Apply local filtering for date range
+  useEffect(() => {
+    if (!users?.items) {
+      setLocalFiltered([]);
+      return;
     }
 
-    setActiveFilters(newFilters);
-    applyFilters(searchText, newFilters);
-  };
+    let filtered = [...users.items];
 
-  const handleResetFilters = () => {
-    setSearchText('');
-    setActiveFilters({});
-    setFilteredUsers(users);
-  };
-
-  const applyFilters = (search, filters) => {
-    let result = [...users];
-
-    // Apply search
-    if (search) {
-      const searchLower = search.toLowerCase();
-      result = result.filter(user =>
-        user.name.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower)
+    // Apply role filter locally (API might not support role filtering)
+    if (roleFilter) {
+      filtered = filtered.filter(user =>
+        user.role === roleFilter ||
+        (roleFilter === 'Admin' && user.email.includes('admin'))
       );
     }
 
-    // Apply filters
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) {
-        result = result.filter(user => user[key] === value);
-      }
-    });
+    // Apply date range filter
+    if (dateRange && dateRange[0] && dateRange[1]) {
+      const startDate = moment(dateRange[0]).startOf('day');
+      const endDate = moment(dateRange[1]).endOf('day');
 
-    setFilteredUsers(result);
+      filtered = filtered.filter(user => {
+        if (!user.registrationDate) return false;
+        const regDate = moment(user.registrationDate);
+        return regDate.isBetween(startDate, endDate, null, '[]');
+      });
+    }
+
+    setLocalFiltered(filtered);
+  }, [users?.items, roleFilter, dateRange]);
+
+  // Search function
+  const handleSearch = (value) => {
+    setSearchValue(value);
+    setCurrentPage(1);
+  };
+
+  // Filter handlers
+  const handleRoleFilterChange = (value) => {
+    setRoleFilter(value);
+  };
+
+  const handleStatusFilterChange = (value) => {
+    setStatusFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleDateRangeChange = (dates) => {
+    setDateRange(dates);
+  };
+
+  // Reset all filters
+  const handleResetFilters = () => {
+    setSearchValue('');
+    setRoleFilter(null);
+    setStatusFilter(null);
+    setDateRange(null);
+    setSortColumn('');
+    setSortDirection('');
+    setCurrentPage(1);
+
+    dispatch(fetchAllUsers({
+      pageNumber: 1,
+      pageSize: pageSize
+    }));
   };
 
   // Refresh users list
-  const handleRefresh = async () => {
-    setLoading(true);
+  const handleRefresh = () => {
+    dispatch(fetchAllUsers({
+      pageNumber: currentPage,
+      pageSize: pageSize,
+      searchValue: searchValue,
+      sortColumn: sortColumn,
+      sortDirection: sortDirection,
+      statuses: statusFilter ? [statusFilter] : undefined
+    }));
 
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    ToastNotifier.success('Users list refreshed');
+  };
 
-      // Randomize some values to simulate fresh data
-      const refreshedUsers = mockUsers.map(user => ({
-        ...user,
-        status: Math.random() > 0.8 ?
-          (user.status === 'active' ? 'inactive' : 'active') :
-          user.status,
-        lastLogin: Math.random() > 0.3 ?
-          new Date(Date.now() - Math.floor(Math.random() * 86400000)).toISOString() :
-          user.lastLogin
-      }));
+  // Table change handler for sorting and pagination
+  const handleTableChange = (pagination, filters, sorter) => {
+    setCurrentPage(pagination.current);
+    setPageSize(pagination.pageSize);
 
-      setUsers(refreshedUsers);
-      setFilteredUsers(refreshedUsers);
-      handleResetFilters();
-      ToastNotifier.success('Users list refreshed');
-    } catch (error) {
-      ToastNotifier.error('Failed to refresh users');
-    } finally {
-      setLoading(false);
+    if (sorter.field && sorter.order) {
+      setSortColumn(sorter.field);
+      setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
+    } else {
+      setSortColumn('');
+      setSortDirection('');
     }
   };
 
@@ -282,33 +200,11 @@ const UsersPage = () => {
     setDeleteLoading(true);
 
     try {
-      // Simulate API call
+      // In a real application, you would call an API to delete the user
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Remove user from state
-      const updatedUsers = users.filter(u => u.id !== userToDelete.id);
-      setUsers(updatedUsers);
-      setFilteredUsers(updatedUsers.filter(user => {
-        // Reapply current filters
-        let matches = true;
-        if (searchText) {
-          const searchLower = searchText.toLowerCase();
-          matches = matches && (
-            user.name.toLowerCase().includes(searchLower) ||
-            user.email.toLowerCase().includes(searchLower)
-          );
-        }
-
-        Object.entries(activeFilters).forEach(([key, value]) => {
-          if (value) {
-            matches = matches && user[key] === value;
-          }
-        });
-
-        return matches;
-      }));
-
       ToastNotifier.success('User deleted successfully');
+      handleRefresh();
     } catch (error) {
       ToastNotifier.error('Failed to delete user');
     } finally {
@@ -323,10 +219,12 @@ const UsersPage = () => {
     setCurrentUser(user);
     setUserFormMode('edit');
     userForm.setFieldsValue({
-      name: user.name,
+      fullName: user.fullName,
       email: user.email,
-      role: user.role,
-      status: user.status
+      role: user.role || 'User', // Role might not be in the API response
+      status: user.status || 'active',
+      address: user.address,
+      phoneNumber: user.phoneNumber
     });
     setUserFormVisible(true);
   };
@@ -342,55 +240,20 @@ const UsersPage = () => {
     setFormLoading(true);
 
     try {
-      // Simulate API call
+      // In a real application, you would call an API to create or update a user
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (userFormMode === 'create') {
-        // Create new user
-        const newUser = {
-          id: users.length + 1,
-          ...values,
-          lastLogin: null,
-          createdAt: new Date().toISOString().split('T')[0]
-        };
-
-        const updatedUsers = [newUser, ...users];
-        setUsers(updatedUsers);
-        setFilteredUsers(updatedUsers);
-        ToastNotifier.success('User created successfully');
-      } else {
-        // Update existing user
-        const updatedUsers = users.map(user =>
-          user.id === currentUser.id ? { ...user, ...values } : user
-        );
-
-        setUsers(updatedUsers);
-        setFilteredUsers(updatedUsers.filter(user => {
-          // Reapply current filters
-          let matches = true;
-          if (searchText) {
-            const searchLower = searchText.toLowerCase();
-            matches = matches && (
-              user.name.toLowerCase().includes(searchLower) ||
-              user.email.toLowerCase().includes(searchLower)
-            );
-          }
-
-          Object.entries(activeFilters).forEach(([key, value]) => {
-            if (value) {
-              matches = matches && user[key] === value;
-            }
-          });
-
-          return matches;
-        }));
-
-        ToastNotifier.success('User updated successfully');
-      }
+      ToastNotifier.success(
+        userFormMode === 'create'
+          ? 'User created successfully'
+          : 'User updated successfully'
+      );
+      handleRefresh();
     } catch (error) {
-      ToastNotifier.error(userFormMode === 'create' ?
-        'Failed to create user' :
-        'Failed to update user'
+      ToastNotifier.error(
+        userFormMode === 'create'
+          ? 'Failed to create user'
+          : 'Failed to update user'
       );
     } finally {
       setFormLoading(false);
@@ -411,7 +274,7 @@ const UsersPage = () => {
     setPasswordLoading(true);
 
     try {
-      // Simulate API call
+      // In a real application, you would call an API to change the password
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       ToastNotifier.success('Password changed successfully');
@@ -431,46 +294,49 @@ const UsersPage = () => {
       title: 'User',
       key: 'user',
       render: (_, record) => (
-        <UserCard
-          name={record.name}
-          email={record.email}
-          status={record.status}
-          role={record.role}
-        />
+        <div className="flex items-center">
+          <Avatar
+            src={record.imageUrl}
+            icon={<UserOutlined />}
+            size="large"
+            className="mr-3"
+          />
+          <div>
+            <div className="font-medium">{record.fullName}</div>
+            <div className="text-xs text-gray-500">{record.email}</div>
+            {record.address && (
+              <div className="text-xs text-gray-400 hidden md:block">{record.address}</div>
+            )}
+          </div>
+        </div>
       ),
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-      width: 120,
+      title: 'Phone',
+      dataIndex: 'phoneNumber',
+      key: 'phoneNumber',
+      responsive: ['md'],
+    },
+    {
+      title: 'Registration Date',
+      dataIndex: 'registrationDate',
+      key: 'registrationDate',
+      sorter: true,
+      render: (date) => date ? new Date(date).toLocaleDateString() : 'N/A',
+      responsive: ['lg'],
     },
     {
       title: 'Status',
-      dataIndex: 'status',
       key: 'status',
-      width: 120,
-      render: (status) => <StatusTag status={status} />,
-    },
-    {
-      title: 'Last Login',
-      dataIndex: 'lastLogin',
-      key: 'lastLogin',
-      width: 200,
-      render: (lastLogin) => lastLogin ?
-        new Date(lastLogin).toLocaleString() :
-        'Never'
-    },
-    {
-      title: 'Created',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      width: 120,
+      render: (_, record) => (
+        <StatusTag status={record.status || 'active'} />
+      ),
+      responsive: ['sm'],
     },
     {
       title: 'Actions',
       key: 'actions',
-      width: 200,
+      width: 160,
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Edit User">
@@ -500,8 +366,13 @@ const UsersPage = () => {
     },
   ];
 
+  // Determine which data to display (filtered locally or from API)
+  const displayData = dateRange || roleFilter
+    ? localFiltered
+    : (users?.items || []);
+
   return (
-    <div className="page-container">
+    <div className="p-4 md:p-6 min-h-screen">
       {/* Page Header */}
       <PageHeader
         title="User Management"
@@ -519,45 +390,112 @@ const UsersPage = () => {
 
       {/* Search and Filter Section */}
       <Card className="mb-6">
-        <div className="mb-4">
-          <SearchInput
-            placeholder="Search by name or email..."
-            onSearch={handleSearch}
-            allowClear
-          />
-        </div>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={12} lg={8}>
+            <SearchInput
+              placeholder="Search by name or email..."
+              onSearch={handleSearch}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              allowClear
+              className="w-full"
+            />
+          </Col>
 
-        <FilterBar
-          filters={filterOptions}
-          onFilterChange={handleFilter}
-          onReset={handleResetFilters}
-          loading={loading}
-        />
+          <Col xs={24} sm={12} md={6} lg={4}>
+            <Select
+              placeholder="Filter by role"
+              value={roleFilter}
+              onChange={handleRoleFilterChange}
+              allowClear
+              className="w-full"
+            >
+              <Option value="Admin">Admin</Option>
+              <Option value="Vendor">Vendor</Option>
+              <Option value="User">User</Option>
+            </Select>
+          </Col>
 
-        <div className="flex justify-end mt-4">
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-            loading={loading}
-          >
-            Refresh
-          </Button>
-        </div>
+          <Col xs={24} sm={12} md={6} lg={4}>
+            <Select
+              placeholder="Filter by status"
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              allowClear
+              className="w-full"
+            >
+              <Option value="active">Active</Option>
+              <Option value="inactive">Inactive</Option>
+              <Option value="pending">Pending</Option>
+            </Select>
+          </Col>
+
+          <Col xs={24} md={12} lg={8}>
+            <RangePicker
+              placeholder={['Start Date', 'End Date']}
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              className="w-full"
+            />
+          </Col>
+
+          <Col xs={12} sm={6} md={6} lg={4}>
+            <Button
+              onClick={handleResetFilters}
+              className="w-full"
+            >
+              Reset Filters
+            </Button>
+          </Col>
+
+          <Col xs={12} sm={6} md={6} lg={4}>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={handleRefresh}
+              loading={loading}
+              className="w-full"
+              type="primary"
+            >
+              Refresh
+            </Button>
+          </Col>
+        </Row>
       </Card>
 
       {/* Users Table */}
-      <Card title={`Users (${filteredUsers.length})`} className="mb-6">
-        <TableWrapper
-          dataSource={filteredUsers}
-          columns={columns}
-          loading={loading}
-          pagination={{
-            pageSize: 8,
-            showSizeChanger: true,
-            pageSizeOptions: ['8', '16', '32'],
-          }}
-        />
-      </Card>
+      {loading ? (
+        <LoadingSpinner text="Loading users..." />
+      ) : (
+        <Card
+          title={`Users (${displayData.length})`}
+          className="mb-6"
+          extra={
+            <div className="text-sm text-gray-500">
+              {dateRange || roleFilter
+                ? `Showing filtered results: ${displayData.length} users`
+                : `Page ${users?.pageNumber || 1} of ${users?.totalPages || 1}`}
+            </div>
+          }
+        >
+          <TableWrapper
+            dataSource={displayData}
+            columns={columns}
+            rowKey="id"
+            pagination={{
+              current: dateRange || roleFilter ? 1 : (users?.pageNumber || 1),
+              pageSize: pageSize,
+              total: dateRange || roleFilter
+                ? displayData.length
+                : (users?.totalPages || 1) * pageSize,
+              showSizeChanger: true,
+              pageSizeOptions: ['8', '16', '32', '50'],
+              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
+            }}
+            onChange={handleTableChange}
+            scroll={{ x: 'max-content' }}
+          />
+        </Card>
+      )}
 
       {/* Delete User Confirm Modal */}
       <ConfirmModal
@@ -566,7 +504,7 @@ const UsersPage = () => {
           userToDelete ?
             <>
               <p>Are you sure you want to delete the following user?</p>
-              <p><strong>{userToDelete.name}</strong> ({userToDelete.email})</p>
+              <p><strong>{userToDelete.fullName}</strong> ({userToDelete.email})</p>
               <p className="text-red-500 mt-4">
                 <ExclamationCircleOutlined className="mr-2" />
                 This action cannot be undone.
@@ -597,6 +535,7 @@ const UsersPage = () => {
         }}
         footer={null}
         destroyOnClose
+        width={600}
       >
         <Form
           form={userForm}
@@ -604,64 +543,94 @@ const UsersPage = () => {
           onFinish={handleUserFormSubmit}
           initialValues={{
             status: 'active',
-            role: 'Viewer'
+            role: 'User'
           }}
         >
-          <Form.Item
-            name="name"
-            label="Name"
-            rules={[{ required: true, message: 'Please enter user name' }]}
-          >
-            <Input placeholder="Full name" />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="fullName"
+                label="Full Name"
+                rules={[{ required: true, message: 'Please enter user name' }]}
+              >
+                <Input placeholder="Full name" />
+              </Form.Item>
+            </Col>
 
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: 'Please enter email' },
-              { type: 'email', message: 'Please enter a valid email' }
-            ]}
-          >
-            <Input placeholder="Email address" />
-          </Form.Item>
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { required: true, message: 'Please enter email' },
+                  { type: 'email', message: 'Please enter a valid email' }
+                ]}
+              >
+                <Input placeholder="Email address" />
+              </Form.Item>
+            </Col>
 
-          {userFormMode === 'create' && (
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[
-                { required: true, message: 'Please enter password' },
-                { min: 8, message: 'Password must be at least 8 characters' }
-              ]}
-            >
-              <Input.Password placeholder="Password" />
-            </Form.Item>
-          )}
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="phoneNumber"
+                label="Phone Number"
+              >
+                <Input placeholder="Phone number" />
+              </Form.Item>
+            </Col>
 
-          <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true, message: 'Please select a role' }]}
-          >
-            <Select placeholder="Select a role">
-              <Option value="Admin">Admin</Option>
-              <Option value="Editor">Editor</Option>
-              <Option value="Viewer">Viewer</Option>
-            </Select>
-          </Form.Item>
+            {userFormMode === 'create' && (
+              <Col span={24}>
+                <Form.Item
+                  name="password"
+                  label="Password"
+                  rules={[
+                    { required: true, message: 'Please enter password' },
+                    { min: 8, message: 'Password must be at least 8 characters' }
+                  ]}
+                >
+                  <Input.Password placeholder="Password" />
+                </Form.Item>
+              </Col>
+            )}
 
-          <Form.Item
-            name="status"
-            label="Status"
-            rules={[{ required: true, message: 'Please select a status' }]}
-          >
-            <Select placeholder="Select status">
-              <Option value="active">Active</Option>
-              <Option value="inactive">Inactive</Option>
-              <Option value="pending">Pending</Option>
-            </Select>
-          </Form.Item>
+            <Col xs={24}>
+              <Form.Item
+                name="address"
+                label="Address"
+              >
+                <Input placeholder="Address" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="role"
+                label="Role"
+                rules={[{ required: true, message: 'Please select a role' }]}
+              >
+                <Select placeholder="Select a role">
+                  <Option value="Admin">Admin</Option>
+                  <Option value="Vendor">Vendor</Option>
+                  <Option value="User">User</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="status"
+                label="Status"
+                rules={[{ required: true, message: 'Please select a status' }]}
+              >
+                <Select placeholder="Select status">
+                  <Option value="active">Active</Option>
+                  <Option value="inactive">Inactive</Option>
+                  <Option value="pending">Pending</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Divider />
 
@@ -697,7 +666,7 @@ const UsersPage = () => {
         {userToChangePassword && (
           <div className="mb-4">
             <p>Change password for user:</p>
-            <p><strong>{userToChangePassword.name}</strong> ({userToChangePassword.email})</p>
+            <p><strong>{userToChangePassword.fullName}</strong> ({userToChangePassword.email})</p>
           </div>
         )}
 

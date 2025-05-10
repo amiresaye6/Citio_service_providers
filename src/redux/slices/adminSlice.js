@@ -62,13 +62,42 @@ export const fetchProjectSummary = createAsyncThunk(
     }
 );
 
-// Async thunk for fetching all users
+// Updated async thunk for fetching all users
 export const fetchAllUsers = createAsyncThunk(
     'admin/fetchAllUsers',
-    async ({ pageNumber = 1, pageSize = 10 }, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
         try {
+            const token = localStorage.getItem('token');
+            const {
+                pageNumber = 1,
+                pageSize = 10,
+                searchValue,
+                sortColumn,
+                sortDirection,
+                businessTypes,
+                minRating,
+                maxRating,
+                status,
+                statuses
+            } = params || {};
+
             const response = await axios.get(`${API_BASE_URL}/all-users`, {
-                params: { pageNumer: pageNumber, pageSize }
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    PageNumer: pageNumber,
+                    PageSize: pageSize,
+                    SearchValue: searchValue,
+                    SortColumn: sortColumn,
+                    SortDirection: sortDirection,
+                    BusinessTypes: businessTypes,
+                    MinRating: minRating,
+                    MaxRating: maxRating,
+                    Status: status,
+                    Statuses: statuses
+                }
             });
             return response.data;
         } catch (error) {
@@ -80,9 +109,40 @@ export const fetchAllUsers = createAsyncThunk(
 // Async thunk for fetching all transactions
 export const fetchAllTransactions = createAsyncThunk(
     'admin/fetchAllTransactions',
-    async (_, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/all-transactions`);
+            const token = localStorage.getItem('token');
+            const {
+                pageNumber = 1,
+                pageSize = 10,
+                searchValue,
+                sortColumn,
+                sortDirection,
+                businessTypes,
+                minRating,
+                maxRating,
+                status,
+                statuses
+            } = params || {};
+
+            const response = await axios.get(`${API_BASE_URL}/all-transactions`, {
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    PageNumer: pageNumber,
+                    PageSize: pageSize,
+                    SearchValue: searchValue,
+                    SortColumn: sortColumn,
+                    SortDirection: sortDirection,
+                    BusinessTypes: businessTypes,
+                    MinRating: minRating,
+                    MaxRating: maxRating,
+                    Status: status,
+                    Statuses: statuses
+                }
+            });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || 'Failed to fetch transactions');
@@ -192,7 +252,9 @@ const adminSlice = createSlice({
         users: {
             items: [],
             pageNumber: 1,
-            pageSize: 10
+            totalPages: 1,
+            hasPreviousPage: false,
+            hasNextPage: false
         },
         transactions: {
             items: []
@@ -273,9 +335,13 @@ const adminSlice = createSlice({
             })
             .addCase(fetchAllUsers.fulfilled, (state, action) => {
                 state.loading = false;
-                state.users.items = action.payload.items;
-                state.users.pageNumber = action.meta.arg.pageNumber;
-                state.users.pageSize = action.meta.arg.pageSize;
+                state.users = {
+                    items: action.payload.items,
+                    pageNumber: action.payload.pageNumber,
+                    totalPages: action.payload.totalPages,
+                    hasPreviousPage: action.payload.hasPreviousPage,
+                    hasNextPage: action.payload.hasNextPage
+                };
             })
             .addCase(fetchAllUsers.rejected, (state, action) => {
                 state.loading = false;
@@ -288,7 +354,13 @@ const adminSlice = createSlice({
             })
             .addCase(fetchAllTransactions.fulfilled, (state, action) => {
                 state.loading = false;
-                state.transactions.items = action.payload.items;
+                state.transactions = {
+                    items: action.payload.items,
+                    pageNumber: action.payload.pageNumber,
+                    totalPages: action.payload.totalPages,
+                    hasPreviousPage: action.payload.hasPreviousPage,
+                    hasNextPage: action.payload.hasNextPage
+                };
             })
             .addCase(fetchAllTransactions.rejected, (state, action) => {
                 state.loading = false;
