@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const API_BASE_URL = "https://service-provider.runasp.net/api/Admin";
 const REVIEWS_API_URL = "https://service-provider.runasp.net/api/Reviews";
+const ORDERS_API_URL = "https://service-provider.runasp.net/api/Orders";
 
 // Async thunk for fetching today's stats
 export const fetchTodayStats = createAsyncThunk(
@@ -133,6 +134,46 @@ export const fetchUserVendorReviews = createAsyncThunk(
     }
 );
 
+// Async thunk for fetching all orders
+export const fetchAllOrders = createAsyncThunk(
+    'admin/fetchAllOrders',
+    async (params, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const {
+                pageNumber = 1,
+                pageSize = 10,
+                searchValue,
+                sortColumn,
+                sortDirection,
+                businessTypes,
+                status,
+                statuses
+            } = params || {};
+
+            const response = await axios.get(`${ORDERS_API_URL}/all-orders`, {
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    PageNumer: pageNumber,
+                    PageSize: pageSize,
+                    SearchValue: searchValue,
+                    SortColumn: sortColumn,
+                    SortDirection: sortDirection,
+                    BusinessTypes: businessTypes,
+                    Status: status,
+                    Statuses: statuses
+                }
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch all orders');
+        }
+    }
+);
+
 const adminSlice = createSlice({
     name: 'admin',
     initialState: {
@@ -157,6 +198,13 @@ const adminSlice = createSlice({
             items: []
         },
         reviews: {
+            items: [],
+            pageNumber: 1,
+            totalPages: 1,
+            hasPreviousPage: false,
+            hasNextPage: false
+        },
+        orders: {
             items: [],
             pageNumber: 1,
             totalPages: 1,
@@ -262,6 +310,25 @@ const adminSlice = createSlice({
                 };
             })
             .addCase(fetchUserVendorReviews.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // All Orders
+            .addCase(fetchAllOrders.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchAllOrders.fulfilled, (state, action) => {
+                state.loading = false;
+                state.orders = {
+                    items: action.payload.items,
+                    pageNumber: action.payload.pageNumber,
+                    totalPages: action.payload.totalPages,
+                    hasPreviousPage: action.payload.hasPreviousPage,
+                    hasNextPage: action.payload.hasNextPage
+                };
+            })
+            .addCase(fetchAllOrders.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
