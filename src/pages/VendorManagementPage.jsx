@@ -29,7 +29,6 @@ const VendorManagementPage = () => {
     const [sortColumn, setSortColumn] = useState('');
     const [sortDirection, setSortDirection] = useState('');
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [selectedVendor, setSelectedVendor] = useState(null);
     const [confirmAction, setConfirmAction] = useState(null);
@@ -95,13 +94,6 @@ const VendorManagementPage = () => {
             key: 'actions',
             render: (_, record) => (
                 <div className="space-x-2">
-                    <Button
-                        type="link"
-                        onClick={() => handleEdit(record)}
-                        disabled
-                    >
-                        Edit
-                    </Button>
                     <Button
                         type="link"
                         danger
@@ -194,24 +186,6 @@ const VendorManagementPage = () => {
         }).catch(() => {
             ToastNotifier.error('Validation Failed', 'Please fill in all required fields.');
         });
-    };
-
-    const handleEdit = (vendor) => {
-        setSelectedVendor(vendor);
-        form.setFieldsValue({
-            businessName: vendor.businessName,
-            email: vendor.email,
-            fullName: vendor.fullName,
-            businessType: vendor.businessType,
-            taxNumber: vendor.taxNumber,
-        });
-        setIsEditModalVisible(true);
-    };
-
-    const handleUpdateVendor = () => {
-        ToastNotifier.warning('Edit Vendor Not Supported', 'No API endpoint available for editing vendors.');
-        setIsEditModalVisible(false);
-        form.resetFields();
     };
 
     const handleActivate = (vendor) => {
@@ -372,58 +346,6 @@ const VendorManagementPage = () => {
                                 <Option key={sub.id} value={sub.id}>{sub.nameEn}</Option>
                             ))}
                         </Select>
-                    </Form.Item>
-                </Form>
-            </Modal>
-
-            <Modal
-                title="Edit Vendor"
-                open={isEditModalVisible}
-                onOk={handleUpdateVendor}
-                onCancel={() => {
-                    setIsAddModalVisible(false);
-                    form.resetFields();
-                }}
-                confirmLoading={authLoading}
-            >
-                <Form form={form} layout="vertical">
-                    <Form.Item
-                        name="businessName"
-                        label="Business Name"
-                        rules={[{ required: true, message: 'Please enter business name' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="fullName"
-                        label="Owner Name"
-                        rules={[{ required: true, message: 'Please enter owner name' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="email"
-                        label="Email"
-                        rules={[
-                            { required: true, message: 'Please enter email' },
-                            { type: 'email', message: 'Please enter a valid email' },
-                        ]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="businessType"
-                        label="Business Type"
-                        rules={[{ required: true, message: 'Please enter business type' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="taxNumber"
-                        label="Tax Number"
-                        rules={[{ required: true, message: 'Please enter tax number' }]}
-                    >
-                        <Input />
                     </Form.Item>
                 </Form>
             </Modal>
