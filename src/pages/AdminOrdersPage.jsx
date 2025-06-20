@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Tag, Select, DatePicker, Space, Col, Row } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllOrders, clearError } from '../redux/slices/adminSlice';
+import { fetchAllOrders, clearError, fetchBusinessTypes } from '../redux/slices/adminSlice';
 import PageHeader from '../components/common/PageHeader';
 import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
@@ -19,7 +19,7 @@ const OrderStatusColors = {
 
 const AdminOrdersPage = () => {
   const dispatch = useDispatch();
-  const { orders, loading, error } = useSelector((state) => state.admin);
+  const { orders, BusinessTypes, loading, error } = useSelector((state) => state.admin);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -42,6 +42,8 @@ const AdminOrdersPage = () => {
       BusinessTypes: vendorFilter.length > 0 ? vendorFilter : undefined,
       DateFilter: filterDate ? filterDate.format('YYYY-MM-DD') : undefined
     }));
+    
+    dispatch(fetchBusinessTypes())
   }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter, filterDate, vendorFilter]);
 
   // Handle errors
@@ -51,13 +53,6 @@ const AdminOrdersPage = () => {
       dispatch(clearError());
     }
   }, [error, dispatch]);
-
-  // Get unique vendor business types for filter, this is done for each pate, need to be handle using api.
-  const vendorTypes = orders?.items
-    ? [...new Set(orders.items.flatMap(order =>
-      order.vendors.map(vendor => vendor.businessType)
-    ))]
-    : [];
 
   // Table columns
   const columns = [
@@ -173,7 +168,7 @@ const AdminOrdersPage = () => {
 
   // Filter orders locally based on vendor filters
   // since the API doesn't directly support these filters
-  const filteredItems = orders ? orders.items : [];
+  // const filteredItems = orders ? orders.items : [];
 
   return (
     <div className="p-4 md:p-6 min-h-screen">
@@ -240,7 +235,7 @@ const AdminOrdersPage = () => {
             className="w-full"
             allowClear
           >
-            {vendorTypes.map(type => (
+            {BusinessTypes.businessTypes.map(type => (
               <Option key={type} value={type}>{type}</Option>
             ))}
           </Select>
@@ -263,7 +258,7 @@ const AdminOrdersPage = () => {
         <LoadingSpinner text="Loading orders..." />
       ) : (
         <TableWrapper
-          dataSource={filteredItems}
+          dataSource={orders.items || []}
           columns={columns}
           loading={loading}
           rowKey="id"

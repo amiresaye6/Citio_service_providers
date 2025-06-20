@@ -4,6 +4,7 @@ import axios from 'axios';
 const API_BASE_URL = "https://service-provider.runasp.net/api/Admin";
 const REVIEWS_API_URL = "https://service-provider.runasp.net/api/Reviews";
 const ORDERS_API_URL = "https://service-provider.runasp.net/api/Orders";
+const VENDORS_API_URL = "https://service-provider.runasp.net/api/Vendors";
 
 // Async thunk for fetching today's stats
 export const fetchTodayStats = createAsyncThunk(
@@ -236,10 +237,6 @@ export const fetchAllOrders = createAsyncThunk(
                 }
             });
 
-            console.log('Request params:', params);
-            console.log('Query string:', queryString);
-            console.log('Response data:', response.data);
-
             return response.data;
         } catch (error) {
             console.error('Error:', error);
@@ -247,6 +244,23 @@ export const fetchAllOrders = createAsyncThunk(
         }
     }
 );
+
+export const fetchBusinessTypes = createAsyncThunk(
+    'admin/fetchBusinessTypes',
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${VENDORS_API_URL}/BusinessTypes`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch BusinessTypes');
+        }
+    }
+)
 
 const adminSlice = createSlice({
     name: 'admin',
@@ -293,6 +307,7 @@ const adminSlice = createSlice({
         transactionsCount: {
             totalTransactionsCount: 0
         },
+        BusinessTypes: [],
         loading: false,
         error: null
     },
@@ -415,6 +430,19 @@ const adminSlice = createSlice({
                 };
             })
             .addCase(fetchAllOrders.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // BusinessTypes
+            .addCase(fetchBusinessTypes.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchBusinessTypes.fulfilled, (state, action) => {
+                state.loading = false;
+                state.BusinessTypes = action.payload;
+            })
+            .addCase(fetchBusinessTypes.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
