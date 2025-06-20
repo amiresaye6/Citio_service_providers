@@ -28,6 +28,7 @@ const AdminOrdersPage = () => {
   const [sortDirection, setSortDirection] = useState('');
   const [statusFilter, setStatusFilter] = useState([]);
   const [vendorFilter, setVendorFilter] = useState([]);
+  const [allBusinessTypes, setAllBusinessTypes] = useState([]);
   const [filterDate, setFilterDate] = useState(null);
 
   // Fetch orders
@@ -42,8 +43,6 @@ const AdminOrdersPage = () => {
       BusinessTypes: vendorFilter.length > 0 ? vendorFilter : undefined,
       DateFilter: filterDate ? filterDate.format('YYYY-MM-DD') : undefined
     }));
-    
-    dispatch(fetchBusinessTypes())
   }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter, filterDate, vendorFilter]);
 
   // Handle errors
@@ -53,6 +52,12 @@ const AdminOrdersPage = () => {
       dispatch(clearError());
     }
   }, [error, dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchBusinessTypes())
+    setAllBusinessTypes(BusinessTypes.businessTypes);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Table columns
   const columns = [
@@ -166,10 +171,6 @@ const AdminOrdersPage = () => {
     }));
   };
 
-  // Filter orders locally based on vendor filters
-  // since the API doesn't directly support these filters
-  // const filteredItems = orders ? orders.items : [];
-
   return (
     <div className="p-4 md:p-6 min-h-screen">
       <PageHeader
@@ -210,7 +211,7 @@ const AdminOrdersPage = () => {
       </Row>
 
       <Row gutter={[16, 16]} className="mb-4">
-        <Col xs={24} sm={12} md={6} lg={4}>
+        <Col xs={24} sm={12} md={6} lg={6}>
           <Select
             mode="multiple"
             placeholder="Filter by status"
@@ -226,7 +227,7 @@ const AdminOrdersPage = () => {
             <Option value="Cancelled">Cancelled</Option>
           </Select>
         </Col>
-        <Col xs={24} sm={12} md={6} lg={4}>
+        <Col xs={24} sm={12} md={6} lg={6}>
           <Select
             mode="multiple"
             placeholder="Filter by vendor type"
@@ -235,7 +236,7 @@ const AdminOrdersPage = () => {
             className="w-full"
             allowClear
           >
-            {BusinessTypes.businessTypes.map(type => (
+            {allBusinessTypes.map(type => (
               <Option key={type} value={type}>{type}</Option>
             ))}
           </Select>
