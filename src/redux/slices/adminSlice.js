@@ -206,30 +206,44 @@ export const fetchAllOrders = createAsyncThunk(
                 searchValue,
                 sortColumn,
                 sortDirection,
-                businessTypes,
-                status,
-                statuses
+                BusinessTypes,
+                DateFilter,
+                Statuses
             } = params || {};
 
-            const response = await axios.get(`${ORDERS_API_URL}/all-orders`, {
+            // Manually construct query string
+            const queryParams = [];
+            if (pageNumber) queryParams.push(`PageNumer=${pageNumber}`);
+            if (pageSize) queryParams.push(`PageSize=${pageSize}`);
+            if (searchValue) queryParams.push(`SearchValue=${encodeURIComponent(searchValue)}`);
+            if (sortColumn) queryParams.push(`SortColumn=${encodeURIComponent(sortColumn)}`);
+            if (sortDirection) queryParams.push(`SortDirection=${encodeURIComponent(sortDirection)}`);
+            if (BusinessTypes && Array.isArray(BusinessTypes)) {
+                BusinessTypes.forEach(type => queryParams.push(`BusinessTypes=${encodeURIComponent(type)}`));
+            }
+            if (DateFilter) queryParams.push(`DateFilter=${encodeURIComponent(DateFilter)}`);
+            if (Statuses && Array.isArray(Statuses) && Statuses.length > 0) {
+                Statuses.forEach(status => queryParams.push(`Statuses=${encodeURIComponent(status)}`));
+            }
+
+            const queryString = queryParams.join('&');
+            const url = queryString ? `${ORDERS_API_URL}/all-orders?${queryString}` : `${ORDERS_API_URL}/all-orders`;
+
+            const response = await axios.get(url, {
                 headers: {
                     accept: 'text/plain',
                     Authorization: `Bearer ${token}`,
-                },
-                params: {
-                    PageNumer: pageNumber,
-                    PageSize: pageSize,
-                    SearchValue: searchValue,
-                    SortColumn: sortColumn,
-                    SortDirection: sortDirection,
-                    BusinessTypes: businessTypes,
-                    Status: status,
-                    Statuses: statuses
                 }
             });
+
+            console.log('Request params:', params);
+            console.log('Query string:', queryString);
+            console.log('Response data:', response.data);
+
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Failed to fetch all orders');
+            console.error('Error:', error);
+            return rejectWithValue(error.response?.data || 'Failed to fetch orders');
         }
     }
 );

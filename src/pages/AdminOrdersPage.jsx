@@ -7,14 +7,12 @@ import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ToastNotifier from '../components/common/ToastNotifier';
-import moment from 'moment';
-
-const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const OrderStatusColors = {
   'Pending': 'orange',
   'Processing': 'blue',
+  'Shipped': 'purple',
   'Delivered': 'green',
   'Cancelled': 'red'
 };
@@ -22,14 +20,15 @@ const OrderStatusColors = {
 const AdminOrdersPage = () => {
   const dispatch = useDispatch();
   const { orders, loading, error } = useSelector((state) => state.admin);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState('');
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('');
-  const [statusFilter, setStatusFilter] = useState(null);
-  const [dateRange, setDateRange] = useState(null);
-  const [vendorFilter, setVendorFilter] = useState(null);
+  const [statusFilter, setStatusFilter] = useState([]);
+  const [vendorFilter, setVendorFilter] = useState([]);
+  const [filterDate, setFilterDate] = useState(null);
 
   // Fetch orders
   useEffect(() => {
@@ -39,9 +38,11 @@ const AdminOrdersPage = () => {
       searchValue: searchValue,
       sortColumn: sortColumn,
       sortDirection: sortDirection,
-      statuses: statusFilter ? [statusFilter] : undefined
+      Statuses: statusFilter.length > 0 ? statusFilter : undefined,
+      BusinessTypes: vendorFilter.length > 0 ? vendorFilter : undefined,
+      DateFilter: filterDate ? filterDate.format('YYYY-MM-DD') : undefined
     }));
-  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter]);
+  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter, filterDate, vendorFilter]);
 
   // Handle errors
   useEffect(() => {
@@ -51,7 +52,7 @@ const AdminOrdersPage = () => {
     }
   }, [error, dispatch]);
 
-  // Get unique vendor business types for filter
+  // Get unique vendor business types for filter, this is done for each pate, need to be handle using api.
   const vendorTypes = orders?.items
     ? [...new Set(orders.items.flatMap(order =>
       order.vendors.map(vendor => vendor.businessType)
@@ -144,24 +145,23 @@ const AdminOrdersPage = () => {
   };
 
   // Handle vendor filter change
-  const handleVendorFilterChange = (value) => {
-    setVendorFilter(value);
-    // Note: We're not changing API call for vendor filter
-    // as it's not supported in the API - we'll filter locally
+  const handleVendorFilterChange = (values) => {
+    setVendorFilter(values);
+    setCurrentPage(1);
   };
 
-  // Handle date range change
-  const handleDateRangeChange = (dates) => {
-    setDateRange(dates);
-    // Note: Date filtering will be done locally as the API doesn't support it
+  // Handle date change (single date only)
+  const handleDateChange = (date) => {
+    setFilterDate(date);
+    setCurrentPage(1);
   };
 
   // Reset filters
   const handleResetFilters = () => {
     setSearchValue('');
-    setStatusFilter(null);
-    setVendorFilter(null);
-    setDateRange(null);
+    setStatusFilter([]);
+    setVendorFilter([]);
+    setFilterDate(null);
     setSortColumn('');
     setSortDirection('');
     setCurrentPage(1);
@@ -171,30 +171,9 @@ const AdminOrdersPage = () => {
     }));
   };
 
-  // Filter orders locally based on date range and vendor filters
+  // Filter orders locally based on vendor filters
   // since the API doesn't directly support these filters
-  const filteredItems = orders?.items?.filter(order => {
-    // Apply vendor filter if set
-    if (vendorFilter) {
-      const hasVendorType = order.vendors.some(
-        vendor => vendor.businessType === vendorFilter
-      );
-      if (!hasVendorType) return false;
-    }
-
-    // Apply date filter if set
-    if (dateRange && dateRange[0] && dateRange[1]) {
-      const orderDate = moment(order.orderDate);
-      const startDate = moment(dateRange[0]);
-      const endDate = moment(dateRange[1]);
-
-      if (!orderDate.isBetween(startDate, endDate, 'day', '[]')) {
-        return false;
-      }
-    }
-
-    return true;
-  }) || [];
+  const filteredItems = orders ? orders.items : [];
 
   return (
     <div className="p-4 md:p-6 min-h-screen">
@@ -211,7 +190,9 @@ const AdminOrdersPage = () => {
                 searchValue: searchValue,
                 sortColumn: sortColumn,
                 sortDirection: sortDirection,
-                statuses: statusFilter ? [statusFilter] : undefined
+                Statuses: statusFilter.length > 0 ? statusFilter : undefined,
+                BusinessTypes: vendorFilter.length > 0 ? vendorFilter : undefined,
+                DateFilter: filterDate ? filterDate.format('YYYY-MM-DD') : undefined
               }));
               ToastNotifier.info('Refresh', 'Orders refreshed.');
             }}
@@ -236,6 +217,7 @@ const AdminOrdersPage = () => {
       <Row gutter={[16, 16]} className="mb-4">
         <Col xs={24} sm={12} md={6} lg={4}>
           <Select
+            mode="multiple"
             placeholder="Filter by status"
             onChange={handleStatusFilterChange}
             value={statusFilter}
@@ -244,12 +226,14 @@ const AdminOrdersPage = () => {
           >
             <Option value="Pending">Pending</Option>
             <Option value="Processing">Processing</Option>
+            <Option value="Shipped">Shipped</Option>
             <Option value="Delivered">Delivered</Option>
             <Option value="Cancelled">Cancelled</Option>
           </Select>
         </Col>
         <Col xs={24} sm={12} md={6} lg={4}>
           <Select
+            mode="multiple"
             placeholder="Filter by vendor type"
             onChange={handleVendorFilterChange}
             value={vendorFilter}
@@ -262,9 +246,9 @@ const AdminOrdersPage = () => {
           </Select>
         </Col>
         <Col xs={24} sm={16} md={8} lg={6}>
-          <RangePicker
-            onChange={(dates) => handleDateRangeChange(dates)}
-            value={dateRange}
+          <DatePicker
+            onChange={handleDateChange}
+            value={filterDate}
             className="w-full"
           />
         </Col>

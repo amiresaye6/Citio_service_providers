@@ -296,7 +296,7 @@ const UsersPage = () => {
       render: (_, record) => (
         <div className="flex items-center">
           <Avatar
-            src={record.imageUrl}
+            src={`https://service-provider.runasp.net${record.imageUr}`}
             icon={<UserOutlined />}
             size="large"
             className="mr-3"
