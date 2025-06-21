@@ -54,10 +54,25 @@ const AdminOrdersPage = () => {
   }, [error, dispatch]);
 
   useEffect(() => {
-    dispatch(fetchBusinessTypes())
-    setAllBusinessTypes(BusinessTypes.businessTypes);
+    // Try to get business types from session storage first
+    const storedBusinessTypes = sessionStorage.getItem('businessTypes');
+    
+    if (storedBusinessTypes) {
+      setAllBusinessTypes(JSON.parse(storedBusinessTypes));
+    } else {
+      // Only fetch from API if not in session storage
+      dispatch(fetchBusinessTypes());
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // When BusinessTypes updates from API, update state and session storage
+  useEffect(() => {
+    if (BusinessTypes.businessTypes?.length > 0) {
+      setAllBusinessTypes(BusinessTypes.businessTypes);
+      sessionStorage.setItem('businessTypes', JSON.stringify(BusinessTypes.businessTypes));
+    }
+  }, [BusinessTypes.businessTypes]);
 
   // Table columns
   const columns = [
