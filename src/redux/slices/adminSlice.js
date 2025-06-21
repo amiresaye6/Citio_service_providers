@@ -245,6 +245,42 @@ export const fetchAllOrders = createAsyncThunk(
     }
 );
 
+export const fetchVendorByID = createAsyncThunk(
+    'admin/fetchVendorByID',
+    async (vendorId, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${VENDORS_API_URL}/${vendorId}`, {
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch vendor details');
+        }
+    }
+);
+
+export const fetchVendorMenu = createAsyncThunk(
+    'admin/fetchVendorMenu',
+    async (vendorId, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${VENDORS_API_URL}/${vendorId}/menu`, {
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch vendor menu');
+        }
+    }
+);
+
 export const fetchBusinessTypes = createAsyncThunk(
     'admin/fetchBusinessTypes',
     async (_, { rejectWithValue }) => {
@@ -261,6 +297,62 @@ export const fetchBusinessTypes = createAsyncThunk(
         }
     }
 )
+
+export const fetchVendorRatings = createAsyncThunk(
+    'admin/fetchVendorRatings',
+    async (params, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const {
+                vendorId,
+                pageNumber = 1,
+                pageSize = 10,
+                searchValue,
+                sortColumn,
+                sortDirection,
+                BusinessTypes,
+                MinRating,
+                MaxRating,
+                DateFilter,
+                Status,
+                Statuses
+            } = params || {};
+
+            const queryParams = [];
+            if (vendorId) queryParams.push(`vendorId=${vendorId}`);
+            if (pageNumber) queryParams.push(`PageNumer=${pageNumber}`);
+            if (pageSize) queryParams.push(`PageSize=${pageSize}`);
+            if (searchValue) queryParams.push(`SearchValue=${encodeURIComponent(searchValue)}`);
+            if (sortColumn) queryParams.push(`SortColumn=${encodeURIComponent(sortColumn)}`);
+            if (sortDirection) queryParams.push(`SortDirection=${encodeURIComponent(sortDirection)}`);
+            if (BusinessTypes && Array.isArray(BusinessTypes)) {
+                BusinessTypes.forEach(type => queryParams.push(`BusinessTypes=${encodeURIComponent(type)}`));
+            }
+            if (MinRating) queryParams.push(`MinRating=${MinRating}`);
+            if (MaxRating) queryParams.push(`MaxRating=${MaxRating}`);
+            if (DateFilter) queryParams.push(`DateFilter=${encodeURIComponent(DateFilter)}`);
+            if (Status !== undefined) queryParams.push(`Status=${Status}`);
+            if (Statuses && Array.isArray(Statuses) && Statuses.length > 0) {
+                Statuses.forEach(status => queryParams.push(`Statuses=${encodeURIComponent(status)}`));
+            }
+
+            const queryString = queryParams.join('&');
+            const url = queryString ? `${VENDORS_API_URL}/vendors-rating?${queryString}` : `${VENDORS_API_URL}/vendors-rating`;
+
+            const response = await axios.get(url, {
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error:', error);
+            return rejectWithValue(error.response?.data || 'Failed to fetch vendor ratings');
+        }
+    }
+);
 
 const adminSlice = createSlice({
     name: 'admin',
@@ -307,6 +399,21 @@ const adminSlice = createSlice({
         transactionsCount: {
             totalTransactionsCount: 0
         },
+        vendorRatings: {
+            items: [],
+            pageNumber: 1,
+            totalPages: 1,
+            hasPreviousPage: false,
+            hasNextPage: false
+        },
+        vendorRatingsLoading: false,
+        vendorRatingsError: null,
+        vendorDetails: null,
+        vendorDetailsLoading: false,
+        vendorDetailsError: null,
+        vendorMenu: [],
+        vendorMenuLoading: false,
+        vendorMenuError: null,
         BusinessTypes: [],
         loading: false,
         error: null
@@ -314,6 +421,26 @@ const adminSlice = createSlice({
     reducers: {
         clearError: (state) => {
             state.error = null;
+            state.vendorDetailsError = null;
+            state.vendorMenuError = null;
+        },
+        clearVendorDetails: (state) => {
+            state.vendorDetails = null;
+            state.vendorDetailsError = null;
+        },
+        clearVendorMenu: (state) => {
+            state.vendorMenu = [];
+            state.vendorMenuError = null;
+        },
+        clearVendorRatings: (state) => {
+            state.vendorRatings = {
+                items: [],
+                pageNumber: 1,
+                totalPages: 1,
+                hasPreviousPage: false,
+                hasNextPage: false
+            };
+            state.vendorRatingsError = null;
         }
     },
     extraReducers: (builder) => {
@@ -446,8 +573,53 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
+            // Vendor Details
+            .addCase(fetchVendorByID.pending, (state) => {
+                state.vendorDetailsLoading = true;
+                state.vendorDetailsError = null;
+            })
+            .addCase(fetchVendorByID.fulfilled, (state, action) => {
+                state.vendorDetailsLoading = false;
+                state.vendorDetails = action.payload;
+            })
+            .addCase(fetchVendorByID.rejected, (state, action) => {
+                state.vendorDetailsLoading = false;
+                state.vendorDetailsError = action.payload;
+            })
+            // Vendor Menu
+            .addCase(fetchVendorMenu.pending, (state) => {
+                state.vendorMenuLoading = true;
+                state.vendorMenuError = null;
+            })
+            .addCase(fetchVendorMenu.fulfilled, (state, action) => {
+                state.vendorMenuLoading = false;
+                state.vendorMenu = action.payload;
+            })
+            .addCase(fetchVendorMenu.rejected, (state, action) => {
+                state.vendorMenuLoading = false;
+                state.vendorMenuError = action.payload;
+            })
+            // Vendor Ratings
+            .addCase(fetchVendorRatings.pending, (state) => {
+                state.vendorRatingsLoading = true;
+                state.vendorRatingsError = null;
+            })
+            .addCase(fetchVendorRatings.fulfilled, (state, action) => {
+                state.vendorRatingsLoading = false;
+                state.vendorRatings = {
+                    items: action.payload.items,
+                    pageNumber: action.payload.pageNumber,
+                    totalPages: action.payload.totalPages,
+                    hasPreviousPage: action.payload.hasPreviousPage,
+                    hasNextPage: action.payload.hasNextPage
+                };
+            })
+            .addCase(fetchVendorRatings.rejected, (state, action) => {
+                state.vendorRatingsLoading = false;
+                state.vendorRatingsError = action.payload;
+            })
     }
 });
 
-export const { clearError } = adminSlice.actions;
+export const { clearError, clearVendorDetails, clearVendorMenu, clearVendorRatings } = adminSlice.actions;
 export default adminSlice.reducer;

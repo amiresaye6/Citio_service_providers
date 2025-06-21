@@ -11,13 +11,13 @@ import UsersPage from '../pages/UsersPage';
 import AllTransactionsPage from '../pages/AllTransactionsPage';
 import VendorManagementPage from '../pages/VendorManagementPage';
 import VendorRatingsPage from '../pages/VendorRatingsPage';
-import AdminVendorRequestsPage from '../pages/AdminVendorRequestsPage';
 import AdminMenusPage from '../pages/AdminMenusPage';
 import AdminRatingsPage from '../pages/AdminRatingsPage';
 import AdminOrdersPage from '../pages/AdminOrdersPage';
 import VendorAccountPage from '../pages/VendorAccountPage';
 import VendorDashboardPage from '../pages/VendorDashboardPage';
 import ManageStorePage from '../pages/VendorProfilePage';
+import AdminVendorDetailsPage from '../pages/AdminVendorDetailsPage';
 
 const AppRoutes = () => (
     <Routes>
@@ -40,6 +40,14 @@ const AppRoutes = () => (
                 element={
                     <ProtectedRoute>
                         <VendorManagementPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/vendors/:vendorId"
+                element={
+                    <ProtectedRoute>
+                        <AdminVendorDetailsPage />
                     </ProtectedRoute>
                 }
             />
