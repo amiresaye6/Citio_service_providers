@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Row, Col, Select, DatePicker, Card, Tag } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllTransactions, clearError, fetchBusinessTypes } from '../redux/slices/adminSlice';
+import { fetchAllTransactions, clearError } from '../redux/slices/adminSlice';
 import PageHeader from '../components/common/PageHeader';
 import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
@@ -20,7 +20,7 @@ const { Option } = Select;
 
 const AllTransactionsPage = () => {
   const dispatch = useDispatch();
-  const { transactions, BusinessTypes, loading, error } = useSelector(state => state.admin);
+  const { transactions, loading, error } = useSelector(state => state.admin);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -28,28 +28,8 @@ const AllTransactionsPage = () => {
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('');
   const [statusFilter, setStatusFilter] = useState([]);
-  const [businessTypesFilter, setBusinessTypesFilter] = useState([]);
   const [dateFilter, setDateFilter] = useState(null);
-  const [allBusinessTypes, setAllBusinessTypes] = useState([]);
 
-  // Fetch business types for filter
-  useEffect(() => {
-    const storedBusinessTypes = sessionStorage.getItem('businessTypes');
-
-    if (storedBusinessTypes) {
-      setAllBusinessTypes(JSON.parse(storedBusinessTypes));
-    } else {
-      dispatch(fetchBusinessTypes());
-    }
-  }, [dispatch]);
-
-  // When BusinessTypes updates from API, update state and session storage
-  useEffect(() => {
-    if (BusinessTypes.businessTypes?.length > 0) {
-      setAllBusinessTypes(BusinessTypes.businessTypes);
-      sessionStorage.setItem('businessTypes', JSON.stringify(BusinessTypes.businessTypes));
-    }
-  }, [BusinessTypes.businessTypes]);
 
   // Fetch transactions
   useEffect(() => {
@@ -60,10 +40,9 @@ const AllTransactionsPage = () => {
       sortColumn: sortColumn,
       sortDirection: sortDirection,
       Statuses: statusFilter.length > 0 ? statusFilter : undefined,
-      BusinessTypes: businessTypesFilter.length > 0 ? businessTypesFilter : undefined,
       DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined
     }));
-  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter, businessTypesFilter, dateFilter]);
+  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter, dateFilter]);
 
   // Handle errors
   useEffect(() => {
@@ -197,11 +176,6 @@ const AllTransactionsPage = () => {
     setCurrentPage(1);
   };
 
-  // Handle business types filter change
-  const handleBusinessTypesFilterChange = (value) => {
-    setBusinessTypesFilter(value);
-    setCurrentPage(1);
-  };
 
   // Handle date filter change
   const handleDateFilterChange = (date) => {
@@ -213,7 +187,6 @@ const AllTransactionsPage = () => {
   const handleResetFilters = () => {
     setSearchValue('');
     setStatusFilter([]);
-    setBusinessTypesFilter([]);
     setDateFilter(null);
     setSortColumn('');
     setSortDirection('');
@@ -234,7 +207,6 @@ const AllTransactionsPage = () => {
       sortColumn: sortColumn,
       sortDirection: sortDirection,
       Statuses: statusFilter.length > 0 ? statusFilter : undefined,
-      BusinessTypes: businessTypesFilter.length > 0 ? businessTypesFilter : undefined,
       DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined
     }));
 
@@ -331,21 +303,6 @@ const AllTransactionsPage = () => {
               <Option value="Pending">Pending</Option>
               <Option value="Failed">Failed</Option>
               <Option value="Processing">Processing</Option>
-            </Select>
-          </Col>
-
-          <Col xs={24} sm={12} md={4}>
-            <Select
-              mode="multiple"
-              placeholder="Filter by business type"
-              value={businessTypesFilter}
-              onChange={handleBusinessTypesFilterChange}
-              className="w-full"
-              allowClear
-            >
-              {allBusinessTypes.map(type => (
-                <Option key={type} value={type}>{type}</Option>
-              ))}
             </Select>
           </Col>
 

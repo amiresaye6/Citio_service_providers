@@ -119,11 +119,7 @@ export const fetchAllTransactions = createAsyncThunk(
                 searchValue,
                 sortColumn,
                 sortDirection,
-                BusinessTypes,
-                MinRating,
-                MaxRating,
                 DateFilter,
-                Status,
                 Statuses
             } = params || {};
 
@@ -133,13 +129,7 @@ export const fetchAllTransactions = createAsyncThunk(
             if (searchValue) queryParams.push(`SearchValue=${encodeURIComponent(searchValue)}`);
             if (sortColumn) queryParams.push(`SortColumn=${encodeURIComponent(sortColumn)}`);
             if (sortDirection) queryParams.push(`SortDirection=${encodeURIComponent(sortDirection)}`);
-            if (BusinessTypes && Array.isArray(BusinessTypes)) {
-                BusinessTypes.forEach(type => queryParams.push(`BusinessTypes=${encodeURIComponent(type)}`));
-            }
-            if (MinRating) queryParams.push(`MinRating=${MinRating}`);
-            if (MaxRating) queryParams.push(`MaxRating=${MaxRating}`);
             if (DateFilter) queryParams.push(`DateFilter=${encodeURIComponent(DateFilter)}`);
-            if (Status !== undefined) queryParams.push(`Status=${Status}`);
             if (Statuses && Array.isArray(Statuses) && Statuses.length > 0) {
                 Statuses.forEach(status => queryParams.push(`Statuses=${encodeURIComponent(status)}`));
             }
