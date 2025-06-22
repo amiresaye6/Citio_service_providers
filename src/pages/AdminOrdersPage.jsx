@@ -7,6 +7,8 @@ import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ToastNotifier from '../components/common/ToastNotifier';
+import { useNavigate } from 'react-router-dom';
+import { InfoCircleOutlined } from '@ant-design/icons';
 const { Option } = Select;
 
 const OrderStatusColors = {
@@ -30,6 +32,8 @@ const AdminOrdersPage = () => {
   const [vendorFilter, setVendorFilter] = useState([]);
   const [allBusinessTypes, setAllBusinessTypes] = useState([]);
   const [filterDate, setFilterDate] = useState(null);
+
+  const navigate = useNavigate();
 
   // Fetch orders
   useEffect(() => {
@@ -56,14 +60,14 @@ const AdminOrdersPage = () => {
   useEffect(() => {
     // Try to get business types from session storage first
     const storedBusinessTypes = sessionStorage.getItem('businessTypes');
-    
+
     if (storedBusinessTypes) {
       setAllBusinessTypes(JSON.parse(storedBusinessTypes));
     } else {
       // Only fetch from API if not in session storage
       dispatch(fetchBusinessTypes());
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // When BusinessTypes updates from API, update state and session storage
@@ -131,6 +135,23 @@ const AdminOrdersPage = () => {
           {status}
         </Tag>
       )
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 100,
+      render: (_, record) => (
+        <Space size="middle">
+          <Button
+            icon={<InfoCircleOutlined />}
+            size="small"
+            onClick={() => navigate(`/admin/orders/${record.id}`)}
+            type="primary"
+          >
+            Details
+          </Button>
+        </Space>
+      ),
     }
   ];
 

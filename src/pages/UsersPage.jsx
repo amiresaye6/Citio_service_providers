@@ -24,6 +24,7 @@ import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
 import ToastNotifier from '../components/common/ToastNotifier';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useNavigate } from 'react-router-dom';
 
 const { RangePicker } = DatePicker;
 
@@ -42,6 +43,8 @@ const UsersPage = () => {
   // State for local filtering (for date range which API doesn't support)
   const [localFiltered, setLocalFiltered] = useState([]);
 
+  const navigate = useNavigate();
+  
   // Load users data
   useEffect(() => {
     dispatch(fetchAllUsers({
@@ -197,9 +200,8 @@ const UsersPage = () => {
               icon={<InfoCircleOutlined />}
               size="middle"
               onClick={() => {
-                // Placeholder for future navigation to user/:userId
-                ToastNotifier.info(`Navigating to user/${record.id || 'unknown'} in the future`);
-              }}
+                        navigate(`/admin/users/${record.id}`);
+                    }}
             />
           </Tooltip>
         </Space>

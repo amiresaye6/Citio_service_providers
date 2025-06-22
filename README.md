@@ -19,3 +19,7 @@ P@ssword123
 admin:
 admin@vendor.com
 Admin@123
+
+apis to use
+/api/Orders/{id} >> ues it to get orders detaisl in admin orders page, remove or change vendors column, make a new pagte to show the whoal order details.
+/api/Admin/users/{userId}/all-transactions >> use it to get user money trasactiosn, display them in a page when clicked in

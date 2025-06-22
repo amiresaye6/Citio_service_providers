@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Row, Col, Select, DatePicker, Card, Tag, Space } from 'antd';
+import { useState, useEffect } from 'react';
+import { Button, Row, Col, Select, DatePicker, Card, Tag } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllTransactions, clearError } from '../redux/slices/adminSlice';
 import PageHeader from '../components/common/PageHeader';
@@ -7,10 +7,15 @@ import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ToastNotifier from '../components/common/ToastNotifier';
-import { SyncOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import {
+  SyncOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ClockCircleOutlined,
+  ReloadOutlined
+} from '@ant-design/icons';
 import moment from 'moment';
 
-const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const AllTransactionsPage = () => {
@@ -22,9 +27,9 @@ const AllTransactionsPage = () => {
   const [searchValue, setSearchValue] = useState('');
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('');
-  const [statusFilter, setStatusFilter] = useState(null);
-  const [dateRange, setDateRange] = useState(null);
-  const [localFiltered, setLocalFiltered] = useState([]);
+  const [statusFilter, setStatusFilter] = useState([]);
+  const [dateFilter, setDateFilter] = useState(null);
+
 
   // Fetch transactions
   useEffect(() => {
@@ -34,9 +39,10 @@ const AllTransactionsPage = () => {
       searchValue: searchValue,
       sortColumn: sortColumn,
       sortDirection: sortDirection,
-      statuses: statusFilter ? [statusFilter] : undefined
+      Statuses: statusFilter.length > 0 ? statusFilter : undefined,
+      DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined
     }));
-  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter]);
+  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter, dateFilter]);
 
   // Handle errors
   useEffect(() => {
@@ -46,39 +52,17 @@ const AllTransactionsPage = () => {
     }
   }, [error, dispatch]);
 
-  // Apply local filtering for date range
-  useEffect(() => {
-    if (!transactions?.items) {
-      setLocalFiltered([]);
-      return;
-    }
-
-    let filtered = [...transactions.items];
-
-    // Apply date range filter
-    if (dateRange && dateRange[0] && dateRange[1]) {
-      const startDate = moment(dateRange[0]).startOf('day');
-      const endDate = moment(dateRange[1]).endOf('day');
-
-      filtered = filtered.filter(transaction => {
-        const txDate = moment(transaction.transactionDate);
-        return txDate.isBetween(startDate, endDate, null, '[]');
-      });
-    }
-
-    setLocalFiltered(filtered);
-  }, [transactions?.items, dateRange]);
-
   // Table columns
   const columns = [
     {
-      title: 'ID',
+      title: 'Transaction ID',
       dataIndex: 'id',
       key: 'id',
       sorter: true,
+      render: (id) => <span className="font-mono text-sm">TXN-{id}</span>
     },
     {
-      title: 'User',
+      title: 'Customer',
       dataIndex: 'applicationUserFullName',
       key: 'applicationUserFullName',
       sorter: true,
@@ -89,26 +73,41 @@ const AllTransactionsPage = () => {
       key: 'orderId',
       sorter: true,
       responsive: ['md'],
+      render: (orderId) => <span className="font-mono text-sm">ORD-{orderId}</span>
     },
     {
       title: 'Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
       sorter: true,
-      render: (amount) => `$${amount.toFixed(2)}`,
+      render: (amount) => (
+        <span className="font-semibold text-green-600">
+          ${amount.toFixed(2)}
+        </span>
+      ),
     },
     {
       title: 'Payment Method',
       dataIndex: 'paymentMethod',
       key: 'paymentMethod',
       responsive: ['lg'],
+      render: (method) => (
+        <Tag color="blue" className="text-xs">
+          {method}
+        </Tag>
+      )
     },
     {
-      title: 'Date',
+      title: 'Transaction Date',
       dataIndex: 'transactionDate',
       key: 'transactionDate',
       sorter: true,
-      render: (date) => moment(date).format('YYYY-MM-DD HH:mm'),
+      render: (date) => (
+        <div>
+          <div className="text-sm">{moment(date).format('YYYY-MM-DD')}</div>
+          <div className="text-xs text-gray-500">{moment(date).format('HH:mm:ss')}</div>
+        </div>
+      ),
       responsive: ['md'],
     },
     {
@@ -120,21 +119,26 @@ const AllTransactionsPage = () => {
         let color = 'default';
         let icon = null;
 
-        switch (status) {
-          case 'Completed':
+        switch (status?.toLowerCase()) {
+          case 'completed':
             color = 'success';
             icon = <CheckCircleOutlined />;
             break;
-          case 'Pending':
+          case 'pending':
             color = 'warning';
-            icon = <SyncOutlined spin />;
+            icon = <ClockCircleOutlined />;
             break;
-          case 'Failed':
+          case 'failed':
             color = 'error';
             icon = <CloseCircleOutlined />;
             break;
+          case 'processing':
+            color = 'processing';
+            icon = <SyncOutlined spin />;
+            break;
           default:
             color = 'default';
+            icon = <ClockCircleOutlined />;
         }
 
         return (
@@ -172,16 +176,18 @@ const AllTransactionsPage = () => {
     setCurrentPage(1);
   };
 
-  // Handle date range filter change
-  const handleDateRangeChange = (dates) => {
-    setDateRange(dates);
+
+  // Handle date filter change
+  const handleDateFilterChange = (date) => {
+    setDateFilter(date);
+    setCurrentPage(1);
   };
 
   // Reset all filters
   const handleResetFilters = () => {
     setSearchValue('');
-    setStatusFilter(null);
-    setDateRange(null);
+    setStatusFilter([]);
+    setDateFilter(null);
     setSortColumn('');
     setSortDirection('');
     setCurrentPage(1);
@@ -200,16 +206,20 @@ const AllTransactionsPage = () => {
       searchValue: searchValue,
       sortColumn: sortColumn,
       sortDirection: sortDirection,
-      statuses: statusFilter ? [statusFilter] : undefined
+      Statuses: statusFilter.length > 0 ? statusFilter : undefined,
+      DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined
     }));
 
-    ToastNotifier.info('Refresh', 'Transactions refreshed.');
+    ToastNotifier.success('Transactions refreshed');
   };
 
-  // Determine which data to display (filtered locally or from API)
-  const displayData = dateRange
-    ? localFiltered
-    : (transactions?.items || []);
+  // Calculate statistics
+  const transactionStats = {
+    total: transactions.items?.length || 0,
+    totalAmount: transactions.items?.reduce((sum, t) => sum + (t.totalAmount || 0), 0) || 0,
+    completed: transactions.items?.filter(t => t.status?.toLowerCase() === 'completed').length || 0,
+    pending: transactions.items?.filter(t => t.status?.toLowerCase() === 'pending').length || 0
+  };
 
   return (
     <div className="p-4 md:p-6 min-h-screen">
@@ -218,19 +228,60 @@ const AllTransactionsPage = () => {
         subtitle="View and manage all transactions in the system"
         actions={
           <Button
+            icon={<ReloadOutlined />}
             type="primary"
             onClick={handleRefresh}
+            loading={loading}
           >
             Refresh
           </Button>
         }
       />
 
+      {/* Transaction Statistics */}
       <Card className="mb-6">
+        <Row gutter={[24, 16]} justify="space-between">
+          <Col xs={12} sm={6}>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {transactionStats.total}
+              </div>
+              <div className="text-sm text-gray-500">Total Transactions</div>
+            </div>
+          </Col>
+          <Col xs={12} sm={6}>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {transactionStats.completed}
+              </div>
+              <div className="text-sm text-gray-500">Completed</div>
+            </div>
+          </Col>
+          <Col xs={12} sm={6}>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                {transactionStats.pending}
+              </div>
+              <div className="text-sm text-gray-500">Pending</div>
+            </div>
+          </Col>
+          <Col xs={12} sm={6}>
+            <div className="text-center">
+              <div className="text-xl font-bold text-purple-600">
+                ${transactionStats.totalAmount.toFixed(2)}
+              </div>
+              <div className="text-sm text-gray-500">Total Amount</div>
+            </div>
+          </Col>
+        </Row>
+      </Card>
+
+      {/* Filters Card */}
+      <Card className="mb-6" title="Filters">
         <Row gutter={[16, 16]}>
-          <Col xs={24} md={12} lg={8}>
+          <Col xs={24} md={8}>
             <SearchInput
-              placeholder="Search by user name or order ID..."
+              placeholder="Search by customer name or order ID..."
               onSearch={handleSearch}
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
@@ -239,8 +290,9 @@ const AllTransactionsPage = () => {
             />
           </Col>
 
-          <Col xs={24} sm={12} md={6} lg={4}>
+          <Col xs={24} sm={12} md={4}>
             <Select
+              mode="multiple"
               placeholder="Filter by status"
               value={statusFilter}
               onChange={handleStatusFilterChange}
@@ -250,69 +302,58 @@ const AllTransactionsPage = () => {
               <Option value="Completed">Completed</Option>
               <Option value="Pending">Pending</Option>
               <Option value="Failed">Failed</Option>
+              <Option value="Processing">Processing</Option>
             </Select>
           </Col>
 
-          <Col xs={24} sm={12} md={10} lg={8}>
-            <RangePicker
-              placeholder={['Start Date', 'End Date']}
-              value={dateRange}
-              onChange={handleDateRangeChange}
+          <Col xs={24} sm={12} md={4}>
+            <DatePicker
+              placeholder="Select date"
+              value={dateFilter}
+              onChange={handleDateFilterChange}
               className="w-full"
-              showTime={{ format: 'HH:mm' }}
-              format="YYYY-MM-DD HH:mm"
+              format="YYYY-MM-DD"
             />
           </Col>
 
-          <Col xs={24} md={6} lg={4}>
-            <Space className="w-full">
-              <Button
-                onClick={handleResetFilters}
-                className="flex-1"
-              >
-                Reset
-              </Button>
-              <Button
-                type="primary"
-                onClick={handleRefresh}
-                className="flex-1"
-                loading={loading}
-              >
-                Refresh
-              </Button>
-            </Space>
+          <Col xs={24} sm={12} md={4}>
+            <Button
+              onClick={handleResetFilters}
+              className="w-full"
+              disabled={loading}
+            >
+              Reset Filters
+            </Button>
           </Col>
         </Row>
       </Card>
 
+      {/* Transactions Table */}
       {loading ? (
         <LoadingSpinner text="Loading transactions..." />
       ) : (
         <Card
           title={
             <div className="flex justify-between items-center">
-              <span>Transactions</span>
+              <span>Transactions ({transactions.items?.length || 0})</span>
               <span className="text-sm text-gray-500">
-                {dateRange
-                  ? `Filtered: ${displayData.length} transactions`
-                  : `Page ${transactions?.pageNumber || 1} of ${transactions?.totalPages || 1}`}
+                Page {transactions?.pageNumber || 1} of {transactions?.totalPages || 1}
               </span>
             </div>
           }
         >
           <TableWrapper
-            dataSource={displayData}
+            dataSource={transactions.items || []}
             columns={columns}
             rowKey="id"
             pagination={{
-              current: dateRange ? 1 : (transactions?.pageNumber || 1),
+              current: transactions?.pageNumber || 1,
               pageSize: pageSize,
-              total: dateRange
-                ? displayData.length
-                : (transactions?.totalPages || 1) * pageSize,
+              total: (transactions?.totalPages || 1) * pageSize,
               showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50'],
+              pageSizeOptions: ['10', '20', '50', '100'],
               showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} transactions`,
+              showQuickJumper: true,
             }}
             onChange={handleTableChange}
             scroll={{ x: 'max-content' }}
