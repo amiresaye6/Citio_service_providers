@@ -442,9 +442,9 @@ const AdminVendorDetailsPage = () => {
                                                 size="medium"
                                             >
                                                 <Descriptions.Item label="Vendor ID">
-                                                    <span className="font-mono text-sm">
+                                                    <Text copyable className="font-mono text-sm">
                                                         {vendorDetails.id}
-                                                    </span>
+                                                    </Text>
                                                 </Descriptions.Item>
 
                                                 <Descriptions.Item label="Full Name">

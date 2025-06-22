@@ -11,13 +11,13 @@ import UsersPage from '../pages/UsersPage';
 import AllTransactionsPage from '../pages/AllTransactionsPage';
 import VendorManagementPage from '../pages/VendorManagementPage';
 import VendorRatingsPage from '../pages/VendorRatingsPage';
-import AdminMenusPage from '../pages/AdminMenusPage';
 import AdminRatingsPage from '../pages/AdminRatingsPage';
 import AdminOrdersPage from '../pages/AdminOrdersPage';
 import VendorAccountPage from '../pages/VendorAccountPage';
 import VendorDashboardPage from '../pages/VendorDashboardPage';
 import ManageStorePage from '../pages/VendorProfilePage';
 import AdminVendorDetailsPage from '../pages/AdminVendorDetailsPage';
+import UserDetailsPage from '../pages/UserDetailsPage';
 
 const AppRoutes = () => (
     <Routes>
@@ -51,22 +51,6 @@ const AppRoutes = () => (
                     </ProtectedRoute>
                 }
             />
-            {/* <Route
-                path="/admin/vendor-requests"
-                element={
-                    <ProtectedRoute>
-                        <AdminVendorRequestsPage />
-                    </ProtectedRoute>
-                }
-            /> */}
-            {/* <Route
-                path="/admin/menus"
-                element={
-                    <ProtectedRoute>
-                        <AdminMenusPage />
-                    </ProtectedRoute>
-                }
-            /> */}
             <Route
                 path="/admin/ratings"
                 element={
@@ -88,6 +72,14 @@ const AppRoutes = () => (
                 element={
                     <ProtectedRoute>
                         <UsersPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/users/:userId"
+                element={
+                    <ProtectedRoute>
+                        <UserDetailsPage />
                     </ProtectedRoute>
                 }
             />
