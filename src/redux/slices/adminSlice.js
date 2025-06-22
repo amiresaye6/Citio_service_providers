@@ -107,7 +107,7 @@ export const fetchAllUsers = createAsyncThunk(
     }
 );
 
-// Async thunk for fetching all transactions
+// Updated async thunk for fetching all transactions
 export const fetchAllTransactions = createAsyncThunk(
     'admin/fetchAllTransactions',
     async (params, { rejectWithValue }) => {
@@ -119,38 +119,50 @@ export const fetchAllTransactions = createAsyncThunk(
                 searchValue,
                 sortColumn,
                 sortDirection,
-                businessTypes,
-                minRating,
-                maxRating,
-                status,
-                statuses
+                BusinessTypes,
+                MinRating,
+                MaxRating,
+                DateFilter,
+                Status,
+                Statuses
             } = params || {};
 
-            const response = await axios.get(`${API_BASE_URL}/all-transactions`, {
+            const queryParams = [];
+            if (pageNumber) queryParams.push(`PageNumer=${pageNumber}`);
+            if (pageSize) queryParams.push(`PageSize=${pageSize}`);
+            if (searchValue) queryParams.push(`SearchValue=${encodeURIComponent(searchValue)}`);
+            if (sortColumn) queryParams.push(`SortColumn=${encodeURIComponent(sortColumn)}`);
+            if (sortDirection) queryParams.push(`SortDirection=${encodeURIComponent(sortDirection)}`);
+            if (BusinessTypes && Array.isArray(BusinessTypes)) {
+                BusinessTypes.forEach(type => queryParams.push(`BusinessTypes=${encodeURIComponent(type)}`));
+            }
+            if (MinRating) queryParams.push(`MinRating=${MinRating}`);
+            if (MaxRating) queryParams.push(`MaxRating=${MaxRating}`);
+            if (DateFilter) queryParams.push(`DateFilter=${encodeURIComponent(DateFilter)}`);
+            if (Status !== undefined) queryParams.push(`Status=${Status}`);
+            if (Statuses && Array.isArray(Statuses) && Statuses.length > 0) {
+                Statuses.forEach(status => queryParams.push(`Statuses=${encodeURIComponent(status)}`));
+            }
+
+            const queryString = queryParams.join('&');
+            const url = queryString
+                ? `${API_BASE_URL}/all-transactions?${queryString}`
+                : `${API_BASE_URL}/all-transactions`;
+
+            const response = await axios.get(url, {
                 headers: {
                     accept: 'text/plain',
                     Authorization: `Bearer ${token}`,
-                },
-                params: {
-                    PageNumer: pageNumber,
-                    PageSize: pageSize,
-                    SearchValue: searchValue,
-                    SortColumn: sortColumn,
-                    SortDirection: sortDirection,
-                    BusinessTypes: businessTypes,
-                    MinRating: minRating,
-                    MaxRating: maxRating,
-                    Status: status,
-                    Statuses: statuses
                 }
             });
+
             return response.data;
         } catch (error) {
+            console.error('Error:', error);
             return rejectWithValue(error.response?.data || 'Failed to fetch transactions');
         }
     }
 );
-
 // Async thunk for fetching user-vendor reviews
 export const fetchUserVendorReviews = createAsyncThunk(
     'admin/fetchUserVendorReviews',
@@ -411,6 +423,27 @@ export const fetchUserTransactions = createAsyncThunk(
     }
 );
 
+export const fetchOrderById = createAsyncThunk(
+    'admin/fetchOrderById',
+    async (orderId, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+
+            const response = await axios.get(`${ORDERS_API_URL}/${orderId}`, {
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error:', error);
+            return rejectWithValue(error.response?.data || 'Failed to fetch order details');
+        }
+    }
+);
+
 const adminSlice = createSlice({
     name: 'admin',
     initialState: {
@@ -481,6 +514,9 @@ const adminSlice = createSlice({
         vendorMenuLoading: false,
         vendorMenuError: null,
         BusinessTypes: [],
+        orderDetails: null,
+        orderDetailsLoading: false,
+        orderDetailsError: null,
         loading: false,
         error: null
     },
@@ -517,6 +553,10 @@ const adminSlice = createSlice({
                 hasNextPage: false
             };
             state.userTransactionsError = null;
+        },
+        clearOrderDetails: (state) => {
+            state.orderDetails = null;
+            state.orderDetailsError = null;
         }
     },
     extraReducers: (builder) => {
@@ -713,6 +753,19 @@ const adminSlice = createSlice({
                 state.userTransactionsLoading = false;
                 state.userTransactionsError = action.payload;
             })
+            // Order Details
+            .addCase(fetchOrderById.pending, (state) => {
+                state.orderDetailsLoading = true;
+                state.orderDetailsError = null;
+            })
+            .addCase(fetchOrderById.fulfilled, (state, action) => {
+                state.orderDetailsLoading = false;
+                state.orderDetails = action.payload;
+            })
+            .addCase(fetchOrderById.rejected, (state, action) => {
+                state.orderDetailsLoading = false;
+                state.orderDetailsError = action.payload;
+            })
     }
 });
 
@@ -721,6 +774,7 @@ export const {
     clearVendorDetails,
     clearVendorMenu,
     clearVendorRatings,
-    clearUserTransactions
+    clearUserTransactions,
+    clearOrderDetails
 } = adminSlice.actions;
 export default adminSlice.reducer;

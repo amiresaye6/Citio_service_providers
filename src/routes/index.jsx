@@ -18,6 +18,7 @@ import VendorDashboardPage from '../pages/VendorDashboardPage';
 import ManageStorePage from '../pages/VendorProfilePage';
 import AdminVendorDetailsPage from '../pages/AdminVendorDetailsPage';
 import UserDetailsPage from '../pages/UserDetailsPage';
+import OrderDetailsPage from '../pages/OrderDetailsPage';
 
 const AppRoutes = () => (
     <Routes>
@@ -64,6 +65,14 @@ const AppRoutes = () => (
                 element={
                     <ProtectedRoute>
                         <AdminOrdersPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/orders/:orderId"
+                element={
+                    <ProtectedRoute>
+                        <OrderDetailsPage />
                     </ProtectedRoute>
                 }
             />
