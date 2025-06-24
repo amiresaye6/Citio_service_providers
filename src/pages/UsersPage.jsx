@@ -16,7 +16,6 @@ import {
 } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllUsers, clearError } from '../redux/slices/adminSlice';
-import moment from 'moment';
 
 // Import reusable components
 import PageHeader from '../components/common/PageHeader';
@@ -25,8 +24,6 @@ import SearchInput from '../components/common/SearchInput';
 import ToastNotifier from '../components/common/ToastNotifier';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useNavigate } from 'react-router-dom';
-
-const { RangePicker } = DatePicker;
 
 const UsersPage = () => {
   const dispatch = useDispatch();
@@ -38,13 +35,10 @@ const UsersPage = () => {
   const [searchValue, setSearchValue] = useState('');
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('');
-  const [dateRange, setDateRange] = useState(null);
-
-  // State for local filtering (for date range which API doesn't support)
-  const [localFiltered, setLocalFiltered] = useState([]);
+  const [dateFilter, setDateFilter] = useState(null);
 
   const navigate = useNavigate();
-  
+
   // Load users data
   useEffect(() => {
     dispatch(fetchAllUsers({
@@ -52,10 +46,11 @@ const UsersPage = () => {
       pageSize: pageSize,
       searchValue: searchValue,
       sortColumn: sortColumn,
-      sortDirection: sortDirection
+      sortDirection: sortDirection,
+      DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined,
     }));
-  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection]);
-
+    
+  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, dateFilter]);
   // Handle errors
   useEffect(() => {
     if (error) {
@@ -64,46 +59,22 @@ const UsersPage = () => {
     }
   }, [error, dispatch]);
 
-  // Apply local filtering for date range
-  // TODO: Update this local filtering to use API when date range filtering is supported
-  useEffect(() => {
-    if (!users?.items) {
-      setLocalFiltered([]);
-      return;
-    }
-
-    let filtered = [...users.items];
-
-    // Apply date range filter
-    if (dateRange && dateRange[0] && dateRange[1]) {
-      const startDate = moment(dateRange[0]).startOf('day');
-      const endDate = moment(dateRange[1]).endOf('day');
-
-      filtered = filtered.filter(user => {
-        if (!user.registrationDate) return false;
-        const regDate = moment(user.registrationDate);
-        return regDate.isBetween(startDate, endDate, null, '[]');
-      });
-    }
-
-    setLocalFiltered(filtered);
-  }, [users?.items, dateRange]);
-
   // Search function
   const handleSearch = (value) => {
     setSearchValue(value);
     setCurrentPage(1);
   };
 
-  // Filter handlers
-  const handleDateRangeChange = (dates) => {
-    setDateRange(dates);
+  // Handle date filter change
+  const handleDateFilterChange = (date) => {
+    setDateFilter(date);
+    setCurrentPage(1);
   };
 
   // Reset all filters
   const handleResetFilters = () => {
     setSearchValue('');
-    setDateRange(null);
+    setDateFilter(null);
     setSortColumn('');
     setSortDirection('');
     setCurrentPage(1);
@@ -121,7 +92,8 @@ const UsersPage = () => {
       pageSize: pageSize,
       searchValue: searchValue,
       sortColumn: sortColumn,
-      sortDirection: sortDirection
+      sortDirection: sortDirection,
+      DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined,
     }));
 
     ToastNotifier.success('Users list refreshed');
@@ -130,7 +102,7 @@ const UsersPage = () => {
   // Table change handler for sorting and pagination
   const handleTableChange = (pagination, filters, sorter) => {
     setCurrentPage(pagination.current);
-  setPageSize(pagination.pageSize);
+    setPageSize(pagination.pageSize);
 
     if (sorter.field && sorter.order) {
       setSortColumn(sorter.field);
@@ -200,8 +172,8 @@ const UsersPage = () => {
               icon={<InfoCircleOutlined />}
               size="middle"
               onClick={() => {
-                        navigate(`/admin/users/${record.id}`);
-                    }}
+                navigate(`/admin/users/${record.id}`);
+              }}
             />
           </Tooltip>
         </Space>
@@ -210,7 +182,7 @@ const UsersPage = () => {
   ];
 
   // Determine which data to display (filtered locally or from API)
-  const displayData = dateRange ? localFiltered : (users?.items || []);
+  const displayData = users?.items || [];
 
   return (
     <div className="p-6 min-h-screen">
@@ -246,13 +218,13 @@ const UsersPage = () => {
             />
           </Col>
 
-          <Col xs={24} md={12} lg={8}>
+          <Col xs={24} sm={12} md={4}>
             <DatePicker
-              placeholder={"Select Date"}
-              value={dateRange}
-              onChange={handleDateRangeChange}
-              size="large"
+              placeholder="Select date"
+              value={dateFilter}
+              onChange={handleDateFilterChange}
               className="w-full"
+              format="YYYY-MM-DD"
             />
           </Col>
 
@@ -277,9 +249,7 @@ const UsersPage = () => {
           className="mb-6"
           extra={
             <div className="text-sm text-gray-500">
-              {dateRange
-                ? `Showing filtered results: ${displayData.length} users`
-                : `Page ${users?.pageNumber || 1} of ${users?.totalPages || 1}`}
+              {`Page ${users?.pageNumber || 1} of ${users?.totalPages || 1}`}
             </div>
           }
         >
@@ -288,11 +258,9 @@ const UsersPage = () => {
             columns={columns}
             rowKey="id"
             pagination={{
-              current: dateRange ? 1 : (users?.pageNumber || 1),
+              current: users?.pageNumber || 1,
               pageSize: pageSize,
-              total: dateRange
-                ? displayData.length
-                : (users?.totalPages || 1) * pageSize,
+              total: (users?.totalPages || 1) * pageSize,
               showSizeChanger: true,
               pageSizeOptions: ['8', '16', '32', '50'],
               showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,

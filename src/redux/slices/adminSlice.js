@@ -75,11 +75,8 @@ export const fetchAllUsers = createAsyncThunk(
                 searchValue,
                 sortColumn,
                 sortDirection,
-                businessTypes,
-                minRating,
-                maxRating,
+                dateFilter,
                 status,
-                statuses
             } = params || {};
 
             const response = await axios.get(`${API_BASE_URL}/all-users`, {
@@ -93,12 +90,10 @@ export const fetchAllUsers = createAsyncThunk(
                     SearchValue: searchValue,
                     SortColumn: sortColumn,
                     SortDirection: sortDirection,
-                    BusinessTypes: businessTypes,
-                    MinRating: minRating,
-                    MaxRating: maxRating,
+                    DateFilter: dateFilter,
                     Status: status,
-                    Statuses: statuses
                 }
+                
             });
             return response.data;
         } catch (error) {
@@ -120,7 +115,8 @@ export const fetchAllTransactions = createAsyncThunk(
                 sortColumn,
                 sortDirection,
                 DateFilter,
-                Statuses
+                Statuses,
+                PaymentMethods
             } = params || {};
 
             const queryParams = [];
@@ -132,6 +128,9 @@ export const fetchAllTransactions = createAsyncThunk(
             if (DateFilter) queryParams.push(`DateFilter=${encodeURIComponent(DateFilter)}`);
             if (Statuses && Array.isArray(Statuses) && Statuses.length > 0) {
                 Statuses.forEach(status => queryParams.push(`Statuses=${encodeURIComponent(status)}`));
+            }
+            if (PaymentMethods && Array.isArray(PaymentMethods) && PaymentMethods.length > 0) {
+                PaymentMethods.forEach(status => queryParams.push(`PaymentMethods=${encodeURIComponent(status)}`));
             }
 
             const queryString = queryParams.join('&');
