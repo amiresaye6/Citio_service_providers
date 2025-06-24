@@ -281,6 +281,50 @@ export const fetchVendorDashboard = createAsyncThunk(
     }
 );
 
+export const fetchVendorOrders = createAsyncThunk(
+    'vendors/fetchVendorOrders',
+    async ({
+        vendorId,
+        pageNumber = 1,
+        pageSize = 10,
+        searchValue,
+        sortColumn,
+        sortDirection,
+        businessTypes,
+        dateFilter,
+        status,
+        statuses
+    }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const params = {};
+            if (pageNumber) params.PageNumer = pageNumber;
+            if (pageSize) params.PageSize = pageSize;
+            if (searchValue) params.SearchValue = searchValue;
+            if (sortColumn) params.SortColumn = sortColumn;
+            if (sortDirection) params.SortDirection = sortDirection;
+            if (businessTypes && businessTypes.length > 0) params.BusinessTypes = businessTypes;
+            if (dateFilter) params.DateFilter = dateFilter;
+            if (typeof status !== 'undefined') params.Status = status;
+            if (statuses && statuses.length > 0) params.Statuses = statuses;
+
+            const response = await axios.get(
+                `${API_BASE_URL}/Orders/vendors/${vendorId}`,
+                {
+                    headers: {
+                        accept: 'text/plain',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    params,
+                }
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch vendor orders');
+        }
+    }
+);
+
 const vendorsSlice = createSlice({
     name: 'vendors',
     initialState: {
@@ -304,6 +348,15 @@ const vendorsSlice = createSlice({
             hasPreviousPage: false,
             hasNextPage: false,
         },
+        vendorOrders: {
+            items: [],
+            pageNumber: 1,
+            totalPages: 1,
+            hasPreviousPage: false,
+            hasNextPage: false,
+        },
+        vendorOrdersLoading: false,
+        vendorOrdersError: null,
         subcategories: [],
         dashboard: null,
         loading: false,
@@ -312,6 +365,16 @@ const vendorsSlice = createSlice({
     reducers: {
         clearError: (state) => {
             state.error = null;
+        },
+        clearVendorOrders: (state) => {
+            state.vendorOrders = {
+                items: [],
+                pageNumber: 1,
+                totalPages: 1,
+                hasPreviousPage: false,
+                hasNextPage: false,
+            };
+            state.vendorOrdersError = null;
         },
     },
     extraReducers: (builder) => {
@@ -515,9 +578,28 @@ const vendorsSlice = createSlice({
             .addCase(fetchVendorDashboard.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
-            });
+            })
+            // get vendor orders
+            .addCase(fetchVendorOrders.pending, (state) => {
+                state.vendorOrdersLoading = true;
+                state.vendorOrdersError = null;
+            })
+            .addCase(fetchVendorOrders.fulfilled, (state, action) => {
+                state.vendorOrdersLoading = false;
+                state.vendorOrders = {
+                    items: action.payload.items,
+                    pageNumber: action.payload.pageNumber,
+                    totalPages: action.payload.totalPages,
+                    hasPreviousPage: action.payload.hasPreviousPage,
+                    hasNextPage: action.payload.hasNextPage,
+                };
+            })
+            .addCase(fetchVendorOrders.rejected, (state, action) => {
+                state.vendorOrdersLoading = false;
+                state.vendorOrdersError = action.payload;
+            })
     },
 });
 
-export const { clearError } = vendorsSlice.actions;
+export const { clearError, clearVendorOrders } = vendorsSlice.actions;
 export default vendorsSlice.reducer;

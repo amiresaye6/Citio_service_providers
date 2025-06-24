@@ -75,11 +75,8 @@ export const fetchAllUsers = createAsyncThunk(
                 searchValue,
                 sortColumn,
                 sortDirection,
-                businessTypes,
-                minRating,
-                maxRating,
+                dateFilter,
                 status,
-                statuses
             } = params || {};
 
             const response = await axios.get(`${API_BASE_URL}/all-users`, {
@@ -93,12 +90,10 @@ export const fetchAllUsers = createAsyncThunk(
                     SearchValue: searchValue,
                     SortColumn: sortColumn,
                     SortDirection: sortDirection,
-                    BusinessTypes: businessTypes,
-                    MinRating: minRating,
-                    MaxRating: maxRating,
+                    DateFilter: dateFilter,
                     Status: status,
-                    Statuses: statuses
                 }
+                
             });
             return response.data;
         } catch (error) {
@@ -120,7 +115,8 @@ export const fetchAllTransactions = createAsyncThunk(
                 sortColumn,
                 sortDirection,
                 DateFilter,
-                Statuses
+                Statuses,
+                PaymentMethods
             } = params || {};
 
             const queryParams = [];
@@ -132,6 +128,9 @@ export const fetchAllTransactions = createAsyncThunk(
             if (DateFilter) queryParams.push(`DateFilter=${encodeURIComponent(DateFilter)}`);
             if (Statuses && Array.isArray(Statuses) && Statuses.length > 0) {
                 Statuses.forEach(status => queryParams.push(`Statuses=${encodeURIComponent(status)}`));
+            }
+            if (PaymentMethods && Array.isArray(PaymentMethods) && PaymentMethods.length > 0) {
+                PaymentMethods.forEach(status => queryParams.push(`PaymentMethods=${encodeURIComponent(status)}`));
             }
 
             const queryString = queryParams.join('&');
@@ -434,6 +433,27 @@ export const fetchOrderById = createAsyncThunk(
     }
 );
 
+export const fetchTransactionsStatus = createAsyncThunk(
+    'admin/fetchTransactionsStatus',
+    async (orderId, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+
+            const response = await axios.get(`${API_BASE_URL}/transaction-stats`, {
+                headers: {
+                    accept: 'text/plain',
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error:', error);
+            return rejectWithValue(error.response?.data || 'Failed to fetch order details');
+        }
+    }
+);
+
 const adminSlice = createSlice({
     name: 'admin',
     initialState: {
@@ -507,6 +527,7 @@ const adminSlice = createSlice({
         orderDetails: null,
         orderDetailsLoading: false,
         orderDetailsError: null,
+        transactionStatus: {},
         loading: false,
         error: null
     },
@@ -755,6 +776,19 @@ const adminSlice = createSlice({
             .addCase(fetchOrderById.rejected, (state, action) => {
                 state.orderDetailsLoading = false;
                 state.orderDetailsError = action.payload;
+            })
+            // Transactions status
+            .addCase(fetchTransactionsStatus.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchTransactionsStatus.fulfilled, (state, action) => {
+                state.loading = true;
+                state.transactionStatus = action.payload;
+            })
+            .addCase(fetchTransactionsStatus.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
             })
     }
 });

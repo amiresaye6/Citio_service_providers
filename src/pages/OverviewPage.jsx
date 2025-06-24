@@ -1,11 +1,15 @@
 import React, { useEffect } from 'react';
-import { Card, Row, Col, Statistic, Button, Space, Typography } from 'antd';
+import { Card, Row, Col, Statistic, Button, Typography, Tag, Tooltip, Divider, Space } from 'antd';
 import {
   UserOutlined,
   FileTextOutlined,
   DollarOutlined,
   ShopOutlined,
   ReloadOutlined,
+  TrophyOutlined,
+  RiseOutlined,
+  UserAddOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -23,6 +27,42 @@ import { debounce } from 'lodash';
 
 const { Text } = Typography;
 
+const StatCard = ({ title, value, prefix, suffix, trend, trendType, tooltip }) => (
+  <Card
+    bordered
+    className="shadow transition-shadow hover:shadow-lg h-full"
+    bodyStyle={{ padding: 20 }}
+  >
+    <Row align="middle" gutter={12}>
+      <Col>
+        <span style={{ fontSize: 30 }}>{prefix}</span>
+      </Col>
+      <Col flex="auto">
+        <Statistic
+          title={
+            tooltip ? (
+              <Tooltip title={tooltip}>
+                <span>{title}</span>
+              </Tooltip>
+            ) : (
+              title
+            )
+          }
+          value={value}
+          valueStyle={{ fontWeight: 600, fontSize: 22 }}
+          suffix={suffix}
+        />
+        {trend !== undefined && (
+          <div className={`text-xs mt-1 ${trendType === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+            {trendType === 'up' ? <RiseOutlined /> : <RiseOutlined style={{ transform: 'rotate(180deg)' }} />}
+            {trend}% {trendType === 'up' ? 'Increase' : 'Decrease'}
+          </div>
+        )}
+      </Col>
+    </Row>
+  </Card>
+);
+
 const OverviewPage = () => {
   const dispatch = useDispatch();
   const {
@@ -33,14 +73,12 @@ const OverviewPage = () => {
     error,
   } = useSelector((state) => state.admin);
 
-  // Load data on mount
   useEffect(() => {
     dispatch(fetchTodayStats());
     dispatch(fetchTopVendors());
     dispatch(fetchProjectSummary());
   }, [dispatch]);
 
-  // Handle errors
   useEffect(() => {
     if (error) {
       ToastNotifier.error('Failed to load dashboard data', error);
@@ -48,7 +86,6 @@ const OverviewPage = () => {
     }
   }, [error, dispatch]);
 
-  // Debounced refresh handler
   const handleRefresh = debounce(() => {
     dispatch(fetchTodayStats());
     dispatch(fetchTopVendors());
@@ -56,7 +93,6 @@ const OverviewPage = () => {
     ToastNotifier.success('Dashboard refreshed');
   }, 300);
 
-  // Table columns for top vendors
   const vendorColumns = [
     {
       title: 'Vendor',
@@ -65,7 +101,7 @@ const OverviewPage = () => {
       render: (_, record) => (
         <UserCard
           name={record.businessName}
-          email={record.fullName.toLowerCase().replace(/\s+/g, '') + '@example.com'} // Placeholder email
+          email={record.fullName.toLowerCase().replace(/\s+/g, '') + '@example.com'}
           avatar={record.profilePictureUrl}
         />
       ),
@@ -79,12 +115,17 @@ const OverviewPage = () => {
       title: 'Business Type',
       dataIndex: 'businessType',
       key: 'businessType',
+      render: (bt) => <Tag color="blue">{bt}</Tag>,
     },
     {
       title: 'Revenue',
       dataIndex: 'totalRevenue',
       key: 'totalRevenue',
-      render: (revenue) => `$${revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      render: (revenue) => (
+        <Text strong style={{ color: '#52c41a' }}>
+          ${revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </Text>
+      ),
       sorter: (a, b) => a.totalRevenue - b.totalRevenue,
       defaultSortOrder: 'descend',
     },
@@ -93,15 +134,18 @@ const OverviewPage = () => {
       dataIndex: 'totalOrderCount',
       key: 'totalOrderCount',
       sorter: (a, b) => a.totalOrderCount - b.totalOrderCount,
+      render: cnt => <Tag color="gold">{cnt}</Tag>
     },
   ];
 
+  // Highlight the top vendor (optional)
+  const topVendor = Array.isArray(topVendors) && topVendors.length > 0 ? topVendors[0] : null;
+
   return (
-    <div className="page-container">
-      {/* Page Header */}
+    <div className="page-container" style={{ padding: 24 }}>
       <PageHeader
-        title="Dashboard Overview"
-        subtitle="Summary of system statistics and top performing vendors"
+        title="Admin Dashboard"
+        subtitle="System summary & top vendors"
         actions={
           <Button
             icon={<ReloadOutlined />}
@@ -119,79 +163,113 @@ const OverviewPage = () => {
         </Card>
       ) : (
         <>
-          {/* Today's Statistics */}
-          <Row gutter={[16, 16]} className="mb-6">
-            <Col xs={24} sm={12} md={6}>
-              <Card>
-                <Statistic
-                  title="New Users Today"
-                  value={todayStats.newUsersCount}
-                  prefix={<UserOutlined className="text-blue-500" />}
-                />
-              </Card>
+          {/* Today's Stats + Project Summary in one row for compactness */}
+          <Row gutter={[24, 24]} className="mb-6">
+            <Col xs={24} sm={12} md={4}>
+              <StatCard
+                title="New Users Today"
+                value={todayStats.newUsersCount}
+                prefix={<UserAddOutlined />}
+                tooltip="Users registered in the last 24 hours"
+              />
             </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Card>
-                <Statistic
-                  title="Orders Today"
-                  value={todayStats.ordersCount}
-                  prefix={<FileTextOutlined className="text-green-500" />}
-                />
-              </Card>
+            <Col xs={24} sm={12} md={4}>
+              <StatCard
+                title="Orders Today"
+                value={todayStats.ordersCount}
+                prefix={<FileTextOutlined />}
+                tooltip="Total orders placed today"
+              />
             </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Card>
-                <Statistic
-                  title="Revenue Today"
-                  value={todayStats.revenueToday}
-                  precision={2}
-                  prefix={<DollarOutlined className="text-purple-500" />}
-                  suffix="USD"
-                />
-              </Card>
+            <Col xs={24} sm={12} md={4}>
+              <StatCard
+                title="Revenue Today"
+                value={todayStats.revenueToday}
+                prefix={<DollarOutlined />}
+                suffix="USD"
+                tooltip="Gross revenue generated today"
+              />
             </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Card>
-                <Statistic
-                  title="Vendors Today"
-                  value={todayStats.vendorsCount}
-                  prefix={<ShopOutlined className="text-orange-500" />}
-                />
-              </Card>
+            <Col xs={24} sm={12} md={4}>
+              <StatCard
+                title="Vendors Today"
+                value={todayStats.vendorsCount}
+                prefix={<ShopOutlined />}
+                tooltip="Vendors who joined today"
+              />
+            </Col>
+            <Col xs={24} sm={12} md={4}>
+              <StatCard
+                title="Total Users"
+                value={projectSummary.totalUsersCount}
+                prefix={<UserOutlined />}
+                tooltip="All users registered on the platform"
+              />
+            </Col>
+            <Col xs={24} sm={12} md={4}>
+              <StatCard
+                title="Total Vendors"
+                value={projectSummary.totalVendorsCount}
+                prefix={<ShopOutlined />}
+                tooltip="All vendors registered on the platform"
+              />
             </Col>
           </Row>
-
-          {/* Project Summary */}
-          <Row gutter={[16, 16]} className="mb-6">
+          <Row gutter={[24, 24]} className="mb-6">
             <Col xs={24} sm={12} md={8}>
-              <Card>
-                <Statistic
-                  title="Total Users"
-                  value={projectSummary.totalUsersCount}
-                  prefix={<UserOutlined className="text-blue-500" />}
-                />
-              </Card>
+              <StatCard
+                title="Total Revenue"
+                value={projectSummary.totalRevenue}
+                prefix={<DollarOutlined />}
+                suffix="USD"
+                tooltip="Total gross revenue generated"
+              />
             </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Card>
-                <Statistic
-                  title="Total Vendors"
-                  value={projectSummary.totalVendorsCount}
-                  prefix={<ShopOutlined className="text-orange-500" />}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Card>
-                <Statistic
-                  title="Total Revenue"
-                  value={projectSummary.totalRevenue}
-                  precision={2}
-                  prefix={<DollarOutlined className="text-purple-500" />}
-                  suffix="USD"
-                />
-              </Card>
-            </Col>
+            {topVendor && (
+              <Col xs={24} sm={24} md={16}>
+                <Card
+                  bordered
+                  style={{ height: '100%' }}
+                  title={
+                    <Space>
+                      <TrophyOutlined style={{ color: "#faad14" }} />
+                      <Text strong style={{ fontSize: 18 }}>Top Vendor</Text>
+                    </Space>
+                  }
+                >
+                  <Row gutter={24} align="middle">
+                    <Col xs={24} sm={12} md={8}>
+                      <UserCard
+                        name={topVendor.businessName}
+                        email={topVendor.fullName.toLowerCase().replace(/\s+/g, '') + '@example.com'}
+                        avatar={topVendor.profilePictureUrl}
+                      />
+                      <div>
+                        <Tag color="blue">{topVendor.businessType}</Tag>
+                      </div>
+                    </Col>
+                    <Col xs={12} sm={6} md={8}>
+                      <Statistic
+                        title="Revenue"
+                        value={topVendor.totalRevenue}
+                        prefix={<DollarOutlined />}
+                        valueStyle={{ color: "#52c41a" }}
+                        precision={2}
+                        suffix="USD"
+                      />
+                    </Col>
+                    <Col xs={12} sm={6} md={8}>
+                      <Statistic
+                        title="Orders"
+                        value={topVendor.totalOrderCount}
+                        prefix={<RiseOutlined />}
+                        valueStyle={{ color: "#faad14" }}
+                      />
+                    </Col>
+                  </Row>
+                </Card>
+              </Col>
+            )}
           </Row>
         </>
       )}
@@ -205,6 +283,7 @@ const OverviewPage = () => {
           </div>
         }
         className="mb-6"
+        bordered
       >
         {loading ? (
           <LoadingSpinner text="Loading vendor data..." />
