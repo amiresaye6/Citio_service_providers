@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Row, Col, Select, DatePicker, Card, Tag } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllTransactions, clearError } from '../redux/slices/adminSlice';
+import { fetchAllTransactions, clearError, fetchTransactionsStatus } from '../redux/slices/adminSlice';
 import PageHeader from '../components/common/PageHeader';
 import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
@@ -20,7 +20,7 @@ const { Option } = Select;
 
 const AllTransactionsPage = () => {
   const dispatch = useDispatch();
-  const { transactions, loading, error } = useSelector(state => state.admin);
+  const { transactions, transactionStatus: tStats, loading, error } = useSelector(state => state.admin);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -29,6 +29,7 @@ const AllTransactionsPage = () => {
   const [sortDirection, setSortDirection] = useState('');
   const [statusFilter, setStatusFilter] = useState([]);
   const [dateFilter, setDateFilter] = useState(null);
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState([]);
 
 
   // Fetch transactions
@@ -40,9 +41,17 @@ const AllTransactionsPage = () => {
       sortColumn: sortColumn,
       sortDirection: sortDirection,
       Statuses: statusFilter.length > 0 ? statusFilter : undefined,
-      DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined
+      DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined,
+      PaymentMethods: paymentMethodFilter.length > 0 ? paymentMethodFilter : undefined
     }));
-  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter, dateFilter]);
+  }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter, dateFilter, paymentMethodFilter]);
+  let i = 0;
+  // // Fetch Transactions status
+  useEffect(() => {
+    ++i === 1 ? dispatch(fetchTransactionsStatus()) : () => { };
+    ;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Handle errors
   useEffect(() => {
@@ -176,6 +185,10 @@ const AllTransactionsPage = () => {
     setCurrentPage(1);
   };
 
+  const handlePaymentMethodFilterChange = (value) => {
+    setPaymentMethodFilter(value);
+    setCurrentPage(1);
+  };
 
   // Handle date filter change
   const handleDateFilterChange = (date) => {
@@ -207,7 +220,8 @@ const AllTransactionsPage = () => {
       sortColumn: sortColumn,
       sortDirection: sortDirection,
       Statuses: statusFilter.length > 0 ? statusFilter : undefined,
-      DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined
+      DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined,
+      PaymentMethods: paymentMethodFilter.length > 0 ? paymentMethodFilter : undefined
     }));
 
     ToastNotifier.success('Transactions refreshed');
@@ -215,10 +229,10 @@ const AllTransactionsPage = () => {
 
   // Calculate statistics
   const transactionStats = {
-    total: transactions.items?.length || 0,
-    totalAmount: transactions.items?.reduce((sum, t) => sum + (t.totalAmount || 0), 0) || 0,
-    completed: transactions.items?.filter(t => t.status?.toLowerCase() === 'completed').length || 0,
-    pending: transactions.items?.filter(t => t.status?.toLowerCase() === 'pending').length || 0
+    total: tStats?.allTransactionsCount || 0,
+    totalAmount: tStats?.totalRevenue || 0,
+    completed: tStats?.compleatedTransactionsCount || 0,
+    pending: tStats?.pendingTransactionsCount || 0
   };
 
   return (
@@ -302,7 +316,25 @@ const AllTransactionsPage = () => {
               <Option value="Completed">Completed</Option>
               <Option value="Pending">Pending</Option>
               <Option value="Failed">Failed</Option>
-              <Option value="Processing">Processing</Option>
+              <Option value="Refunded">Refunded</Option>
+            </Select>
+          </Col>
+
+          <Col xs={24} sm={12} md={4}>
+            <Select
+              mode="multiple"
+              placeholder="Filter by payment method"
+              value={paymentMethodFilter}
+              onChange={handlePaymentMethodFilterChange}
+              className="w-full"
+              allowClear
+            >
+              <Option value="Visa">Visa</Option>
+              <Option value="Mastercard">Mastercard</Option>
+              <Option value="American Express">American Express</Option>
+              <Option value="Discover">Discover</Option>
+              <Option value="UnionPay">UnionPay</Option>
+              <Option value="JCB">JCB</Option>
             </Select>
           </Col>
 
