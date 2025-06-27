@@ -284,7 +284,7 @@ export const fetchVendorDashboard = createAsyncThunk(
 export const fetchVendorOrders = createAsyncThunk(
     'vendors/fetchVendorOrders',
     async ({
-        vendorId,
+        // vendorId,
         pageNumber = 1,
         pageSize = 10,
         searchValue,
@@ -309,7 +309,7 @@ export const fetchVendorOrders = createAsyncThunk(
             if (statuses && statuses.length > 0) params.Statuses = statuses;
 
             const response = await axios.get(
-                `${API_BASE_URL}/Orders/vendors/${vendorId}`,
+                `${API_BASE_URL}/Orders/vendors`,
                 {
                     headers: {
                         accept: 'text/plain',
@@ -321,6 +321,49 @@ export const fetchVendorOrders = createAsyncThunk(
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || 'Failed to fetch vendor orders');
+        }
+    }
+);
+
+export const fetchVendorTopSellingProducts = createAsyncThunk(
+    'vendors/fetchVendorTopSellingProducts',
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+
+            const response = await axios.get(
+                `${API_BASE_URL}/Vendors/vendors-top-selling-products`,
+                {
+                    headers: {
+                        accept: 'text/plain',
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch top selling products');
+        }
+    }
+);
+
+export const fetchVendorRevenueByPaymentMethod = createAsyncThunk(
+    'vendors/fetchVendorRevenueByPaymentMethod',
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                `${API_BASE_URL}/Vendors/vendor-Revenue-ByPaymentMethod`,
+                {
+                    headers: {
+                        accept: 'text/plain',
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch revenue by payment method');
         }
     }
 );
@@ -355,6 +398,12 @@ const vendorsSlice = createSlice({
             hasPreviousPage: false,
             hasNextPage: false,
         },
+        vendorRevenueByPaymentMethod: [],
+        vendorRevenueByPaymentMethodLoading: false,
+        vendorRevenueByPaymentMethodError: null,
+        vendorTopSellingProducts: [],
+        vendorTopSellingProductsLoading: false,
+        vendorTopSellingProductsError: null,
         vendorOrdersLoading: false,
         vendorOrdersError: null,
         subcategories: [],
@@ -597,6 +646,32 @@ const vendorsSlice = createSlice({
             .addCase(fetchVendorOrders.rejected, (state, action) => {
                 state.vendorOrdersLoading = false;
                 state.vendorOrdersError = action.payload;
+            })
+            // get vendor top selling products
+            .addCase(fetchVendorTopSellingProducts.pending, (state) => {
+                state.vendorTopSellingProductsLoading = true;
+                state.vendorTopSellingProductsError = null;
+            })
+            .addCase(fetchVendorTopSellingProducts.fulfilled, (state, action) => {
+                state.vendorTopSellingProductsLoading = false;
+                state.vendorTopSellingProducts = action.payload;
+            })
+            .addCase(fetchVendorTopSellingProducts.rejected, (state, action) => {
+                state.vendorTopSellingProductsLoading = false;
+                state.vendorTopSellingProductsError = action.payload;
+            })
+            // get vendor revenue by payment method
+            .addCase(fetchVendorRevenueByPaymentMethod.pending, (state) => {
+                state.vendorRevenueByPaymentMethodLoading = true;
+                state.vendorRevenueByPaymentMethodError = null;
+            })
+            .addCase(fetchVendorRevenueByPaymentMethod.fulfilled, (state, action) => {
+                state.vendorRevenueByPaymentMethodLoading = false;
+                state.vendorRevenueByPaymentMethod = action.payload;
+            })
+            .addCase(fetchVendorRevenueByPaymentMethod.rejected, (state, action) => {
+                state.vendorRevenueByPaymentMethodLoading = false;
+                state.vendorRevenueByPaymentMethodError = action.payload;
             })
     },
 });
