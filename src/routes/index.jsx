@@ -19,6 +19,8 @@ import ManageStorePage from '../pages/VendorProfilePage';
 import AdminVendorDetailsPage from '../pages/AdminVendorDetailsPage';
 import UserDetailsPage from '../pages/UserDetailsPage';
 import OrderDetailsPage from '../pages/OrderDetailsPage';
+import VendorMenuItemAddPage from '../pages/VendorMenuItemAddPage';
+import VendorMenuItemPage from '../pages/VendorMenuItemPage';
 
 const AppRoutes = () => (
     <Routes>
@@ -131,6 +133,22 @@ const AppRoutes = () => (
                 element={
                     <ProtectedRoute>
                         <VendorMenuPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/vendor/menu/add"
+                element={
+                    <ProtectedRoute>
+                        <VendorMenuItemAddPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/vendor/menu/item/:id"
+                element={
+                    <ProtectedRoute>
+                        <VendorMenuItemPage />
                     </ProtectedRoute>
                 }
             />
