@@ -1,37 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, Form, Input, InputNumber, Select, Avatar } from 'antd';
+import { Button, Input, Table, Avatar, Tag, Dropdown, Menu, Tooltip, Card, Modal } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchVendorMenu, fetchSubcategories, deactivateMenuItem, clearError } from '../redux/slices/vendorsSlice';
+import { useNavigate } from 'react-router-dom';
 import {
-    fetchVendorMenu,
-    addProduct,
-    updateMenuItem,
-    deactivateMenuItem,
-    fetchSubcategories,
-    clearError,
-} from '../redux/slices/vendorsSlice';
+    MoreOutlined,
+    PlusOutlined,
+    InfoCircleOutlined,
+    ExclamationCircleOutlined,
+    WarningOutlined
+} from '@ant-design/icons';
 import PageHeader from '../components/common/PageHeader';
-import TableWrapper from '../components/common/TableWrapper';
-import StatusTag from '../components/common/StatusTag';
-import ConfirmModal from '../components/common/ConfirmModal';
-import ToastNotifier from '../components/common/ToastNotifier';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import ToastNotifier from '../components/common/ToastNotifier';
+
+const MOBILE_WIDTH = 768;
 
 const VendorMenuPage = () => {
     const dispatch = useDispatch();
-    const { vendorMenu, subcategories, loading, error } = useSelector((state) => state.vendors);
-    const { user } = useSelector((state) => state.auth); // Assumes authSlice with user info
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [sortColumn, setSortColumn] = useState('');
-    const [sortDirection, setSortDirection] = useState('');
-    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [form] = Form.useForm();
-    const vendorId = user?.id; // Vendor ID from auth state
+    const navigate = useNavigate();
+    const { vendorMenu, loading, error } = useSelector((state) => state.vendors);
+    const { user } = useSelector((state) => state.auth);
+    const [search, setSearch] = useState('');
+    const [filteredItems, setFilteredItems] = useState([]);
+    const [deactivatingId, setDeactivatingId] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < MOBILE_WIDTH);
+    const [confirmModal, setConfirmModal] = useState({ visible: false, itemId: null, itemName: '' });
+    const vendorId = user?.id || localStorage.getItem("userId");
 
-    // Fetch menu items and subcategories
     useEffect(() => {
         if (vendorId) {
             dispatch(fetchVendorMenu({ vendorId }));
@@ -39,7 +35,6 @@ const VendorMenuPage = () => {
         }
     }, [dispatch, vendorId]);
 
-    // Handle errors
     useEffect(() => {
         if (error) {
             ToastNotifier.error('Operation Failed', error);
@@ -47,341 +42,366 @@ const VendorMenuPage = () => {
         }
     }, [error, dispatch]);
 
-    // Sort and paginate items
-    const sortedItems = [...vendorMenu.items].sort((a, b) => {
-        if (!sortColumn || !sortDirection) return 0;
-        const valueA = a[sortColumn] || '';
-        const valueB = b[sortColumn] || '';
-        const direction = sortDirection === 'asc' ? 1 : -1;
-        if (typeof valueA === 'string') {
-            return valueA.localeCompare(valueB) * direction;
+    useEffect(() => {
+        if (!search) {
+            setFilteredItems(vendorMenu.items || []);
+        } else {
+            setFilteredItems(
+                (vendorMenu.items || []).filter(
+                    (item) =>
+                        (item.nameEn?.toLowerCase().includes(search.toLowerCase()) || '') ||
+                        (item.description?.toLowerCase().includes(search.toLowerCase()) || '') ||
+                        (item.categoryNameEn?.toLowerCase().includes(search.toLowerCase()) || '')
+                )
+            );
         }
-        return (valueA - valueB) * direction;
-    });
+    }, [vendorMenu, search]);
 
-    const paginatedItems = sortedItems.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize
-    );
+    useEffect(() => {
+        // Responsive: listen for window resize
+        const handleResize = () => setIsMobile(window.innerWidth < MOBILE_WIDTH);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
-    // Table columns
+    // Show confirmation modal before deactivation
+    const showDeactivateConfirmation = (item) => {
+        setConfirmModal({
+            visible: true,
+            itemId: item.id,
+            itemName: item.nameEn
+        });
+    };
+
+    // Handle deactivation after confirmation
+    const handleDeactivate = () => {
+        const itemId = confirmModal.itemId;
+        setDeactivatingId(itemId);
+
+        // Close modal
+        setConfirmModal({ visible: false, itemId: null, itemName: '' });
+
+        // Add user information and timestamp to the deactivation log
+        const deactivateInfo = {
+            vendorId,
+            menuItemId: itemId,
+            deactivatedBy: 'amiresaye6',
+            deactivatedAt: '2025-06-29 22:07:46'
+        };
+
+        dispatch(deactivateMenuItem(deactivateInfo)).then((result) => {
+            if (result.meta.requestStatus === 'fulfilled') {
+                ToastNotifier.success('Item Deactivated', `Menu item has been deactivated.`);
+                dispatch(fetchVendorMenu({ vendorId }));
+            }
+            setDeactivatingId(null);
+        });
+    };
+
     const columns = [
         {
             title: 'Image',
             dataIndex: 'mainImageUrl',
             key: 'mainImageUrl',
-            render: (url) => (
+            width: 80,
+            render: (url, record) => (
                 <Avatar
-                    src={`https://service-provider.runasp.net${url}`}
+                    src={url ? `https://service-provider.runasp.net${url}` : null}
                     size={40}
                     shape="square"
-                    alt="Product Image"
+                    alt={record.nameEn}
                     style={{ objectFit: 'cover' }}
                 />
             ),
+            fixed: 'left'
         },
         {
-            title: 'Name (EN)',
+            title: 'Name',
             dataIndex: 'nameEn',
             key: 'nameEn',
-            sorter: true,
-        },
-        {
-            title: 'Name (AR)',
-            dataIndex: 'nameAr',
-            key: 'nameAr',
-            sorter: true,
-        },
-        {
-            title: 'Price',
-            dataIndex: 'price',
-            key: 'price',
-            sorter: true,
-            render: (price) => `$${price.toFixed(2)}`,
+            render: (text) => <span style={{ fontWeight: 600 }}>{text}</span>,
+            ellipsis: true,
+            width: 180,
         },
         {
             title: 'Description',
             dataIndex: 'description',
             key: 'description',
+            ellipsis: true,
+            render: (desc) => (
+                <Tooltip title={desc}>
+                    <span style={{ color: '#555' }}>
+                        {desc && desc.length > 80 ? desc.slice(0, 80) + "..." : desc}
+                    </span>
+                </Tooltip>
+            ),
+            width: 300,
+        },
+        {
+            title: 'Price',
+            dataIndex: 'price',
+            key: 'price',
+            render: (price) => <span>${Number(price).toFixed(2)}</span>,
+            width: 120,
+            sorter: (a, b) => a.price - b.price,
+        },
+        {
+            title: 'Category',
+            dataIndex: 'categoryNameEn',
+            key: 'categoryNameEn',
+            render: (val) => <span style={{ color: '#555' }}>{val}</span>,
+            width: 150,
+            filters: [...new Set((vendorMenu.items || []).map(item => item.categoryNameEn))]
+                .filter(Boolean)
+                .map(cat => ({ text: cat, value: cat })),
+            onFilter: (value, record) => record.categoryNameEn === value,
         },
         {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            sorter: true,
-            render: (status) => <StatusTag status={status || 'active'} />,
+            render: (status) =>
+                status === 'inactive' ? (
+                    <Tag color="red">Inactive</Tag>
+                ) : (
+                    <Tag color="green">Active</Tag>
+                ),
+            width: 90,
+            filters: [
+                { text: 'Active', value: 'active' },
+                { text: 'Inactive', value: 'inactive' },
+            ],
+            onFilter: (value, record) => record.status === value,
         },
         {
-            title: 'Actions',
+            title: '',
             key: 'actions',
+            align: 'right',
+            width: 48,
             render: (_, record) => (
-                <div className="space-x-2">
+                <Dropdown
+                    overlay={
+                        <Menu>
+                            <Menu.Item
+                                key="view/edit"
+                                onClick={() => navigate(`/vendor/menu/item/${record.id}`)}
+                                icon={<InfoCircleOutlined />}
+                            >
+                                View & Edit
+                            </Menu.Item>
+                            <Menu.Item
+                                key="deactivate"
+                                onClick={() => showDeactivateConfirmation(record)}
+                                disabled={record.status === 'inactive' || deactivatingId === record.id}
+                                icon={<WarningOutlined />}
+                                danger
+                            >
+                                Deactivate
+                            </Menu.Item>
+                        </Menu>
+                    }
+                    trigger={['click']}
+                    placement="bottomRight"
+                >
                     <Button
-                        type="link"
-                        onClick={() => handleEdit(record)}
-                        disabled={record.status === 'inactive'}
-                    >
-                        Edit
-                    </Button>
-                    <Button
-                        type="link"
-                        danger
-                        onClick={() => handleDeactivate(record)}
-                        disabled={record.status === 'inactive'}
-                    >
-                        Deactivate
-                    </Button>
-                </div>
+                        icon={<MoreOutlined />}
+                        type="text"
+                        loading={deactivatingId === record.id}
+                    />
+                </Dropdown>
             ),
+            fixed: 'right'
         },
     ];
 
-    // Handle add product
-    const handleAddProduct = () => {
-        form.validateFields().then((values) => {
-            dispatch(addProduct(values))
-                .then((result) => {
-                    if (result.meta.requestStatus === 'fulfilled') {
-                        ToastNotifier.success('Product Added', `${values.nameEn} has been added to the menu.`);
-                        dispatch(fetchVendorMenu({ vendorId }));
-                    }
-                });
-            setIsAddModalVisible(false);
-            form.resetFields();
-        }).catch(() => {
-            ToastNotifier.error('Validation Failed', 'Please fill in all required fields.');
-        });
-    };
+    // Mobile Card rendering with improved layout
+    const renderMobileCards = () => (
+        <div className="flex flex-col gap-4">
+            {filteredItems.length > 0 ? (
+                filteredItems.map((item) => (
+                    <Card
+                        key={item.id}
+                        bodyStyle={{ padding: 12, display: 'flex', alignItems: 'flex-start', gap: 12 }}
+                        style={{ borderRadius: 12, boxShadow: '0 1px 8px #0001' }}
+                    >
+                        <Avatar
+                            src={item.mainImageUrl ? `https://service-provider.runasp.net${item.mainImageUrl}` : null}
+                            size={64}
+                            shape="square"
+                            alt={item.nameEn}
+                            style={{
+                                objectFit: 'cover',
+                                flexShrink: 0,
+                                border: '1px solid #eee',
+                                borderRadius: '8px'
+                            }}
+                        />
+                        <div style={{ flex: 1 }}>
+                            <div className="flex justify-between items-start">
+                                <div style={{ fontWeight: 600, fontSize: 16 }}>{item.nameEn}</div>
+                                <Tag
+                                    style={{
+                                        borderRadius: 8,
+                                        fontSize: 12
+                                    }}
+                                    color={item.status === 'inactive' ? 'red' : 'green'}
+                                >
+                                    {item.status === 'inactive' ? 'Inactive' : 'Active'}
+                                </Tag>
+                            </div>
+                            <div style={{ color: '#888', fontSize: 13, marginBottom: 4 }}>{item.categoryNameEn}</div>
+                            <div style={{ color: '#555', marginBottom: 8, fontSize: 13, lineHeight: 1.4 }}>
+                                {item.description && item.description.length > 100
+                                    ? item.description.slice(0, 100) + "..."
+                                    : item.description}
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span style={{
+                                    fontWeight: 600,
+                                    color: '#1a1a1a',
+                                    fontSize: '16px'
+                                }}>
+                                    ${Number(item.price).toFixed(2)}
+                                </span>
+                                <div className="flex gap-2">
+                                    <Button
+                                        size="small"
+                                        type="primary"
+                                        onClick={() => navigate(`/vendor/menu/item/${item.id}`)}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        danger
+                                        disabled={item.status === 'inactive' || deactivatingId === item.id}
+                                        loading={deactivatingId === item.id}
+                                        onClick={() => showDeactivateConfirmation(item)}
+                                    >
+                                        Deactivate
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                ))
+            ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+                    <ExclamationCircleOutlined style={{ fontSize: 48, marginBottom: 16 }} />
+                    <p>No menu items found</p>
+                    {search && (
+                        <Button type="link" onClick={() => setSearch('')}>
+                            Clear search
+                        </Button>
+                    )}
+                </div>
+            )}
+        </div>
+    );
 
-    // Handle edit menu item
-    const handleEdit = (item) => {
-        setSelectedItem(item);
-        form.setFieldsValue({
-            nameEn: item.nameEn,
-            nameAr: item.nameAr,
-            description: item.description,
-            mainImageUrl: item.mainImageUrl,
-            price: item.price,
-            subCategoryId: item.subCategoryId,
-        });
-        setIsEditModalVisible(true);
-    };
-
-    const handleUpdateItem = () => {
-        form.validateFields().then((values) => {
-            dispatch(updateMenuItem({
-                vendorId,
-                menuItemId: selectedItem.id,
-                item: values,
-            })).then((result) => {
-                if (result.meta.requestStatus === 'fulfilled') {
-                    ToastNotifier.success('Item Updated', `${values.nameEn} has been updated.`);
-                    dispatch(fetchVendorMenu({ vendorId }));
-                }
-            });
-            setIsEditModalVisible(false);
-            form.resetFields();
-        }).catch(() => {
-            ToastNotifier.error('Validation Failed', 'Please fill in all required fields.');
-        });
-    };
-
-    // Handle deactivate menu item
-    const handleDeactivate = (item) => {
-        setSelectedItem(item);
-        setIsConfirmModalVisible(true);
-    };
-
-    const handleConfirmDeactivate = () => {
-        dispatch(deactivateMenuItem({
-            vendorId,
-            menuItemId: selectedItem.id,
-        })).then((result) => {
-            if (result.meta.requestStatus === 'fulfilled') {
-                ToastNotifier.success('Item Deactivated', `${selectedItem.nameEn} has been deactivated.`);
-                dispatch(fetchVendorMenu({ vendorId }));
-            }
-        });
-        setIsConfirmModalVisible(false);
-    };
-
-    // Handle table change (pagination and sorting)
-    const handleTableChange = (pagination, filters, sorter) => {
-        setCurrentPage(pagination.current);
-        setPageSize(pagination.pageSize);
-        if (sorter.field && sorter.order) {
-            setSortColumn(sorter.field);
-            setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
-        } else {
-            setSortColumn('');
-            setSortDirection('');
-        }
-    };
+    // Empty state component
+    const renderEmptyState = () => (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+            <ExclamationCircleOutlined style={{ fontSize: 48, marginBottom: 16 }} />
+            <p className="mb-4">No menu items found</p>
+            {search ? (
+                <Button type="link" onClick={() => setSearch('')}>
+                    Clear search
+                </Button>
+            ) : (
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => navigate('/vendor/menu/add')}
+                >
+                    Add Your First Menu Item
+                </Button>
+            )}
+        </div>
+    );
 
     return (
         <div className="p-6 min-h-screen">
             <PageHeader
-                title="Vendor Menu"
-                subtitle="Manage your menu items"
+                title="Menu"
+                subtitle="View and manage your menu items"
                 actions={
-                    <Button type="primary" onClick={() => setIsAddModalVisible(true)}>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => navigate('/vendor/menu/add')}
+                    >
                         Add Product
                     </Button>
                 }
             />
 
+            {/* Search and filter section */}
+            <div className="mb-6">
+                <div className="flex flex-wrap gap-4 items-center">
+                    <div style={{ maxWidth: 340, width: '100%' }}>
+                        <Input.Search
+                            placeholder="Search menu items..."
+                            allowClear
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            style={{ borderRadius: 6 }}
+                        />
+                    </div>
+                    {!isMobile && (
+                        <div className="text-gray-500 text-sm">
+                            {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} found
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Main content section */}
             {loading ? (
                 <LoadingSpinner text="Loading menu items..." />
+            ) : filteredItems.length > 0 ? (
+                isMobile ? (
+                    renderMobileCards()
+                ) : (
+                    <Table
+                        dataSource={filteredItems}
+                        columns={columns}
+                        rowKey="id"
+                        scroll={{ x: 900, y: 520 }}
+                        pagination={{
+                            pageSize: 10,
+                            showSizeChanger: true,
+                            pageSizeOptions: ['10', '20', '50'],
+                            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                            position: ['bottomCenter'],
+                            showQuickJumper: true,
+                        }}
+                        rowClassName={record => record.status === 'inactive' ? 'bg-gray-50' : ''}
+                    />
+                )
             ) : (
-                <TableWrapper
-                    dataSource={paginatedItems}
-                    columns={columns}
-                    loading={loading}
-                    rowKey="id"
-                    pagination={{
-                        current: currentPage,
-                        pageSize: pageSize,
-                        total: vendorMenu.items.length,
-                        showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50'],
-                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-                        position: ['bottomCenter'],
-                        showQuickJumper: true,
-                    }}
-                    onChange={handleTableChange}
-                />
+                renderEmptyState()
             )}
 
+            {/* Confirmation modal for deactivation */}
             <Modal
-                title="Add Product"
-                open={isAddModalVisible}
-                onOk={handleAddProduct}
-                onCancel={() => {
-                    setIsAddModalVisible(false);
-                    form.resetFields();
-                }}
+                title={<div className="flex items-center gap-2"><WarningOutlined style={{ color: '#ff4d4f' }} /> Confirm Deactivation</div>}
+                open={confirmModal.visible}
+                onOk={handleDeactivate}
+                onCancel={() => setConfirmModal({ visible: false, itemId: null, itemName: '' })}
+                okText="Yes, Deactivate"
+                cancelText="Cancel"
+                okButtonProps={{ danger: true, loading: deactivatingId === confirmModal.itemId }}
             >
-                <Form form={form} layout="vertical">
-                    <Form.Item
-                        name="nameEn"
-                        label="Name (English)"
-                        rules={[{ required: true, message: 'Please enter English name' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="nameAr"
-                        label="Name (Arabic)"
-                        rules={[{ required: true, message: 'Please enter Arabic name' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="description"
-                        label="Description"
-                        rules={[{ required: true, message: 'Please enter description' }]}
-                    >
-                        <Input.TextArea />
-                    </Form.Item>
-                    <Form.Item
-                        name="mainImageUrl"
-                        label="Image URL"
-                        rules={[{ required: true, message: 'Please enter image URL' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="price"
-                        label="Price"
-                        rules={[{ required: true, message: 'Please enter price' }]}
-                    >
-                        <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
-                    </Form.Item>
-                    <Form.Item
-                        name="subCategoryId"
-                        label="Subcategory"
-                        rules={[{ required: true, message: 'Please select a subcategory' }]}
-                    >
-                        <Select
-                            placeholder="Select a subcategory"
-                            options={subcategories.map((subcat) => ({
-                                value: subcat.id,
-                                label: subcat.nameEn,
-                            }))}
-                        />
-                    </Form.Item>
-                </Form>
+                <p>Are you sure you want to deactivate <strong>{confirmModal.itemName}</strong>?</p>
+                <p className="text-gray-500 text-sm mt-2">
+                    This will make the item unavailable for customers to order. This action will be logged.
+                </p>
+                <div className="bg-gray-50 p-3 rounded mt-3 text-xs">
+                    <p><strong>User:</strong> amiresaye6</p>
+                    <p><strong>Date:</strong> 2025-06-29 22:07:46</p>
+                </div>
             </Modal>
-
-            <Modal
-                title="Edit Menu Item"
-                open={isEditModalVisible}
-                onOk={handleUpdateItem}
-                onCancel={() => {
-                    setIsEditModalVisible(false);
-                    form.resetFields();
-                }}
-            >
-                <Form form={form} layout="vertical">
-                    <Form.Item
-                        name="nameEn"
-                        label="Name (English)"
-                        rules={[{ required: true, message: 'Please enter English name' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="nameAr"
-                        label="Name (Arabic)"
-                        rules={[{ required: true, message: 'Please enter Arabic name' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="description"
-                        label="Description"
-                        rules={[{ required: true, message: 'Please enter description' }]}
-                    >
-                        <Input.TextArea />
-                    </Form.Item>
-                    <Form.Item
-                        name="mainImageUrl"
-                        label="Image URL"
-                        rules={[{ required: true, message: 'Please enter image URL' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="price"
-                        label="Price"
-                        rules={[{ required: true, message: 'Please enter price' }]}
-                    >
-                        <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
-                    </Form.Item>
-                    <Form.Item
-                        name="subCategoryId"
-                        label="Subcategory"
-                        rules={[{ required: true, message: 'Please select a subcategory' }]}
-                    >
-                        <Select
-                            placeholder="Select a subcategory"
-                            options={subcategories.map((subcat) => ({
-                                value: subcat.id,
-                                label: subcat.nameEn,
-                            }))}
-                        />
-                    </Form.Item>
-                </Form>
-            </Modal>
-
-            <ConfirmModal
-                open={isConfirmModalVisible}
-                onConfirm={handleConfirmDeactivate}
-                onCancel={() => setIsConfirmModalVisible(false)}
-                title="Deactivate Menu Item"
-                content={`Are you sure you want to deactivate ${selectedItem?.nameEn}?`}
-                isDanger
-            />
         </div>
     );
 };

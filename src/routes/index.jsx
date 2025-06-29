@@ -19,6 +19,10 @@ import ManageStorePage from '../pages/VendorProfilePage';
 import AdminVendorDetailsPage from '../pages/AdminVendorDetailsPage';
 import UserDetailsPage from '../pages/UserDetailsPage';
 import OrderDetailsPage from '../pages/OrderDetailsPage';
+import VendorMenuItemAddPage from '../pages/VendorMenuItemAddPage';
+import VendorMenuItemPage from '../pages/VendorMenuItemPage';
+import SecuritySettingsPage from '../pages/SecuritySettingsPage';
+import SettingsPage from '../pages/SettingsPage';
 
 const AppRoutes = () => (
     <Routes>
@@ -135,6 +139,22 @@ const AppRoutes = () => (
                 }
             />
             <Route
+                path="/vendor/menu/add"
+                element={
+                    <ProtectedRoute>
+                        <VendorMenuItemAddPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/vendor/menu/item/:id"
+                element={
+                    <ProtectedRoute>
+                        <VendorMenuItemPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
                 path="/vendor/orders"
                 element={
                     <ProtectedRoute>
@@ -152,6 +172,22 @@ const AppRoutes = () => (
                 }
             />
 
+            <Route
+                path="/settings"
+                element={
+                    <ProtectedRoute>
+                        <SettingsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/settings/security"
+                element={
+                    <ProtectedRoute>
+                        <SecuritySettingsPage />
+                    </ProtectedRoute>
+                }
+            />
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
         </Route>

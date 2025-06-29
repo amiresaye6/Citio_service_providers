@@ -10,14 +10,15 @@ import {
     UserOutlined,
     CreditCardOutlined,
     IdcardOutlined,
-    BookOutlined
+    BookOutlined,
+    PlusCircleOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../context/DirectionContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSelector } from 'react-redux';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const { Sider } = Layout;
 
@@ -149,6 +150,16 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
             label: t('sidebar.vendorMenu'),
             onClick: () => {
                 navigate('/vendor/menu');
+                if (isMobile) onClose();
+            },
+            type: 'vendor',
+        },
+        {
+            key: '15',
+            icon: <PlusCircleOutlined />,
+            label: t('sidebar.createProduct'),
+            onClick: () => {
+                navigate('/vendor/menu/add');
                 if (isMobile) onClose();
             },
             type: 'vendor',
