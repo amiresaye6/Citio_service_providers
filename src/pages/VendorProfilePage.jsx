@@ -1,23 +1,10 @@
-import React, { useState } from 'react';
-import { Card, Form, Input, Button, Upload, Row, Col, message, Divider, Tabs, Avatar, Switch, Tooltip, Space, Descriptions } from 'antd';
-import { UploadOutlined, EditOutlined, SaveOutlined, CloseOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Card, Form, Input, Button, Upload, Row, Col, message, Divider, Tabs, Avatar, Spin } from 'antd';
+import { UploadOutlined, EditOutlined, SaveOutlined, CloseOutlined, LoadingOutlined } from '@ant-design/icons';
 import PageHeader from '../components/common/PageHeader';
-
-// Mock vendor
-const mockVendor = {
-    id: 'vnd-001',
-    businessName: 'Acme Fresh Foods',
-    email: 'contact@acmefoods.com',
-    phone: '+1 800 123 4567',
-    address: '123 Market Street, San Francisco, CA 94103',
-    logoUrl: 'https://i.pravatar.cc/150?img=40',
-    bannerUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?fit=crop&w=1200&q=80',
-    status: 'active',
-    allowOnlineOrders: true,
-    timezone: 'America/Los_Angeles',
-    openingHours: '8:00 AM - 10:00 PM',
-    about: 'We deliver fresh groceries and organic food at your doorstep.',
-};
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchVendorDetails, updateVendorProfile, clearUpdateErrors } from '../redux/slices/vendorsSlice';
+import { Link } from 'react-router-dom';
 
 const InfoRow = ({ label, value, editable, children }) => (
     <Row align="middle" className="mb-2">
@@ -29,59 +16,127 @@ const InfoRow = ({ label, value, editable, children }) => (
 );
 
 const VendorProfilePage = () => {
-    const [vendor, setVendor] = useState(mockVendor);
     const [editMode, setEditMode] = useState(false);
     const [form] = Form.useForm();
     const [logoFile, setLogoFile] = useState(null);
     const [bannerFile, setBannerFile] = useState(null);
-    const [tabKey, setTabKey] = useState('profile');
-    const [loading, setLoading] = useState(false);
+
+    const dispatch = useDispatch();
+    const {
+        vendorDetails,
+        loading: fetchLoading,
+        updateLoading,
+        error,
+        updateError
+    } = useSelector(state => state.vendors);
 
     // Upload handlers
     const handleLogoUpload = ({ file }) => {
         setLogoFile(file);
         return false;
     };
+
     const handleBannerUpload = ({ file }) => {
         setBannerFile(file);
         return false;
     };
 
-    // Save Profile
-    const handleSaveProfile = (values) => {
-        setLoading(true);
-        setTimeout(() => {
-            setVendor({
-                ...vendor,
-                ...values,
-                logoUrl: logoFile ? URL.createObjectURL(logoFile) : vendor.logoUrl,
-                bannerUrl: bannerFile ? URL.createObjectURL(bannerFile) : vendor.bannerUrl,
-            });
-            setEditMode(false);
-            setLogoFile(null);
-            setBannerFile(null);
-            setLoading(false);
-            message.success('Profile updated (mock)');
-        }, 900);
-    };
+    // Fetch vendor details on component mount
+    useEffect(() => {
+        dispatch(fetchVendorDetails());
+    }, [dispatch]);
 
-    // Toggle Online Orders
-    const handleToggleOnlineOrders = (checked) => {
-        setVendor({ ...vendor, allowOnlineOrders: checked });
-        message.info(`Online orders ${checked ? 'enabled' : 'disabled'} (mock)`);
+    // Clear any update errors when component unmounts
+    useEffect(() => {
+        return () => {
+            dispatch(clearUpdateErrors());
+        };
+    }, [dispatch]);
+
+    // Show error message if update fails
+    useEffect(() => {
+        if (updateError) {
+            let errorMessage = "Failed to update profile";
+            if (typeof updateError === 'string') {
+                errorMessage = updateError;
+            } else if (updateError.message) {
+                errorMessage = updateError.message;
+            }
+            message.error(errorMessage);
+        }
+    }, [updateError]);
+
+    // Save Profile
+    const handleSaveProfile = (formValues) => {
+        // Dispatch the update action with form values and files
+        dispatch(updateVendorProfile({
+            formValues: {
+                userName: formValues.fullName,
+                businessName: formValues.businessName,
+            },
+            logoFile,
+            bannerFile
+        })).unwrap()
+            .then(() => {
+                setEditMode(false);
+                setLogoFile(null);
+                setBannerFile(null);
+                message.success('Profile updated successfully');
+                // Refresh profile data
+                dispatch(fetchVendorDetails());
+            })
+            .catch(() => {
+                // Error is handled by the useEffect that watches updateError
+            });
     };
 
     // Fill form when entering edit mode
-    React.useEffect(() => {
-        if (editMode)
-            form.setFieldsValue(vendor);
-    }, [editMode, vendor, form]);
+    useEffect(() => {
+        if (editMode && vendorDetails) {
+            form.setFieldsValue({
+                businessName: vendorDetails.businessName,
+                fullName: vendorDetails.fullName,
+                businessType: vendorDetails.businessType,
+                taxNumber: vendorDetails.taxNumber,
+                email: vendorDetails.email,
+            });
+        }
+    }, [editMode, vendorDetails, form]);
 
-    // Banner and logo display
-    const logoUrl = logoFile ? URL.createObjectURL(logoFile) : vendor.logoUrl;
-    const bannerUrl = bannerFile ? URL.createObjectURL(bannerFile) : vendor.bannerUrl;
+    // Banner and logo display - use data from API
+    const logoUrl = logoFile
+        ? URL.createObjectURL(logoFile)
+        : (vendorDetails?.profilePictureUrl ? `https://service-provider.runasp.net${vendorDetails.profilePictureUrl}` : '');
 
-    // Responsive details view with edit in drawer/card
+    const bannerUrl = bannerFile
+        ? URL.createObjectURL(bannerFile)
+        : (vendorDetails?.coverImageUrl ? `https://service-provider.runasp.net${vendorDetails.coverImageUrl}` : '');
+
+
+    if (fetchLoading) {
+        return (
+            <div className="p-4 md:p-8 min-h-screen flex justify-center items-center">
+                <Spin indicator={<LoadingOutlined style={{ fontSize: 40 }} spin />} tip="Loading profile..." />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-4 md:p-8 min-h-screen">
+                <PageHeader title="Store Profile" subtitle="Manage your business account and store appearance" />
+                <Card className="shadow-lg mb-8 rounded-lg overflow-hidden">
+                    <div className="p-8 text-center">
+                        <p className="text-red-500 mb-4">Failed to load profile data</p>
+                        <Button type="primary" onClick={() => dispatch(fetchVendorDetails())}>
+                            Try Again
+                        </Button>
+                    </div>
+                </Card>
+            </div>
+        );
+    }
+
     return (
         <div className="p-4 md:p-8 min-h-screen">
             <PageHeader
@@ -92,11 +147,15 @@ const VendorProfilePage = () => {
             <Card className="shadow-lg mb-8 rounded-lg overflow-hidden">
                 {/* Banner */}
                 <div className="relative w-full mb-8" style={{ borderRadius: 8, overflow: 'hidden' }}>
-                    <img
-                        src={bannerUrl}
-                        alt="Store Banner"
-                        style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 8 }}
-                    />
+                    <div style={{ height: 180, background: '#f5f5f5', width: '100%' }}>
+                        {bannerUrl && (
+                            <img
+                                src={bannerUrl}
+                                alt="Store Banner"
+                                style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 8 }}
+                            />
+                        )}
+                    </div>
                     {editMode && (
                         <Upload
                             accept="image/*"
@@ -141,41 +200,52 @@ const VendorProfilePage = () => {
                     </Col>
                     <Col xs={24} md={16}>
                         <div>
-                            <div className="text-2xl font-bold mb-1">{vendor.businessName}</div>
-                            <div className="text-gray-500 mb-1">{vendor.email}</div>
-                            <div className="text-gray-500">{vendor.phone}</div>
-                            <div className="text-gray-400 text-xs mt-1">{vendor.address}</div>
-                            <div className="mt-2">
+                            <div className="text-2xl font-bold mb-1">{vendorDetails.businessName}</div>
+                            <div className="text-gray-500 mb-1">{vendorDetails.email}</div>
+                            <div className="text-gray-500">{vendorDetails.fullName}</div>
+                            <div className="text-gray-400 text-xs mt-1">{vendorDetails.businessType}</div>
+                            <div className="mt-2 flex gap-2">
                                 <span
                                     style={{
                                         display: 'inline-block',
-                                        background: vendor.status === "active" ? '#e6fffb' : '#fff1f0',
-                                        color: vendor.status === "active" ? '#13c2c2' : '#cf1322',
+                                        background: vendorDetails.isApproved ? '#e6fffb' : '#fff1f0',
+                                        color: vendorDetails.isApproved ? '#13c2c2' : '#cf1322',
                                         borderRadius: 8,
                                         padding: '2px 12px',
                                         fontWeight: 500,
                                         fontSize: 13
                                     }}
                                 >
-                                    {vendor.status === "active" ? 'Active' : 'Inactive'}
+                                    {vendorDetails.isApproved ? 'Approved' : 'Not Approved'}
+                                </span>
+                                <span
+                                    style={{
+                                        display: 'inline-block',
+                                        background: '#fafafa',
+                                        color: '#333',
+                                        borderRadius: 8,
+                                        padding: '2px 12px',
+                                        fontWeight: 500,
+                                        fontSize: 13
+                                    }}
+                                >
+                                    Rating: {vendorDetails.rating?.toFixed(1) || '0.0'} ({vendorDetails.numOfReviews || 0} reviews)
                                 </span>
                             </div>
                         </div>
                     </Col>
                     <Col xs={24} md={4} className="text-right">
                         {!editMode ? (
-                            <Tooltip title="Edit Profile">
-                                <Button
-                                    icon={<EditOutlined />}
-                                    type="primary"
-                                    onClick={() => setEditMode(true)}
-                                    size="middle"
-                                >
-                                    Edit Profile
-                                </Button>
-                            </Tooltip>
+                            <Button
+                                icon={<EditOutlined />}
+                                type="primary"
+                                onClick={() => setEditMode(true)}
+                                size="middle"
+                            >
+                                Edit Profile
+                            </Button>
                         ) : (
-                            <Space>
+                            <div className="flex gap-2 justify-end">
                                 <Button
                                     icon={<CloseOutlined />}
                                     onClick={() => {
@@ -191,182 +261,121 @@ const VendorProfilePage = () => {
                                     type="primary"
                                     form="vendor-profile-form"
                                     htmlType="submit"
-                                    loading={loading}
+                                    loading={updateLoading}
                                 >
                                     Save
                                 </Button>
-                            </Space>
+                            </div>
                         )}
                     </Col>
                 </Row>
 
                 <Divider />
 
-                <Tabs activeKey={tabKey} onChange={setTabKey} tabBarGutter={40}>
-                    <Tabs.TabPane tab="Profile Information" key="profile">
-                        {!editMode ? (
-                            // View mode with Descriptions/Rows
-                            <Descriptions
-                                bordered
-                                column={{ xs: 1, sm: 2, md: 2, lg: 2 }}
-                                size="middle"
-                                className="mb-4"
-                            >
-                                <Descriptions.Item label="Business Name">{vendor.businessName}</Descriptions.Item>
-                                <Descriptions.Item label="Status">
+                {!editMode ? (
+                    // View mode with better styling
+                    <div className="px-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                            <div>
+                                <div className="text-gray-500 text-sm mb-1">Business Name</div>
+                                <div className="text-lg">{vendorDetails.businessName || '—'}</div>
+                            </div>
+                            <div>
+                                <div className="text-gray-500 text-sm mb-1">Status</div>
+                                <div>
                                     <span style={{
-                                        color: vendor.status === "active" ? "#13c2c2" : "#cf1322",
+                                        color: vendorDetails.isApproved ? "#13c2c2" : "#cf1322",
                                         fontWeight: 500
                                     }}>
-                                        {vendor.status}
+                                        {vendorDetails.isApproved ? "Approved" : "Not Approved"}
                                     </span>
-                                </Descriptions.Item>
-                                <Descriptions.Item label="Contact Email">{vendor.email}</Descriptions.Item>
-                                <Descriptions.Item label="Phone">{vendor.phone}</Descriptions.Item>
-                                <Descriptions.Item label="Timezone">{vendor.timezone}</Descriptions.Item>
-                                <Descriptions.Item label="Opening Hours">{vendor.openingHours}</Descriptions.Item>
-                                <Descriptions.Item label="Address" span={2}>{vendor.address}</Descriptions.Item>
-                                <Descriptions.Item label="About" span={2}>{vendor.about}</Descriptions.Item>
-                                <Descriptions.Item label="Online Orders" span={2}>
-                                    <Switch checked={vendor.allowOnlineOrders} disabled style={{ marginRight: 8 }} />
-                                    <span>{vendor.allowOnlineOrders ? 'Enabled' : 'Disabled'}</span>
-                                </Descriptions.Item>
-                            </Descriptions>
-                        ) : (
-                            // Edit mode
-                            <Form
-                                form={form}
-                                id="vendor-profile-form"
-                                layout="vertical"
-                                initialValues={vendor}
-                                onFinish={handleSaveProfile}
-                                style={{ maxWidth: 700, margin: '0 auto' }}
-                            >
-                                <InfoRow label="Business Name" editable>
-                                    <Form.Item
-                                        name="businessName"
-                                        noStyle
-                                        rules={[{ required: true, message: 'Enter your business name' }]}
-                                    >
-                                        <Input placeholder="Your business name" />
-                                    </Form.Item>
-                                </InfoRow>
-                                <InfoRow label="Contact Email" editable>
-                                    <Form.Item
-                                        name="email"
-                                        noStyle
-                                        rules={[
-                                            { required: true, message: 'Enter contact email' },
-                                            { type: 'email', message: 'Invalid email address' }
-                                        ]}
-                                    >
-                                        <Input placeholder="Contact email" />
-                                    </Form.Item>
-                                </InfoRow>
-                                <InfoRow label="Phone" editable>
-                                    <Form.Item
-                                        name="phone"
-                                        noStyle
-                                        rules={[{ required: true, message: 'Enter phone number' }]}
-                                    >
-                                        <Input placeholder="Phone number" />
-                                    </Form.Item>
-                                </InfoRow>
-                                <InfoRow label="Address" editable>
-                                    <Form.Item
-                                        name="address"
-                                        noStyle
-                                        rules={[{ required: true, message: 'Enter address' }]}
-                                    >
-                                        <Input placeholder="Business address" />
-                                    </Form.Item>
-                                </InfoRow>
-                                <InfoRow label="Timezone" editable>
-                                    <Form.Item name="timezone" noStyle>
-                                        <Input placeholder="e.g. America/Los_Angeles" />
-                                    </Form.Item>
-                                </InfoRow>
-                                <InfoRow label="Opening Hours" editable>
-                                    <Form.Item name="openingHours" noStyle>
-                                        <Input placeholder="e.g. 8:00 AM - 10:00 PM" />
-                                    </Form.Item>
-                                </InfoRow>
-                                <InfoRow label="About" editable>
-                                    <Form.Item name="about" noStyle>
-                                        <Input.TextArea rows={2} placeholder="Describe your business..." />
-                                    </Form.Item>
-                                </InfoRow>
-                                <InfoRow label="Online Orders" editable>
-                                    <Form.Item name="allowOnlineOrders" valuePropName="checked" noStyle>
-                                        <Switch onChange={handleToggleOnlineOrders} />
-                                    </Form.Item>
-                                </InfoRow>
-                            </Form>
-                        )}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab="Security" key="security">
-                        <Card
-                            bordered={false}
-                            style={{ maxWidth: 500, margin: '0 auto', border: "2px solid #6a7282" }}
-                        >
-                            <Form layout="vertical" onFinish={() => message.success('Password changed (mock)')}>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-gray-500 text-sm mb-1">Full Name</div>
+                                <div className="text-lg">{vendorDetails.fullName || '—'}</div>
+                            </div>
+                            <div>
+                                <div className="text-gray-500 text-sm mb-1">Email</div>
+                                <div className="text-lg">{vendorDetails.email || '—'}</div>
+                            </div>
+                            <div>
+                                <div className="text-gray-500 text-sm mb-1">Business Type</div>
+                                <div className="text-lg">{vendorDetails.businessType || '—'}</div>
+                            </div>
+                            <div>
+                                <div className="text-gray-500 text-sm mb-1">Tax Number</div>
+                                <div className="text-lg">{vendorDetails.taxNumber || '—'}</div>
+                            </div>
+                            <div>
+                                <div className="text-gray-500 text-sm mb-1">Rating</div>
+                                <div className="text-lg">
+                                    {vendorDetails.rating?.toFixed(1) || '0.0'} ({vendorDetails.numOfReviews || 0} reviews)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex justify-end">
+                            <Link type="primary" to='/settings/security'>
+                                Security Settings
+                            </Link>
+                        </div>
+                    </div>
+                ) : (
+                    // Edit mode with improved form layout
+                    <Form
+                        form={form}
+                        id="vendor-profile-form"
+                        layout="vertical"
+                        onFinish={handleSaveProfile}
+                        className="px-4"
+                    >
+                        <Row gutter={24}>
+                            <Col xs={24} md={12}>
                                 <Form.Item
-                                    name="oldPassword"
-                                    label="Current Password"
-                                    rules={[{ required: true, message: 'Enter current password' }]}
+                                    label="Business Name"
+                                    name="businessName"
+                                    rules={[{ required: true, message: 'Enter your business name' }]}
                                 >
-                                    <Input.Password
-                                        placeholder="Current password"
-                                        iconRender={visible => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
-                                    />
+                                    <Input placeholder="Your business name" />
                                 </Form.Item>
+                            </Col>
+                            <Col xs={24} md={12}>
                                 <Form.Item
-                                    name="newPassword"
-                                    label="New Password"
-                                    rules={[
-                                        { required: true, message: 'Enter new password' },
-                                        { min: 6, message: 'Password should be at least 6 characters' }
-                                    ]}
+                                    label="Full Name"
+                                    name="fullName"
+                                    rules={[{ required: true, message: 'Enter your full name' }]}
                                 >
-                                    <Input.Password
-                                        placeholder="New password"
-                                        iconRender={visible => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
-                                    />
+                                    <Input placeholder="Your full name" />
                                 </Form.Item>
+                            </Col>
+                            <Col xs={24} md={12}>
                                 <Form.Item
-                                    name="confirmPassword"
-                                    label="Confirm New Password"
-                                    dependencies={['newPassword']}
-                                    rules={[
-                                        { required: true, message: 'Confirm your new password' },
-                                        ({ getFieldValue }) => ({
-                                            validator(_, value) {
-                                                if (!value || getFieldValue('newPassword') === value) {
-                                                    return Promise.resolve();
-                                                }
-                                                return Promise.reject('Passwords do not match!');
-                                            },
-                                        }),
-                                    ]}
+                                    label="Email"
+                                    name="email"
                                 >
-                                    <Input.Password
-                                        placeholder="Confirm new password"
-                                        iconRender={visible => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
-                                    />
+                                    <Input placeholder="Contact email" disabled />
                                 </Form.Item>
-                                <Form.Item>
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                        icon={<LockOutlined />}
-                                    >
-                                        Change Password
-                                    </Button>
+                            </Col>
+                            <Col xs={24} md={12}>
+                                <Form.Item
+                                    label="Business Type"
+                                    name="businessType"
+                                >
+                                    <Input placeholder="Business type" disabled />
                                 </Form.Item>
-                            </Form>
-                        </Card>
-                    </Tabs.TabPane>
-                </Tabs>
+                            </Col>
+                            <Col xs={24} md={12}>
+                                <Form.Item
+                                    label="Tax Number"
+                                    name="taxNumber"
+                                >
+                                    <Input placeholder="Tax number" disabled />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </Form>
+                )}
             </Card>
         </div>
     );

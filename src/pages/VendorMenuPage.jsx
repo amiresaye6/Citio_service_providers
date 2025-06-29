@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Table, Avatar, Tag, Dropdown, Menu, Tooltip, Card } from 'antd';
+import { Button, Input, Table, Avatar, Tag, Dropdown, Menu, Tooltip, Card, Modal } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchVendorMenu, fetchSubcategories, deactivateMenuItem, clearError } from '../redux/slices/vendorsSlice';
 import { useNavigate } from 'react-router-dom';
-import { MoreOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import {
+    MoreOutlined,
+    PlusOutlined,
+    InfoCircleOutlined,
+    ExclamationCircleOutlined,
+    WarningOutlined
+} from '@ant-design/icons';
 import PageHeader from '../components/common/PageHeader';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ToastNotifier from '../components/common/ToastNotifier';
@@ -19,6 +25,7 @@ const VendorMenuPage = () => {
     const [filteredItems, setFilteredItems] = useState([]);
     const [deactivatingId, setDeactivatingId] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < MOBILE_WIDTH);
+    const [confirmModal, setConfirmModal] = useState({ visible: false, itemId: null, itemName: '' });
     const vendorId = user?.id || localStorage.getItem("userId");
 
     useEffect(() => {
@@ -37,10 +44,10 @@ const VendorMenuPage = () => {
 
     useEffect(() => {
         if (!search) {
-            setFilteredItems(vendorMenu.items);
+            setFilteredItems(vendorMenu.items || []);
         } else {
             setFilteredItems(
-                vendorMenu.items.filter(
+                (vendorMenu.items || []).filter(
                     (item) =>
                         (item.nameEn?.toLowerCase().includes(search.toLowerCase()) || '') ||
                         (item.description?.toLowerCase().includes(search.toLowerCase()) || '') ||
@@ -57,9 +64,32 @@ const VendorMenuPage = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const handleDeactivate = (itemId) => {
+    // Show confirmation modal before deactivation
+    const showDeactivateConfirmation = (item) => {
+        setConfirmModal({
+            visible: true,
+            itemId: item.id,
+            itemName: item.nameEn
+        });
+    };
+
+    // Handle deactivation after confirmation
+    const handleDeactivate = () => {
+        const itemId = confirmModal.itemId;
         setDeactivatingId(itemId);
-        dispatch(deactivateMenuItem({ vendorId, menuItemId: itemId })).then((result) => {
+
+        // Close modal
+        setConfirmModal({ visible: false, itemId: null, itemName: '' });
+
+        // Add user information and timestamp to the deactivation log
+        const deactivateInfo = {
+            vendorId,
+            menuItemId: itemId,
+            deactivatedBy: 'amiresaye6',
+            deactivatedAt: '2025-06-29 22:07:46'
+        };
+
+        dispatch(deactivateMenuItem(deactivateInfo)).then((result) => {
             if (result.meta.requestStatus === 'fulfilled') {
                 ToastNotifier.success('Item Deactivated', `Menu item has been deactivated.`);
                 dispatch(fetchVendorMenu({ vendorId }));
@@ -76,7 +106,7 @@ const VendorMenuPage = () => {
             width: 80,
             render: (url, record) => (
                 <Avatar
-                    src={`https://service-provider.runasp.net${url}`}
+                    src={url ? `https://service-provider.runasp.net${url}` : null}
                     size={40}
                     shape="square"
                     alt={record.nameEn}
@@ -90,6 +120,8 @@ const VendorMenuPage = () => {
             dataIndex: 'nameEn',
             key: 'nameEn',
             render: (text) => <span style={{ fontWeight: 600 }}>{text}</span>,
+            ellipsis: true,
+            width: 180,
         },
         {
             title: 'Description',
@@ -103,14 +135,15 @@ const VendorMenuPage = () => {
                     </span>
                 </Tooltip>
             ),
-            width: 500,
+            width: 300,
         },
         {
             title: 'Price',
             dataIndex: 'price',
             key: 'price',
-            render: (price) => <span>${price?.toFixed(2)}</span>,
-            width: 150,
+            render: (price) => <span>${Number(price).toFixed(2)}</span>,
+            width: 120,
+            sorter: (a, b) => a.price - b.price,
         },
         {
             title: 'Category',
@@ -118,6 +151,10 @@ const VendorMenuPage = () => {
             key: 'categoryNameEn',
             render: (val) => <span style={{ color: '#555' }}>{val}</span>,
             width: 150,
+            filters: [...new Set((vendorMenu.items || []).map(item => item.categoryNameEn))]
+                .filter(Boolean)
+                .map(cat => ({ text: cat, value: cat })),
+            onFilter: (value, record) => record.categoryNameEn === value,
         },
         {
             title: 'Status',
@@ -130,6 +167,11 @@ const VendorMenuPage = () => {
                     <Tag color="green">Active</Tag>
                 ),
             width: 90,
+            filters: [
+                { text: 'Active', value: 'active' },
+                { text: 'Inactive', value: 'inactive' },
+            ],
+            onFilter: (value, record) => record.status === value,
         },
         {
             title: '',
@@ -149,8 +191,9 @@ const VendorMenuPage = () => {
                             </Menu.Item>
                             <Menu.Item
                                 key="deactivate"
-                                onClick={() => handleDeactivate(record.id)}
-                                disabled={record.status === 'inactive'}
+                                onClick={() => showDeactivateConfirmation(record)}
+                                disabled={record.status === 'inactive' || deactivatingId === record.id}
+                                icon={<WarningOutlined />}
                                 danger
                             >
                                 Deactivate
@@ -158,75 +201,122 @@ const VendorMenuPage = () => {
                         </Menu>
                     }
                     trigger={['click']}
+                    placement="bottomRight"
                 >
-                    <Button icon={<MoreOutlined />} type="text" />
+                    <Button
+                        icon={<MoreOutlined />}
+                        type="text"
+                        loading={deactivatingId === record.id}
+                    />
                 </Dropdown>
             ),
             fixed: 'right'
         },
     ];
 
-    // Mobile Card rendering
+    // Mobile Card rendering with improved layout
     const renderMobileCards = () => (
         <div className="flex flex-col gap-4">
-            {filteredItems.map((item) => (
-                <Card
-                    key={item.id}
-                    bodyStyle={{ padding: 12, display: 'flex', alignItems: 'flex-start', gap: 12 }}
-                    style={{ borderRadius: 12, boxShadow: '0 1px 8px #0001' }}
+            {filteredItems.length > 0 ? (
+                filteredItems.map((item) => (
+                    <Card
+                        key={item.id}
+                        bodyStyle={{ padding: 12, display: 'flex', alignItems: 'flex-start', gap: 12 }}
+                        style={{ borderRadius: 12, boxShadow: '0 1px 8px #0001' }}
+                    >
+                        <Avatar
+                            src={item.mainImageUrl ? `https://service-provider.runasp.net${item.mainImageUrl}` : null}
+                            size={64}
+                            shape="square"
+                            alt={item.nameEn}
+                            style={{
+                                objectFit: 'cover',
+                                flexShrink: 0,
+                                border: '1px solid #eee',
+                                borderRadius: '8px'
+                            }}
+                        />
+                        <div style={{ flex: 1 }}>
+                            <div className="flex justify-between items-start">
+                                <div style={{ fontWeight: 600, fontSize: 16 }}>{item.nameEn}</div>
+                                <Tag
+                                    style={{
+                                        borderRadius: 8,
+                                        fontSize: 12
+                                    }}
+                                    color={item.status === 'inactive' ? 'red' : 'green'}
+                                >
+                                    {item.status === 'inactive' ? 'Inactive' : 'Active'}
+                                </Tag>
+                            </div>
+                            <div style={{ color: '#888', fontSize: 13, marginBottom: 4 }}>{item.categoryNameEn}</div>
+                            <div style={{ color: '#555', marginBottom: 8, fontSize: 13, lineHeight: 1.4 }}>
+                                {item.description && item.description.length > 100
+                                    ? item.description.slice(0, 100) + "..."
+                                    : item.description}
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span style={{
+                                    fontWeight: 600,
+                                    color: '#1a1a1a',
+                                    fontSize: '16px'
+                                }}>
+                                    ${Number(item.price).toFixed(2)}
+                                </span>
+                                <div className="flex gap-2">
+                                    <Button
+                                        size="small"
+                                        type="primary"
+                                        onClick={() => navigate(`/vendor/menu/item/${item.id}`)}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        danger
+                                        disabled={item.status === 'inactive' || deactivatingId === item.id}
+                                        loading={deactivatingId === item.id}
+                                        onClick={() => showDeactivateConfirmation(item)}
+                                    >
+                                        Deactivate
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                ))
+            ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+                    <ExclamationCircleOutlined style={{ fontSize: 48, marginBottom: 16 }} />
+                    <p>No menu items found</p>
+                    {search && (
+                        <Button type="link" onClick={() => setSearch('')}>
+                            Clear search
+                        </Button>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+
+    // Empty state component
+    const renderEmptyState = () => (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+            <ExclamationCircleOutlined style={{ fontSize: 48, marginBottom: 16 }} />
+            <p className="mb-4">No menu items found</p>
+            {search ? (
+                <Button type="link" onClick={() => setSearch('')}>
+                    Clear search
+                </Button>
+            ) : (
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => navigate('/vendor/menu/add')}
                 >
-                    <Avatar
-                        src={`https://service-provider.runasp.net${item.mainImageUrl}`}
-                        size={54}
-                        shape="square"
-                        alt={item.nameEn}
-                        style={{ objectFit: 'cover', flexShrink: 0, border: '1px solid #eee' }}
-                    />
-                    <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600, fontSize: 16 }}>{item.nameEn}</div>
-                        <div style={{ color: '#888', fontSize: 13, marginBottom: 4 }}>{item.categoryNameEn}</div>
-                        <div style={{ color: '#555', marginBottom: 4 }}>
-                            {item.description && item.description.length > 60
-                                ? item.description.slice(0, 60) + "..."
-                                : item.description}
-                        </div>
-                        <div style={{ marginBottom: 4 }}>
-                            <span style={{ fontWeight: 500, color: '#1a1a1a' }}>${item.price?.toFixed(2)}</span>
-                            <Tag
-                                style={{
-                                    marginLeft: 10,
-                                    verticalAlign: 'middle',
-                                    fontSize: 12,
-                                    borderRadius: 8,
-                                }}
-                                color={item.status === 'inactive' ? 'red' : 'green'}
-                            >
-                                {item.status === 'inactive' ? 'Inactive' : 'Active'}
-                            </Tag>
-                        </div>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                            <Button
-                                size="small"
-                                type="primary"
-                                icon={<InfoCircleOutlined />}
-                                onClick={() => navigate(`/vendor/menu/item/${item.id}`)}
-                            >
-                                View & Edit
-                            </Button>
-                            <Button
-                                size="small"
-                                danger
-                                style={{ marginLeft: 4 }}
-                                disabled={item.status === 'inactive' || deactivatingId === item.id}
-                                loading={deactivatingId === item.id}
-                                onClick={() => handleDeactivate(item.id)}
-                            >
-                                Deactivate
-                            </Button>
-                        </div>
-                    </div>
-                </Card>
-            ))}
+                    Add Your First Menu Item
+                </Button>
+            )}
         </div>
     );
 
@@ -245,35 +335,73 @@ const VendorMenuPage = () => {
                     </Button>
                 }
             />
-            <div style={{ maxWidth: 340, marginBottom: 18 }}>
-                <Input.Search
-                    placeholder="Search menu item..."
-                    allowClear
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    style={{ borderRadius: 6 }}
-                />
+
+            {/* Search and filter section */}
+            <div className="mb-6">
+                <div className="flex flex-wrap gap-4 items-center">
+                    <div style={{ maxWidth: 340, width: '100%' }}>
+                        <Input.Search
+                            placeholder="Search menu items..."
+                            allowClear
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            style={{ borderRadius: 6 }}
+                        />
+                    </div>
+                    {!isMobile && (
+                        <div className="text-gray-500 text-sm">
+                            {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} found
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/* Main content section */}
             {loading ? (
                 <LoadingSpinner text="Loading menu items..." />
-            ) : isMobile ? (
-                renderMobileCards()
+            ) : filteredItems.length > 0 ? (
+                isMobile ? (
+                    renderMobileCards()
+                ) : (
+                    <Table
+                        dataSource={filteredItems}
+                        columns={columns}
+                        rowKey="id"
+                        scroll={{ x: 900, y: 520 }}
+                        pagination={{
+                            pageSize: 10,
+                            showSizeChanger: true,
+                            pageSizeOptions: ['10', '20', '50'],
+                            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                            position: ['bottomCenter'],
+                            showQuickJumper: true,
+                        }}
+                        rowClassName={record => record.status === 'inactive' ? 'bg-gray-50' : ''}
+                    />
+                )
             ) : (
-                <Table
-                    dataSource={filteredItems}
-                    columns={columns}
-                    rowKey="id"
-                    scroll={{ x: 900, y: 520 }}
-                    pagination={{
-                        pageSize: 10,
-                        showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50'],
-                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-                        position: ['bottomCenter'],
-                        showQuickJumper: true,
-                    }}
-                />
+                renderEmptyState()
             )}
+
+            {/* Confirmation modal for deactivation */}
+            <Modal
+                title={<div className="flex items-center gap-2"><WarningOutlined style={{ color: '#ff4d4f' }} /> Confirm Deactivation</div>}
+                open={confirmModal.visible}
+                onOk={handleDeactivate}
+                onCancel={() => setConfirmModal({ visible: false, itemId: null, itemName: '' })}
+                okText="Yes, Deactivate"
+                cancelText="Cancel"
+                okButtonProps={{ danger: true, loading: deactivatingId === confirmModal.itemId }}
+            >
+                <p>Are you sure you want to deactivate <strong>{confirmModal.itemName}</strong>?</p>
+                <p className="text-gray-500 text-sm mt-2">
+                    This will make the item unavailable for customers to order. This action will be logged.
+                </p>
+                <div className="bg-gray-50 p-3 rounded mt-3 text-xs">
+                    <p><strong>User:</strong> amiresaye6</p>
+                    <p><strong>Date:</strong> 2025-06-29 22:07:46</p>
+                </div>
+            </Modal>
         </div>
     );
 };

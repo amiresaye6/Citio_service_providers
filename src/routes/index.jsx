@@ -21,6 +21,8 @@ import UserDetailsPage from '../pages/UserDetailsPage';
 import OrderDetailsPage from '../pages/OrderDetailsPage';
 import VendorMenuItemAddPage from '../pages/VendorMenuItemAddPage';
 import VendorMenuItemPage from '../pages/VendorMenuItemPage';
+import SecuritySettingsPage from '../pages/SecuritySettingsPage';
+import SettingsPage from '../pages/SettingsPage';
 
 const AppRoutes = () => (
     <Routes>
@@ -170,6 +172,22 @@ const AppRoutes = () => (
                 }
             />
 
+            <Route
+                path="/settings"
+                element={
+                    <ProtectedRoute>
+                        <SettingsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/settings/security"
+                element={
+                    <ProtectedRoute>
+                        <SecuritySettingsPage />
+                    </ProtectedRoute>
+                }
+            />
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
         </Route>

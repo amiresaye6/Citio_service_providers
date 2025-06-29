@@ -53,20 +53,65 @@ export const approveVendor = createAsyncThunk(
     }
 );
 
+// Fetch vendor details
 export const fetchVendorDetails = createAsyncThunk(
     'vendors/fetchVendorDetails',
-    async (vendorId, { rejectWithValue }) => {
+    async (_, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_BASE_URL}/Vendors/${vendorId}`, {
-                headers: {
-                    accept: '*/*',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axios.get(`${API_BASE_URL}/Vendors/my-profile`,
+                {
+                    headers: {
+                        accept: 'text/plain',
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Failed to fetch vendor details');
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+// Update vendor profile
+export const updateVendorProfile = createAsyncThunk(
+    'vendors/updateVendorProfile',
+    async (data, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const { formValues, logoFile, bannerFile } = data;
+
+            // Create FormData for multipart/form-data request
+            const formData = new FormData();
+
+            // Add form fields
+            formData.append('UserName', formValues.userName || '');
+            formData.append('BusinessName', formValues.businessName || '');
+
+            // Add files if present
+            if (logoFile) {
+                formData.append('ProfilePictureUrl', logoFile);
+            }
+
+            if (bannerFile) {
+                formData.append('CoverImageUrl', bannerFile);
+            }
+
+            const response = await axios.put(
+                `${API_BASE_URL}/Vendors/update-profile`,
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -368,6 +413,36 @@ export const fetchVendorRevenueByPaymentMethod = createAsyncThunk(
     }
 );
 
+// Update vendor password action
+export const updateVendorPassword = createAsyncThunk(
+    'vendors/updateVendorPassword',
+    async (passwordData, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `${API_BASE_URL}/Vendors/change-password`,
+                {
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+
+
+
 const vendorsSlice = createSlice({
     name: 'vendors',
     initialState: {
@@ -379,7 +454,7 @@ const vendorsSlice = createSlice({
             hasPreviousPage: false,
             hasNextPage: false,
         },
-        vendorDetails: null,
+        vendorDetails: {},
         vendorMenu: {
             items: [],
         },
@@ -410,6 +485,8 @@ const vendorsSlice = createSlice({
         dashboard: null,
         loading: false,
         error: null,
+        updateLoading: false,
+        updateError: null,
     },
     reducers: {
         clearError: (state) => {
@@ -424,6 +501,9 @@ const vendorsSlice = createSlice({
                 hasNextPage: false,
             };
             state.vendorOrdersError = null;
+        },
+        clearUpdateErrors: (state) => {
+            state.updateError = null;
         },
     },
     extraReducers: (builder) => {
@@ -673,8 +753,44 @@ const vendorsSlice = createSlice({
                 state.vendorRevenueByPaymentMethodLoading = false;
                 state.vendorRevenueByPaymentMethodError = action.payload;
             })
+            // Add these to your extraReducers in vendorsSlice
+            .addCase(updateVendorProfile.pending, (state) => {
+                state.updateLoading = true;
+                state.updateError = null;
+            })
+            .addCase(updateVendorProfile.fulfilled, (state, action) => {
+                state.updateLoading = false;
+                if (action.payload) {
+                    state.vendorDetails = {
+                        ...state.vendorDetails,
+                        ...action.payload
+                    };
+                }
+            })
+            .addCase(updateVendorProfile.rejected, (state, action) => {
+                state.updateLoading = false;
+                state.updateError = action.payload;
+            })
+            // Add these to your extraReducers in vendorsSlice
+            .addCase(updateVendorPassword.pending, (state) => {
+                state.updateLoading = true;
+                state.updateError = null;
+            })
+            .addCase(updateVendorPassword.fulfilled, (state) => {
+                state.updateLoading = false;
+                // No need to update state for password change
+            })
+            .addCase(updateVendorPassword.rejected, (state, action) => {
+                state.updateLoading = false;
+                state.updateError = action.payload;
+            })
     },
 });
 
-export const { clearError, clearVendorOrders } = vendorsSlice.actions;
+export const {
+    clearError,
+    clearVendorOrders,
+    clearUpdateErrors,
+} = vendorsSlice.actions;
+
 export default vendorsSlice.reducer;
