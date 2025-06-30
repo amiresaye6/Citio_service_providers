@@ -172,24 +172,6 @@ export const updateMenuItem = createAsyncThunk(
     }
 );
 
-export const deactivateMenuItem = createAsyncThunk(
-    'vendors/deactivateMenuItem',
-    async ({ vendorId, menuItemId }, { rejectWithValue }) => {
-        try {
-            const token = localStorage.getItem('token');
-            await axios.post(`${API_BASE_URL}/Vendors/${vendorId}/menu/${menuItemId}/deactivate`, null, {
-                headers: {
-                    accept: '*/*',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            return { vendorId, menuItemId };
-        } catch (error) {
-            return rejectWithValue(error.response?.data || 'Failed to deactivate menu item');
-        }
-    }
-);
-
 export const fetchVendorRatings = createAsyncThunk(
     'vendors/fetchVendorRatings',
     async ({ PageNumer = 1, PageSize = 10, SearchValue = '', SortColumn = '', SortDirection = '', Status = null }, { rejectWithValue }) => {
@@ -605,21 +587,6 @@ const vendorsSlice = createSlice({
                 );
             })
             .addCase(updateMenuItem.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
-            .addCase(deactivateMenuItem.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(deactivateMenuItem.fulfilled, (state, action) => {
-                state.loading = false;
-                const { menuItemId } = action.payload;
-                state.vendorMenu.items = state.vendorMenu.items.map((item) =>
-                    item.id === menuItemId ? { ...item, status: 'inactive' } : item
-                );
-            })
-            .addCase(deactivateMenuItem.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Table, Avatar, Tag, Dropdown, Menu, Tooltip, Card, Modal } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchVendorMenu, fetchSubcategories, deactivateMenuItem, clearError } from '../redux/slices/vendorsSlice';
+import { fetchVendorMenu, fetchSubcategories, clearError } from '../redux/slices/vendorsSlice';
 import { useNavigate } from 'react-router-dom';
 import {
     MoreOutlined,
@@ -13,6 +13,7 @@ import {
 import PageHeader from '../components/common/PageHeader';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ToastNotifier from '../components/common/ToastNotifier';
+import { deleteProduct } from '../redux/slices/productsSlice';
 
 const MOBILE_WIDTH = 768;
 
@@ -81,15 +82,7 @@ const VendorMenuPage = () => {
         // Close modal
         setConfirmModal({ visible: false, itemId: null, itemName: '' });
 
-        // Add user information and timestamp to the deactivation log
-        const deactivateInfo = {
-            vendorId,
-            menuItemId: itemId,
-            deactivatedBy: 'amiresaye6',
-            deactivatedAt: '2025-06-29 22:07:46'
-        };
-
-        dispatch(deactivateMenuItem(deactivateInfo)).then((result) => {
+        dispatch(deleteProduct(itemId)).then((result) => {
             if (result.meta.requestStatus === 'fulfilled') {
                 ToastNotifier.success('Item Deactivated', `Menu item has been deactivated.`);
                 dispatch(fetchVendorMenu({ vendorId }));
@@ -397,10 +390,6 @@ const VendorMenuPage = () => {
                 <p className="text-gray-500 text-sm mt-2">
                     This will make the item unavailable for customers to order. This action will be logged.
                 </p>
-                <div className="bg-gray-50 p-3 rounded mt-3 text-xs">
-                    <p><strong>User:</strong> amiresaye6</p>
-                    <p><strong>Date:</strong> 2025-06-29 22:07:46</p>
-                </div>
             </Modal>
         </div>
     );

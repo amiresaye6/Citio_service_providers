@@ -158,10 +158,8 @@ const VendorMenuItemAddPage = () => {
   // Check if we're loading
   const isLoading = loading || subcategoriesLoading;
 
-  // Rest of the component remains unchanged...
   return (
     <div className="p-6 min-h-screen ">
-      {/* Component JSX remains the same... */}
       <div className="flex items-center mb-6">
         <Button
           icon={<ArrowLeftOutlined />}

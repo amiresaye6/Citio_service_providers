@@ -157,7 +157,51 @@ export const deleteProduct = createAsyncThunk(
     }
 );
 
+// Async thunk for fetching product reviews
+export const fetchProductReviews = createAsyncThunk(
+    'products/fetchProductReviews',
+    async ({ productId, params = {} }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
 
+            // Build query parameters
+            const queryParams = new URLSearchParams();
+            if (params.pageNumber) queryParams.append('PageNumer', params.pageNumber); // Note the typo in API: "PageNumer"
+            if (params.pageSize) queryParams.append('PageSize', params.pageSize);
+            if (params.searchValue) queryParams.append('SearchValue', params.searchValue);
+            if (params.sortColumn) queryParams.append('SortColumn', params.sortColumn);
+            if (params.sortDirection) queryParams.append('SortDirection', params.sortDirection);
+            if (params.minRating) queryParams.append('MinRating', params.minRating);
+            if (params.maxRating) queryParams.append('MaxRating', params.maxRating);
+            if (params.dateFilter) queryParams.append('DateFilter', params.dateFilter);
+            if (params.status !== undefined) queryParams.append('Status', params.status);
+
+
+            if (params.paymentMethods && params.paymentMethods.length) {
+                params.paymentMethods.forEach(method => {
+                    queryParams.append('PaymentMethods', method);
+                });
+            }
+
+            const queryString = queryParams.toString();
+            const url = `${API_BASE_URL}/Products/${productId}/reviews${queryString ? `?${queryString}` : ''}`;
+
+            const response = await axios.get(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue({ detail: error.message });
+        }
+    }
+);
 // Initial state for the products slice
 const initialState = {
     product: null,
@@ -176,6 +220,15 @@ const initialState = {
     productsError: null,
     productDeleteLoading: false,
     productDeleteError: null,
+    productReviews: {
+        items: [],
+        pageNumber: 0,
+        totalPages: 0,
+        hasPreviousPage: false,
+        hasNextPage: false
+    },
+    productReviewsLoading: false,
+    productReviewsError: null,
 };
 
 // Create the products slice
@@ -204,6 +257,16 @@ const productsSlice = createSlice({
         },
         clearProductDeleteError: (state) => {
             state.productDeleteError = null;
+        },
+        clearProductReviews: (state) => {
+            state.productReviews = {
+                items: [],
+                pageNumber: 0,
+                totalPages: 0,
+                hasPreviousPage: false,
+                hasNextPage: false
+            };
+            state.productReviewsError = null;
         },
     },
     extraReducers: (builder) => {
@@ -260,7 +323,7 @@ const productsSlice = createSlice({
                 state.providerSubcategoriesLoading = false;
                 state.providerSubcategoriesError = action.payload;
             })
-            // Add these cases to extraReducers
+            // Handle delete product
             .addCase(deleteProduct.pending, (state) => {
                 state.productDeleteLoading = true;
                 state.productDeleteError = null;
@@ -278,6 +341,19 @@ const productsSlice = createSlice({
                 state.productDeleteLoading = false;
                 state.productDeleteError = action.payload;
             })
+            // handle get products reviews
+            .addCase(fetchProductReviews.pending, (state) => {
+                state.productReviewsLoading = true;
+                state.productReviewsError = null;
+            })
+            .addCase(fetchProductReviews.fulfilled, (state, action) => {
+                state.productReviewsLoading = false;
+                state.productReviews = action.payload;
+            })
+            .addCase(fetchProductReviews.rejected, (state, action) => {
+                state.productReviewsLoading = false;
+                state.productReviewsError = action.payload;
+            })
     },
 });
 
@@ -289,7 +365,8 @@ export const {
     clearProductData,
     clearProviderSubcategories,
     clearProductUpdateError,
-    clearProductDeleteError
+    clearProductDeleteError,
+    clearProductReviews
 } = productsSlice.actions;
 
 // Export reducer

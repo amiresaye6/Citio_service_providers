@@ -1,3 +1,4 @@
+import React from 'react'
 import { notification } from 'antd'
 import {
   CheckCircleOutlined,
@@ -6,14 +7,19 @@ import {
   WarningOutlined
 } from '@ant-design/icons'
 
-// Configure global settings for notifications
+// Ensure this is called only once (ideally outside component renders)
 notification.config({
   placement: 'topRight',
   duration: 4,
 })
 
 const ToastNotifier = {
-  success: (message, description = '', duration = 4, icon = <CheckCircleOutlined style={{ color: '#52c41a' }} />) => {
+  success: (
+    message,
+    description = '',
+    duration = 4,
+    icon = <CheckCircleOutlined style={{ color: '#52c41a' }} />
+  ) => {
     notification.success({
       message,
       description,
@@ -22,7 +28,12 @@ const ToastNotifier = {
     })
   },
 
-  error: (message, description = '', duration = 6, icon = <CloseCircleOutlined style={{ color: '#ff4d4f' }} />) => {
+  error: (
+    message,
+    description = '',
+    duration = 6,
+    icon = <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+  ) => {
     notification.error({
       message,
       description,
@@ -31,7 +42,12 @@ const ToastNotifier = {
     })
   },
 
-  info: (message, description = '', duration = 4, icon = <InfoCircleOutlined style={{ color: '#1677ff' }} />) => {
+  info: (
+    message,
+    description = '',
+    duration = 4,
+    icon = <InfoCircleOutlined style={{ color: '#1677ff' }} />
+  ) => {
     notification.info({
       message,
       description,
@@ -40,7 +56,12 @@ const ToastNotifier = {
     })
   },
 
-  warning: (message, description = '', duration = 4, icon = <WarningOutlined style={{ color: '#faad14' }} />) => {
+  warning: (
+    message,
+    description = '',
+    duration = 4,
+    icon = <WarningOutlined style={{ color: '#faad14' }} />
+  ) => {
     notification.warning({
       message,
       description,
@@ -49,7 +70,6 @@ const ToastNotifier = {
     })
   },
 
-  // Method to close all currently open notifications
   closeAll: () => {
     notification.destroy()
   },
