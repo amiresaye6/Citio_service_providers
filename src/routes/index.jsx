@@ -3,6 +3,7 @@ import MainLayout from '../pages/dashboard/MainLayout';
 import NotFound from '../pages/errors/NotFound';
 import ProtectedRoute from '../components/common/ProtectedRoute';
 import LoginPage from '../pages/auth/Login';
+import VendorSignUpPage from '../pages/auth/VendorSignUpPage';
 
 import VendorOrdersPage from '../pages/VendorOrdersPage';
 import VendorMenuPage from '../pages/VendorMenuPage';
@@ -13,7 +14,6 @@ import VendorManagementPage from '../pages/VendorManagementPage';
 import VendorRatingsPage from '../pages/VendorRatingsPage';
 import AdminRatingsPage from '../pages/AdminRatingsPage';
 import AdminOrdersPage from '../pages/AdminOrdersPage';
-import VendorAccountPage from '../pages/VendorAccountPage';
 import VendorDashboardPage from '../pages/VendorDashboardPage';
 import ManageStorePage from '../pages/VendorProfilePage';
 import AdminVendorDetailsPage from '../pages/AdminVendorDetailsPage';
@@ -23,11 +23,13 @@ import VendorMenuItemAddPage from '../pages/VendorMenuItemAddPage';
 import VendorMenuItemPage from '../pages/VendorMenuItemPage';
 import SecuritySettingsPage from '../pages/SecuritySettingsPage';
 import SettingsPage from '../pages/SettingsPage';
+import VendorTransactionsPage from '../pages/VendorTransactionsPage';
 
 const AppRoutes = () => (
     <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<VendorSignUpPage />} />
 
         {/* Protected Routes */}
         <Route element={<MainLayout />}>
@@ -123,14 +125,6 @@ const AppRoutes = () => (
                 }
             />
             <Route
-                path="/vendor/profile"
-                element={
-                    <ProtectedRoute>
-                        <VendorAccountPage />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
                 path="/vendor/menu"
                 element={
                     <ProtectedRoute>
@@ -159,6 +153,14 @@ const AppRoutes = () => (
                 element={
                     <ProtectedRoute>
                         <VendorOrdersPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/vendor/transactions"
+                element={
+                    <ProtectedRoute>
+                        <VendorTransactionsPage />
                     </ProtectedRoute>
                 }
             />

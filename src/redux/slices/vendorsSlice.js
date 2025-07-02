@@ -421,9 +421,72 @@ export const updateVendorPassword = createAsyncThunk(
         }
     }
 );
+// get all transactions for my vendor.
+export const fetchVendorTransactions = createAsyncThunk(
+    'vendors/fetchVendorTransactions',
+    async (params = {}, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const queryParams = new URLSearchParams();
+            if (params.pageNumber) queryParams.append('PageNumer', params.pageNumber);
+            if (params.pageSize) queryParams.append('PageSize', params.pageSize);
+            if (params.sortColumn) queryParams.append('SortColumn', params.sortColumn);
+            if (params.sortDirection) queryParams.append('SortDirection', params.sortDirection);
+            if (params.dateFilter) queryParams.append('DateFilter', params.dateFilter);
+            if (params.status !== undefined) queryParams.append('Status', params.status);
+            if (params.paymentMethods && params.paymentMethods.length) {
+                params.paymentMethods.forEach(method => queryParams.append('PaymentMethods', method));
+            }
+            if (params.statuses && params.statuses.length) {
+                params.statuses.forEach(status => queryParams.append('Statuses', status));
+            }
+            const url = `${API_BASE_URL}/Vendors/vendor-transactions${queryParams.toString() ? `?${queryParams}` : ''}`;
+            const response = await axios.get(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            return response.data;
+        } catch (error) {
+            if (error.response) return rejectWithValue(error.response.data);
+            return rejectWithValue({ detail: error.message });
+        }
+    }
+);
 
+// Thunk to fetch vendor reviews
+export const fetchVendorReviews = createAsyncThunk(
+    'reviews/fetchVendorReviews',
+    async (params = {}, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            // Build query params
+            const queryParams = new URLSearchParams();
+            // if (params.vendorId) queryParams.append('vendorId', params.vendorId);
+            if (params.PageNumer) queryParams.append('PageNumer', params.PageNumer);
+            if (params.PageSize) queryParams.append('PageSize', params.PageSize);
+            if (params.SearchValue) queryParams.append('SearchValue', params.SearchValue);
+            if (params.SortColumn) queryParams.append('SortColumn', params.SortColumn);
+            if (params.SortDirection) queryParams.append('SortDirection', params.SortDirection);
+            if (params.MinRating) queryParams.append('MinRating', params.MinRating);
+            if (params.MaxRating) queryParams.append('MaxRating', params.MaxRating);
+            if (params.DateFilter) queryParams.append('DateFilter', params.DateFilter);
 
-
+            const url = `${API_BASE_URL}/Reviews/vendor-reviews${queryParams.toString() ? `?${queryParams}` : ''}`;
+            const response = await axios.get(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            return response.data;
+        } catch (error) {
+            if (error.response) return rejectWithValue(error.response.data);
+            return rejectWithValue({ detail: error.message });
+        }
+    }
+);
 
 const vendorsSlice = createSlice({
     name: 'vendors',
@@ -469,6 +532,22 @@ const vendorsSlice = createSlice({
         error: null,
         updateLoading: false,
         updateError: null,
+        vendorTransactions: {
+            items: [],
+            pageNumber: 0,
+            totalPages: 0,
+            hasPreviousPage: false,
+            hasNextPage: false,
+        },
+        vendorTransactionsLoading: false,
+        vendorTransactionsError: null,
+        vendorReviews: {
+            items: [],
+            pageNumber: 0,
+            totalPages: 0,
+            hasPreviousPage: false,
+            hasNextPage: false,
+        },
     },
     reducers: {
         clearError: (state) => {
@@ -486,6 +565,9 @@ const vendorsSlice = createSlice({
         },
         clearUpdateErrors: (state) => {
             state.updateError = null;
+        },
+        clearVendorTransactionsError: (state) => {
+            state.vendorTransactionsError = null;
         },
     },
     extraReducers: (builder) => {
@@ -738,19 +820,44 @@ const vendorsSlice = createSlice({
                 state.updateLoading = false;
                 state.updateError = action.payload;
             })
-            // Add these to your extraReducers in vendorsSlice
+            // handle pass change
             .addCase(updateVendorPassword.pending, (state) => {
                 state.updateLoading = true;
                 state.updateError = null;
             })
             .addCase(updateVendorPassword.fulfilled, (state) => {
                 state.updateLoading = false;
-                // No need to update state for password change
             })
             .addCase(updateVendorPassword.rejected, (state, action) => {
                 state.updateLoading = false;
                 state.updateError = action.payload;
             })
+            // get vendor transactions "money baby"
+            .addCase(fetchVendorTransactions.pending, (state) => {
+                state.vendorTransactionsLoading = true;
+                state.vendorTransactionsError = null;
+            })
+            .addCase(fetchVendorTransactions.fulfilled, (state, action) => {
+                state.vendorTransactionsLoading = false;
+                state.vendorTransactions = action.payload;
+            })
+            .addCase(fetchVendorTransactions.rejected, (state, action) => {
+                state.vendorTransactionsLoading = false;
+                state.vendorTransactionsError = action.payload;
+            })
+            // handle vendor reviews
+            .addCase(fetchVendorReviews.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchVendorReviews.fulfilled, (state, action) => {
+                state.loading = false;
+                state.vendorReviews = action.payload;
+            })
+            .addCase(fetchVendorReviews.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            });
     },
 });
 
@@ -758,6 +865,7 @@ export const {
     clearError,
     clearVendorOrders,
     clearUpdateErrors,
+    clearVendorTransactionsError,
 } = vendorsSlice.actions;
 
 export default vendorsSlice.reducer;

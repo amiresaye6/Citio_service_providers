@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../redux/slices/authSlice';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 const LoginPage = () => {
     const { t, i18n } = useTranslation('login');
@@ -20,16 +20,12 @@ const LoginPage = () => {
 
     const handleSubmit = async (values) => {
         try {
-            // eslint-disable-next-line no-unused-vars
             const result = await dispatch(login({
                 email: values.email,
                 password: values.password
             })).unwrap();
-            // On successful login, redirect to dashboard
-            // navigate('/');
             const from = location.state?.from?.pathname || '/';
             navigate(from, { replace: true });
-            // eslint-disable-next-line no-unused-vars
         } catch (error) {
             form.setFields([
                 {
@@ -47,27 +43,34 @@ const LoginPage = () => {
             style={{
                 minHeight: "100vh",
                 padding: "16px",
+                background: "linear-gradient(135deg, #f0f3ff 0%, #d5e6fb 100%)",
             }}
         >
-            <Col xs={22} sm={20} md={16} lg={10} xl={8}>
+            <Col xs={24} sm={16} md={12} lg={8}>
                 <Card
                     bordered={false}
                     style={{
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                        borderRadius: "8px",
+                        boxShadow: "0 6px 32px 0 rgba(0, 72, 255, 0.07)",
+                        borderRadius: "16px",
+                        padding: "32px 4vw 40px 4vw",
+                        background: "#fff",
                     }}
                     className={`login-card ${isRTL ? "rtl" : "ltr"}`}
                 >
-                    <img
-                        src="/citio.svg"
-                        alt="Citio Logo"
-                        style={{
-                            maxWidth: "180px",
-                            marginBottom: "20px",
-                            display: "block",
-                            margin: "0 auto"
-                        }}
-                    />
+                    <div style={{ textAlign: "center", marginBottom: 24 }}>
+                        <img
+                            src="/citio.svg"
+                            alt="Citio Logo"
+                            style={{
+                                maxWidth: "90px",
+                                marginBottom: "12px",
+                                display: "block",
+                                margin: "0 auto"
+                            }}
+                        />
+                        <Title level={3} style={{ marginBottom: 0 }}>{t("login.title") || "Welcome Back"}</Title>
+                        <Text type="secondary">{t("login.subtitle") || "Please log in to your account"}</Text>
+                    </div>
                     <Form
                         form={form}
                         name="login"
@@ -146,10 +149,20 @@ const LoginPage = () => {
                                 htmlType="submit"
                                 loading={loading}
                                 block
+                                size="large"
+                                style={{ borderRadius: 8 }}
                             >
                                 {t("login.submit")}
                             </Button>
                         </Form.Item>
+                        <div style={{ textAlign: "center", marginTop: 24 }}>
+                            <Text>
+                                {t("login.noAccount") || "Don't have an account?"}{' '}
+                                <Button type="link" onClick={() => navigate('/signup')} style={{ padding: 0 }}>
+                                    {t("login.signup") || "Register as Vendor"}
+                                </Button>
+                            </Text>
+                        </div>
                     </Form>
                 </Card>
             </Col>

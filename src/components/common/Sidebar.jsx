@@ -11,7 +11,8 @@ import {
     CreditCardOutlined,
     IdcardOutlined,
     BookOutlined,
-    PlusCircleOutlined
+    PlusCircleOutlined,
+    DollarOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -160,6 +161,16 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
             label: t('sidebar.createProduct'),
             onClick: () => {
                 navigate('/vendor/menu/add');
+                if (isMobile) onClose();
+            },
+            type: 'vendor',
+        },
+        {
+            key: '16',
+            icon: <DollarOutlined />,
+            label: t('sidebar.transactions'),
+            onClick: () => {
+                navigate('/vendor/transactions');
                 if (isMobile) onClose();
             },
             type: 'vendor',

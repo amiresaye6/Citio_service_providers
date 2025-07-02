@@ -258,6 +258,9 @@ const VendorDashboardPage = () => {
 
     const recentOrders = vendorOrders?.items || [];
 
+    console.log(recentOrders);
+    
+
     return (
         <div className="p-6 min-h-screen">
             <PageHeader

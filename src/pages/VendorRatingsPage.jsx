@@ -1,47 +1,55 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, Rate, Form } from 'antd';
+import { Card, Rate, Select, Row, Col, Typography, Empty, Spin, Button, Pagination } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    fetchVendorRatings,
-    flagRating,
-    respondToRating,
+    fetchVendorReviews,
     clearError,
 } from '../redux/slices/vendorsSlice';
 import PageHeader from '../components/common/PageHeader';
-import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
-import StatusTag from '../components/common/StatusTag';
-import ConfirmModal from '../components/common/ConfirmModal';
 import ToastNotifier from '../components/common/ToastNotifier';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { UserOutlined, CalendarOutlined, MessageOutlined } from '@ant-design/icons';
+import { Grid } from "antd";
+import TableWrapper from '../components/common/TableWrapper';
 
-const { TextArea } = Form.Item;
+const { Option } = Select;
+const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
+
+const ratingFilterOptions = [
+    { label: 'All Ratings', value: 'all' },
+    { label: '5 Stars Only', value: '5' },
+    { label: '4-5 Stars', value: '4-5' },
+    { label: '1-3 Stars', value: '1-3' },
+];
 
 const VendorRatingsPage = () => {
     const dispatch = useDispatch();
-    const { vendorRatings, loading, error } = useSelector((state) => state.vendors);
+    const { vendorReviews, loading, error } = useSelector((state) => state.vendors);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [searchValue, setSearchValue] = useState('');
     const [sortColumn, setSortColumn] = useState('');
     const [sortDirection, setSortDirection] = useState('');
-    const [statusFilter, setStatusFilter] = useState(null);
-    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
-    const [isResponseModalVisible, setIsResponseModalVisible] = useState(false);
-    const [selectedRating, setSelectedRating] = useState(null);
-    const [form] = Form.useForm();
+    const [minRating, setMinRating] = useState(null);
+    const [maxRating, setMaxRating] = useState(null);
+
+    const screens = useBreakpoint();
+    const isMobile = !screens.md;
 
     // Fetch ratings
     useEffect(() => {
-        dispatch(fetchVendorRatings({
+        dispatch(fetchVendorReviews({
             PageNumer: currentPage,
             PageSize: pageSize,
             SearchValue: searchValue,
             SortColumn: sortColumn,
             SortDirection: sortDirection,
-            Status: statusFilter,
+            MinRating: minRating,
+            MaxRating: maxRating,
         }));
-    }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, statusFilter]);
+    }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, minRating, maxRating]);
 
     // Handle errors
     useEffect(() => {
@@ -51,18 +59,83 @@ const VendorRatingsPage = () => {
         }
     }, [error, dispatch]);
 
-    // Table columns
+    // Handle search
+    const handleSearch = (value) => {
+        setSearchValue(value);
+        setCurrentPage(1);
+    };
+
+    // Handle rating filter
+    const handleRatingFilterChange = (value) => {
+        if (value === "all") {
+            setMinRating(null);
+            setMaxRating(null);
+        } else if (value === "5") {
+            setMinRating(5);
+            setMaxRating(5);
+        } else if (value === "4-5") {
+            setMinRating(4);
+            setMaxRating(5);
+        } else if (value === "1-3") {
+            setMinRating(1);
+            setMaxRating(3);
+        }
+    };
+
+    // Enhanced Card UI for mobile/tablet; table for desktop
+    const renderCard = (review) => (
+        <Card
+            key={review.id}
+            className="mb-4"
+            style={{
+                borderRadius: 14,
+                marginBottom: 18,
+                boxShadow: "0 4px 12px #eee",
+                background: "#fafcff"
+            }}
+            bodyStyle={{ padding: 20 }}
+        >
+            <Row align="middle" gutter={[12, 8]} style={{ marginBottom: 10 }}>
+                <Col>
+                    <UserOutlined style={{ fontSize: 32, color: "#91a5be" }} />
+                </Col>
+                <Col flex="auto">
+                    <Title level={5} style={{ margin: 0 }}>{review.userName}</Title>
+                    <Text type="secondary" style={{ fontSize: 13 }}>{review.productNameEn}</Text>
+                </Col>
+                <Col>
+                    <Rate disabled value={review.rating} style={{ color: "#ffb700" }} />
+                </Col>
+            </Row>
+            <Row style={{ marginBottom: 8 }}>
+                <Col flex="auto">
+                    <Text>
+                        <MessageOutlined style={{ color: "#69c0ff", marginRight: 6 }} />
+                        {review.comment || <Text type="secondary">No comment.</Text>}
+                    </Text>
+                </Col>
+            </Row>
+            <Row gutter={12} style={{ fontSize: 13 }}>
+                <Col>
+                    <CalendarOutlined style={{ color: "#aaa" }} />{" "}
+                    <span>{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "-"}</span>
+                </Col>
+            </Row>
+        </Card>
+    );
+
+    // Table columns for desktop
     const columns = [
         {
             title: 'Reviewer',
-            dataIndex: 'reviewer',
-            key: 'reviewer',
+            dataIndex: 'userName',
+            key: 'userName',
             sorter: true,
         },
         {
             title: 'Product',
-            dataIndex: 'product',
-            key: 'product',
+            dataIndex: 'productNameEn',
+            key: 'productNameEn',
             sorter: true,
         },
         {
@@ -70,137 +143,45 @@ const VendorRatingsPage = () => {
             dataIndex: 'rating',
             key: 'rating',
             sorter: true,
-            render: (rating) => <Rate disabled defaultValue={rating} />,
+            render: (rating) => <Rate disabled value={rating} style={{ color: "#ffb700" }} />,
         },
         {
             title: 'Comment',
             dataIndex: 'comment',
             key: 'comment',
-        },
-        {
-            title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
-            sorter: true,
-            render: (status) => <StatusTag status={status} />,
+            render: (comment) =>
+                <span>
+                    <MessageOutlined style={{ color: "#69c0ff", marginRight: 4 }} />
+                    {comment || <Text type="secondary">No comment.</Text>}
+                </span>
         },
         {
             title: 'Date',
-            dataIndex: 'date',
-            key: 'date',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
             sorter: true,
-        },
-        {
-            title: 'Actions',
-            key: 'actions',
-            render: (_, record) => (
-                <div className="space-x-2">
-                    <Button
-                        type="link"
-                        onClick={() => handleRespond(record)}
-                        disabled={true}
-                    >
-                        Respond
-                    </Button>
-                    <Button
-                        type="link"
-                        danger
-                        onClick={() => handleFlag(record)}
-                        disabled={record.status === 'error'}
-                    >
-                        Flag
-                    </Button>
-                </div>
-            ),
-        },
-    ];
-
-    // Handle search
-    const handleSearch = (value) => {
-        setSearchValue(value);
-        setCurrentPage(1);
-    };
-
-    // Handle table change (pagination and sorting)
-    const handleTableChange = (pagination, filters, sorter) => {
-        setCurrentPage(pagination.current);
-        setPageSize(pagination.pageSize);
-        if (sorter.field && sorter.order) {
-            setSortColumn(sorter.field);
-            setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
-        } else {
-            setSortColumn('');
-            setSortDirection('');
+            render: (date) =>
+                date ? new Date(date).toLocaleDateString() : "-",
         }
-    };
-
-    // Handle flag review
-    const handleFlag = (rating) => {
-        setSelectedRating(rating);
-        setIsConfirmModalVisible(true);
-    };
-
-    const handleConfirmFlag = () => {
-        dispatch(flagRating(selectedRating.id)).then((result) => {
-            if (result.meta.requestStatus === 'fulfilled') {
-                ToastNotifier.success('Review Flagged', `${selectedRating.reviewer}'s review has been flagged.`);
-                dispatch(fetchVendorRatings({
-                    PageNumer: currentPage,
-                    PageSize: pageSize,
-                    SearchValue: searchValue,
-                    SortColumn: sortColumn,
-                    SortDirection: sortDirection,
-                    Status: statusFilter,
-                }));
-            }
-        });
-        setIsConfirmModalVisible(false);
-    };
-
-    // Handle respond to review
-    const handleRespond = (rating) => {
-        setSelectedRating(rating);
-        form.setFieldsValue({ response: rating.response });
-        setIsResponseModalVisible(true);
-    };
-
-    const handleSubmitResponse = (values) => {
-        dispatch(respondToRating({
-            ratingId: selectedRating.id,
-            response: values.response,
-        })).then((result) => {
-            if (result.meta.requestStatus === 'fulfilled') {
-                ToastNotifier.success('Response Submitted', `Response to ${selectedRating.reviewer}'s review has been submitted.`);
-                dispatch(fetchVendorRatings({
-                    PageNumer: currentPage,
-                    PageSize: pageSize,
-                    SearchValue: searchValue,
-                    SortColumn: sortColumn,
-                    SortDirection: sortDirection,
-                    Status: statusFilter,
-                }));
-            }
-        });
-        setIsResponseModalVisible(false);
-        form.resetFields();
-    };
+    ];
 
     return (
         <div className="p-6 min-h-screen">
             <PageHeader
-                title="Admin Ratings"
+                title="Vendor Ratings"
                 subtitle="View and manage user-submitted reviews and ratings"
                 actions={
                     <Button
                         type="primary"
                         onClick={() => {
-                            dispatch(fetchVendorRatings({
+                            dispatch(fetchVendorReviews({
                                 PageNumer: currentPage,
                                 PageSize: pageSize,
                                 SearchValue: searchValue,
                                 SortColumn: sortColumn,
                                 SortDirection: sortDirection,
-                                Status: statusFilter,
+                                MinRating: minRating,
+                                MaxRating: maxRating,
                             }));
                             ToastNotifier.info('Refresh', 'Ratings refreshed.');
                         }}
@@ -210,62 +191,87 @@ const VendorRatingsPage = () => {
                 }
             />
 
-            <SearchInput
-                placeholder="Search by reviewer, product, or comment..."
-                onSearch={handleSearch}
-                className="mb-4"
-            />
+            <Row gutter={[16, 16]} className="mb-5" align="middle" wrap>
+                <Col xs={24} md={12}>
+                    <SearchInput
+                        placeholder="Search by reviewer, product, or comment..."
+                        onSearch={handleSearch}
+                        className="w-full"
+                    />
+                </Col>
+                <Col xs={24} md={12}>
+                    <Select
+                        placeholder="Filter by rating"
+                        onChange={handleRatingFilterChange}
+                        className="w-full md:w-48"
+                        allowClear
+                        style={{ maxWidth: 200 }}
+                    >
+                        {ratingFilterOptions.map(opt =>
+                            <Option value={opt.value} key={opt.value}>{opt.label}</Option>
+                        )}
+                    </Select>
+                </Col>
+            </Row>
 
             {loading ? (
                 <LoadingSpinner text="Loading ratings..." />
             ) : (
-                <TableWrapper
-                    dataSource={vendorRatings.items}
-                    columns={columns}
-                    loading={loading}
-                    rowKey="id"
-                    pagination={{
-                        current: currentPage,
-                        pageSize: pageSize,
-                        total: vendorRatings.totalCount,
-                        showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50'],
-                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} ratings`,
-                        position: ['bottomCenter'],
-                        showQuickJumper: true,
-                    }}
-                    onChange={handleTableChange}
-                />
+                <>
+                    {isMobile ? (
+                        <div>
+                            {vendorReviews.items && vendorReviews.items.length > 0 ? (
+                                vendorReviews.items.map(review => renderCard(review))
+                            ) : (
+                                <Empty description="No ratings found" style={{ margin: '32px 0' }} />
+                            )}
+                            <div style={{ marginTop: 16, textAlign: 'right' }}>
+                                <Pagination
+                                    current={vendorReviews.pageNumber + 1}
+                                    pageSize={pageSize}
+                                    total={vendorReviews.totalPages * pageSize}
+                                    showSizeChanger
+                                    pageSizeOptions={['10', '20', '50']}
+                                    onChange={(page, size) => {
+                                        setCurrentPage(page);
+                                        setPageSize(size);
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <TableWrapper
+                                dataSource={vendorReviews.items}
+                                columns={columns}
+                                loading={loading}
+                                rowKey="id"
+                                pagination={{
+                                    current: vendorReviews.pageNumber + 1,
+                                    pageSize: pageSize,
+                                    total: vendorReviews.totalPages * pageSize,
+                                    showSizeChanger: true,
+                                    pageSizeOptions: ['10', '20', '50'],
+                                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} ratings`,
+                                    position: ['bottomCenter'],
+                                    showQuickJumper: true,
+                                }}
+                                onChange={({ current, pageSize: ps }, filters, sorter) => {
+                                    setCurrentPage(current || 1);
+                                    setPageSize(ps || 10);
+                                    if (sorter && sorter.field && sorter.order) {
+                                        setSortColumn(sorter.field);
+                                        setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
+                                    } else {
+                                        setSortColumn('');
+                                        setSortDirection('');
+                                    }
+                                }}
+                            />
+                        </div>
+                    )}
+                </>
             )}
-
-            <ConfirmModal
-                open={isConfirmModalVisible}
-                onConfirm={handleConfirmFlag}
-                onCancel={() => setIsConfirmModalVisible(false)}
-                title="Flag Review"
-                content={`Are you sure you want to flag ${selectedRating?.reviewer}'s review as inappropriate?`}
-                isDanger
-            />
-
-            <Modal
-                title={`Respond to ${selectedRating?.reviewer}'s Review`}
-                open={isResponseModalVisible}
-                onOk={() => form.submit()}
-                onCancel={() => {
-                    setIsResponseModalVisible(false);
-                    form.resetFields();
-                }}
-            >
-                <Form form={form} layout="vertical" onFinish={handleSubmitResponse}>
-                    <Form.Item
-                        name="response"
-                        label="Response"
-                        rules={[{ required: true, message: 'Please enter a response' }]}
-                    >
-                        <TextArea rows={4} />
-                    </Form.Item>
-                </Form>
-            </Modal>
         </div>
     );
 };
