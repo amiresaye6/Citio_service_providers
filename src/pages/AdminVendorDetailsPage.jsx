@@ -47,11 +47,13 @@ import {
 } from '../redux/slices/adminSlice';
 import PageHeader from '../components/common/PageHeader';
 import ToastNotifier from '../components/common/ToastNotifier';
+import { useTranslation } from 'react-i18next';
 
 const { TabPane } = Tabs;
 const { Text, Title, Paragraph } = Typography;
 
 const AdminVendorDetailsPage = () => {
+    const { t, i18n } = useTranslation('vendorDetails');
     const { vendorId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -71,6 +73,9 @@ const AdminVendorDetailsPage = () => {
     const [activeTab, setActiveTab] = useState('details');
     const [ratingsPage, setRatingsPage] = useState(1);
     const [ratingsPageSize, setRatingsPageSize] = useState(5);
+
+    const direction = i18n.dir();
+    const isRTL = direction === "rtl";
 
     useEffect(() => {
         if (vendorId) {
@@ -104,18 +109,18 @@ const AdminVendorDetailsPage = () => {
 
     useEffect(() => {
         if (vendorDetailsError) {
-            ToastNotifier.error('Failed to load vendor details', vendorDetailsError);
+            ToastNotifier.error(t('errors.detailsFailed'), vendorDetailsError);
             dispatch(clearError());
         }
         if (vendorMenuError) {
-            ToastNotifier.error('Failed to load vendor menu', vendorMenuError);
+            ToastNotifier.error(t('errors.menuFailed'), vendorMenuError);
             dispatch(clearError());
         }
         if (vendorRatingsError) {
-            ToastNotifier.error('Failed to load vendor ratings', vendorRatingsError);
+            ToastNotifier.error(t('errors.ratingsFailed'), vendorRatingsError);
             dispatch(clearError());
         }
-    }, [vendorDetailsError, vendorMenuError, vendorRatingsError, dispatch]);
+    }, [vendorDetailsError, vendorMenuError, vendorRatingsError, dispatch, t]);
 
     const handleGoBack = () => {
         navigate('/admin/vendors');
@@ -145,7 +150,7 @@ const AdminVendorDetailsPage = () => {
             cover={
                 <div className="h-48 overflow-hidden">
                     <Image
-                        alt={product.nameEn}
+                        alt={isRTL && product.nameAr ? product.nameAr : product.nameEn}
                         src={`https://service-provider.runasp.net${product.mainImageUrl}`}
                         className="w-full h-full object-cover"
                         width={"100%"}
@@ -159,7 +164,7 @@ const AdminVendorDetailsPage = () => {
                         <Text strong className="text-lg text-green-600">
                             ${product.price.toFixed(2)}
                         </Text>
-                        <Tag color="blue">{product.categoryNameEn}</Tag>
+                        <Tag color="blue">{isRTL && product.categoryNameAr ? product.categoryNameAr : product.categoryNameEn}</Tag>
                     </div>
                 </div>
             ]}
@@ -167,14 +172,14 @@ const AdminVendorDetailsPage = () => {
             <Card.Meta
                 title={
                     <div>
-                        <Text strong className="text-base">{product.nameEn}</Text>
+                        <Text strong className="text-base">{isRTL && product.nameAr ? product.nameAr : product.nameEn}</Text>
                         <br />
-                        <Text className="text-sm text-gray-500">{product.nameAr}</Text>
+                        <Text className="text-sm text-gray-500">{isRTL ? product.nameEn : product.nameAr}</Text>
                     </div>
                 }
                 description={
                     <Text className="text-sm text-gray-600 line-clamp-2">
-                        {product.description}
+                        {isRTL && product.descriptionAr ? product.descriptionAr : product.description}
                     </Text>
                 }
             />
@@ -189,8 +194,8 @@ const AdminVendorDetailsPage = () => {
                     <div>
                         <Text strong className="block">{rating.customerName}</Text>
                         <Text className="text-xs text-gray-500">
-                            <CalendarOutlined className="mr-1" />
-                            {new Date(rating.createdAt).toLocaleDateString()}
+                            <CalendarOutlined className={isRTL ? "ml-1" : "mr-1"} />
+                            {new Date(rating.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
                         </Text>
                     </div>
                 </div>
@@ -198,10 +203,10 @@ const AdminVendorDetailsPage = () => {
             </div>
 
             <div className="mb-3">
-                <Text strong className="text-sm">Product: </Text>
-                <Text className="text-sm">{rating.productNameEn}</Text>
+                <Text strong className="text-sm">{t('ratings.product')}: </Text>
+                <Text className="text-sm">{isRTL && rating.productNameAr ? rating.productNameAr : rating.productNameEn}</Text>
                 <br />
-                <Text className="text-xs text-gray-500">{rating.productNameAr}</Text>
+                <Text className="text-xs text-gray-500">{isRTL ? rating.productNameEn : rating.productNameAr}</Text>
             </div>
 
             {rating.comment && (
@@ -236,27 +241,27 @@ const AdminVendorDetailsPage = () => {
 
     if (vendorDetailsError) {
         return (
-            <div className="p-6 min-h-screen">
+            <div className="p-6 min-h-screen" dir={direction}>
                 <PageHeader
-                    title="Vendor Details"
-                    subtitle="View vendor information"
+                    title={t('pageHeader.title')}
+                    subtitle={t('pageHeader.subtitle')}
                     actions={
                         <Button
                             icon={<ArrowLeftOutlined />}
                             onClick={handleGoBack}
                         >
-                            Back to Vendors
+                            {t('buttons.backToVendors')}
                         </Button>
                     }
                 />
                 <Alert
-                    message="Error Loading Vendor"
-                    description="Unable to load vendor details. Please try again."
+                    message={t('errors.errorLoadingVendor')}
+                    description={t('errors.unableToLoadDetails')}
                     type="error"
                     showIcon
                     action={
                         <Button size="small" onClick={() => dispatch(fetchVendorByID(vendorId))}>
-                            Retry
+                            {t('buttons.retry')}
                         </Button>
                     }
                 />
@@ -266,22 +271,22 @@ const AdminVendorDetailsPage = () => {
 
     if (!vendorDetails) {
         return (
-            <div className="p-6 min-h-screen">
+            <div className="p-6 min-h-screen" dir={direction}>
                 <PageHeader
-                    title="Vendor Details"
-                    subtitle="View vendor information"
+                    title={t('pageHeader.title')}
+                    subtitle={t('pageHeader.subtitle')}
                     actions={
                         <Button
                             icon={<ArrowLeftOutlined />}
                             onClick={handleGoBack}
                         >
-                            Back to Vendors
+                            {t('buttons.backToVendors')}
                         </Button>
                     }
                 />
                 <Alert
-                    message="Vendor Not Found"
-                    description="The requested vendor could not be found."
+                    message={t('errors.vendorNotFound')}
+                    description={t('errors.vendorNotFoundDescription')}
                     type="warning"
                     showIcon
                 />
@@ -290,9 +295,9 @@ const AdminVendorDetailsPage = () => {
     }
 
     return (
-        <div className="p-4 md:p-6 min-h-screen">
+        <div className="p-4 md:p-6 min-h-screen" dir={direction}>
             <PageHeader
-                title="Vendor Details"
+                title={t('pageHeader.title')}
                 subtitle={`${vendorDetails.businessName} - ${vendorDetails.businessType}`}
                 actions={
                     <Space>
@@ -300,7 +305,7 @@ const AdminVendorDetailsPage = () => {
                             icon={<ArrowLeftOutlined />}
                             onClick={handleGoBack}
                         >
-                            Back to Vendors
+                            {t('buttons.backToVendors')}
                         </Button>
                     </Space>
                 }
@@ -334,7 +339,7 @@ const AdminVendorDetailsPage = () => {
                                 className="mb-2"
                             />
                             <p className="text-sm text-gray-500">
-                                Rating: {vendorDetails.rating?.toFixed(1)} / 5.0
+                                {t('profile.rating')}: {vendorDetails.rating?.toFixed(1)} / 5.0
                             </p>
                         </div>
 
@@ -344,7 +349,7 @@ const AdminVendorDetailsPage = () => {
                                 color={vendorDetails.isApproved ? 'green' : 'orange'}
                                 className="px-3 py-1"
                             >
-                                {vendorDetails.isApproved ? 'Approved' : 'Pending Approval'}
+                                {vendorDetails.isApproved ? t('status.approved') : t('status.pendingApproval')}
                             </Tag>
                         </div>
 
@@ -352,25 +357,25 @@ const AdminVendorDetailsPage = () => {
 
                         <Space direction="vertical" className="w-full">
                             <div className="flex items-center justify-center text-gray-600">
-                                <MailOutlined className="mr-2" />
+                                <MailOutlined className={isRTL ? "ml-2" : "mr-2"} />
                                 <span className="text-sm">{vendorDetails.email}</span>
                             </div>
                             <div className="flex items-center justify-center text-gray-600">
-                                <ShopOutlined className="mr-2" />
+                                <ShopOutlined className={isRTL ? "ml-2" : "mr-2"} />
                                 <span className="text-sm">{vendorDetails.businessType}</span>
                             </div>
                         </Space>
                     </Card>
 
                     {/* Menu Stats Card */}
-                    <Card title="Menu Overview" style={{ marginTop: "28px" }}>
+                    <Card title={t('menu.overview')} style={{ marginTop: "28px" }}>
                         <Row gutter={[16, 16]}>
                             <Col span={12}>
                                 <div className="text-center">
                                     <div className="text-2xl font-bold text-blue-600">
                                         {menuStats.totalProducts}
                                     </div>
-                                    <div className="text-sm text-gray-500">Products</div>
+                                    <div className="text-sm text-gray-500">{t('menu.products')}</div>
                                 </div>
                             </Col>
                             <Col span={12}>
@@ -378,7 +383,7 @@ const AdminVendorDetailsPage = () => {
                                     <div className="text-2xl font-bold text-green-600">
                                         {menuStats.categories}
                                     </div>
-                                    <div className="text-sm text-gray-500">Categories</div>
+                                    <div className="text-sm text-gray-500">{t('menu.categories')}</div>
                                 </div>
                             </Col>
                             <Col span={12}>
@@ -386,7 +391,7 @@ const AdminVendorDetailsPage = () => {
                                     <div className="text-xl font-bold text-purple-600">
                                         ${menuStats.averagePrice.toFixed(2)}
                                     </div>
-                                    <div className="text-sm text-gray-500">Avg. Price</div>
+                                    <div className="text-sm text-gray-500">{t('menu.avgPrice')}</div>
                                 </div>
                             </Col>
                             <Col span={12}>
@@ -394,7 +399,7 @@ const AdminVendorDetailsPage = () => {
                                     <div className="text-xl font-bold text-orange-600">
                                         ${menuStats.totalValue.toFixed(2)}
                                     </div>
-                                    <div className="text-sm text-gray-500">Total Value</div>
+                                    <div className="text-sm text-gray-500">{t('menu.totalValue')}</div>
                                 </div>
                             </Col>
                         </Row>
@@ -406,7 +411,7 @@ const AdminVendorDetailsPage = () => {
                     {/* Cover Image Section - Always visible */}
                     {vendorDetails.coverImageUrl && (
                         <Card className="mb-6">
-                            <Title level={4} className="mb-3">Cover Image</Title>
+                            <Title level={4} className="mb-3">{t('profile.coverImage')}</Title>
                             <div className="text-center">
                                 <Image
                                     width="100%"
@@ -431,7 +436,7 @@ const AdminVendorDetailsPage = () => {
                                     label: (
                                         <span>
                                             <UserOutlined />
-                                            Vendor Information
+                                            {t('tabs.vendorInformation')}
                                         </span>
                                     ),
                                     children: (
@@ -441,35 +446,35 @@ const AdminVendorDetailsPage = () => {
                                                 column={1}
                                                 size="medium"
                                             >
-                                                <Descriptions.Item label="Vendor ID">
+                                                <Descriptions.Item label={t('details.vendorId')}>
                                                     <Text copyable className="font-mono text-sm">
                                                         {vendorDetails.id}
                                                     </Text>
                                                 </Descriptions.Item>
 
-                                                <Descriptions.Item label="Full Name">
+                                                <Descriptions.Item label={t('details.fullName')}>
                                                     {vendorDetails.fullName}
                                                 </Descriptions.Item>
 
-                                                <Descriptions.Item label="Email Address">
+                                                <Descriptions.Item label={t('details.emailAddress')}>
                                                     <a href={`mailto:${vendorDetails.email}`}>
                                                         {vendorDetails.email}
                                                     </a>
                                                 </Descriptions.Item>
 
-                                                <Descriptions.Item label="Business Name">
+                                                <Descriptions.Item label={t('details.businessName')}>
                                                     {vendorDetails.businessName}
                                                 </Descriptions.Item>
 
-                                                <Descriptions.Item label="Business Type">
+                                                <Descriptions.Item label={t('details.businessType')}>
                                                     <Tag color="blue">{vendorDetails.businessType}</Tag>
                                                 </Descriptions.Item>
 
-                                                <Descriptions.Item label="Tax Number">
+                                                <Descriptions.Item label={t('details.taxNumber')}>
                                                     {vendorDetails.taxNumber}
                                                 </Descriptions.Item>
 
-                                                <Descriptions.Item label="Rating">
+                                                <Descriptions.Item label={t('details.rating')}>
                                                     <div className="flex items-center gap-2">
                                                         <Rate
                                                             disabled
@@ -480,12 +485,12 @@ const AdminVendorDetailsPage = () => {
                                                     </div>
                                                 </Descriptions.Item>
 
-                                                <Descriptions.Item label="Account Status">
+                                                <Descriptions.Item label={t('details.accountStatus')}>
                                                     <Tag
                                                         icon={vendorDetails.isApproved ? <CheckCircleOutlined /> : <ClockCircleOutlined />}
                                                         color={vendorDetails.isApproved ? 'green' : 'orange'}
                                                     >
-                                                        {vendorDetails.isApproved ? 'Approved & Active' : 'Pending Approval'}
+                                                        {vendorDetails.isApproved ? t('status.approvedActive') : t('status.pendingApproval')}
                                                     </Tag>
                                                 </Descriptions.Item>
                                             </Descriptions>
@@ -497,7 +502,7 @@ const AdminVendorDetailsPage = () => {
                                     label: (
                                         <span>
                                             <AppstoreOutlined />
-                                            Menu & Products ({vendorMenu.length})
+                                            {t('tabs.menuProducts', { count: vendorMenu.length })}
                                         </span>
                                     ),
                                     children: (
@@ -505,12 +510,12 @@ const AdminVendorDetailsPage = () => {
                                             {vendorMenuLoading ? (
                                                 <div className="text-center py-8">
                                                     <Spin size="large" />
-                                                    <p className="mt-4 text-gray-500">Loading menu...</p>
+                                                    <p className="mt-4 text-gray-500">{t('loading.menu')}</p>
                                                 </div>
                                             ) : vendorMenuError ? (
                                                 <Alert
-                                                    message="Error Loading Menu"
-                                                    description="Unable to load vendor menu. Please try again."
+                                                    message={t('errors.errorLoadingMenu')}
+                                                    description={t('errors.unableToLoadMenu')}
                                                     type="error"
                                                     showIcon
                                                     action={
@@ -518,14 +523,14 @@ const AdminVendorDetailsPage = () => {
                                                             size="small"
                                                             onClick={() => dispatch(fetchVendorMenu(vendorId))}
                                                         >
-                                                            Retry
+                                                            {t('buttons.retry')}
                                                         </Button>
                                                     }
                                                 />
                                             ) : vendorMenu.length === 0 ? (
                                                 <Empty
                                                     image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                                    description="No products found in this vendor's menu"
+                                                    description={t('menu.noProducts')}
                                                 />
                                             ) : (
                                                 <Row gutter={[16, 16]}>
@@ -544,7 +549,7 @@ const AdminVendorDetailsPage = () => {
                                     label: (
                                         <span>
                                             <StarOutlined />
-                                            Reviews & Ratings
+                                            {t('tabs.reviewsRatings')}
                                         </span>
                                     ),
                                     children: (
@@ -552,12 +557,12 @@ const AdminVendorDetailsPage = () => {
                                             {vendorRatingsLoading ? (
                                                 <div className="text-center py-8">
                                                     <Spin size="large" />
-                                                    <p className="mt-4 text-gray-500">Loading reviews...</p>
+                                                    <p className="mt-4 text-gray-500">{t('loading.reviews')}</p>
                                                 </div>
                                             ) : vendorRatingsError ? (
                                                 <Alert
-                                                    message="Error Loading Reviews"
-                                                    description="Unable to load vendor reviews. Please try again."
+                                                    message={t('errors.errorLoadingReviews')}
+                                                    description={t('errors.unableToLoadReviews')}
                                                     type="error"
                                                     showIcon
                                                     action={
@@ -569,19 +574,19 @@ const AdminVendorDetailsPage = () => {
                                                                 pageSize: ratingsPageSize
                                                             }))}
                                                         >
-                                                            Retry
+                                                            {t('buttons.retry')}
                                                         </Button>
                                                     }
                                                 />
                                             ) : vendorRatings.items.length === 0 ? (
                                                 <Empty
                                                     image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                                    description="No reviews found for this vendor"
+                                                    description={t('ratings.noReviews')}
                                                 />
                                             ) : (
                                                 <div>
                                                     {/* Reviews Header */}
-                                                    <div className="mb-4 p-4  rounded-lg">
+                                                    <div className="mb-4 p-4 rounded-lg">
                                                         <Row gutter={[16, 16]} align="middle">
                                                             <Col span={12}>
                                                                 <div className="text-center">
@@ -594,7 +599,7 @@ const AdminVendorDetailsPage = () => {
                                                                         style={{ fontSize: '14px', display: 'block' }}
                                                                     />
                                                                     <Text className="text-sm text-gray-500">
-                                                                        Average Rating
+                                                                        {t('ratings.averageRating')}
                                                                     </Text>
                                                                 </div>
                                                             </Col>
@@ -604,7 +609,7 @@ const AdminVendorDetailsPage = () => {
                                                                         {vendorRatings.totalPages * ratingsPageSize}
                                                                     </Text>
                                                                     <Text className="text-sm text-gray-500 block">
-                                                                        Total Reviews
+                                                                        {t('ratings.totalReviews')}
                                                                     </Text>
                                                                 </div>
                                                             </Col>
@@ -627,9 +632,10 @@ const AdminVendorDetailsPage = () => {
                                                                 showSizeChanger
                                                                 showQuickJumper
                                                                 showTotal={(total, range) =>
-                                                                    `${range[0]}-${range[1]} of ${total} reviews`
+                                                                    t('pagination.showTotal', { start: range[0], end: range[1], total })
                                                                 }
                                                                 pageSizeOptions={['5', '10', '20']}
+                                                                className={isRTL ? 'rtl-pagination' : ''}
                                                             />
                                                         </div>
                                                     )}

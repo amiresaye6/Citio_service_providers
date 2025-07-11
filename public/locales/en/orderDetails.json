@@ -1,0 +1,69 @@
+{
+    "pageHeader": {
+        "title": "Order Details",
+        "subtitle": "View order information",
+        "loadingSubtitle": "Loading order information...",
+        "orderDetails": "Order #{{id}} - {{status}}"
+    },
+    "buttons": {
+        "backToOrders": "Back to Orders",
+        "retry": "Retry"
+    },
+    "orderSummary": {
+        "orderNumber": "Order #{{id}}"
+    },
+    "orderStats": {
+        "title": "Order Statistics",
+        "products": "Products",
+        "totalItems": "Total Items",
+        "totalAmount": "Total Amount"
+    },
+    "orderInfo": {
+        "title": "Order Information",
+        "orderId": "Order ID",
+        "totalAmount": "Total Amount",
+        "orderDate": "Order Date",
+        "orderStatus": "Order Status"
+    },
+    "payment": {
+        "title": "Payment Information",
+        "amount": "Payment Amount",
+        "status": "Payment Status",
+        "transactionDate": "Transaction Date"
+    },
+    "shipping": {
+        "title": "Shipping Information",
+        "status": "Shipping Status",
+        "estimatedDelivery": "Estimated Delivery"
+    },
+    "products": {
+        "title": "Products ({{count}})",
+        "noProducts": "No products found in this order",
+        "totals": "Totals"
+    },
+    "table": {
+        "productId": "Product ID",
+        "productNameEn": "Product Name (English)",
+        "productNameAr": "Product Name (Arabic)",
+        "price": "Price",
+        "quantity": "Quantity",
+        "total": "Total"
+    },
+    "status": {
+        "completed": "Completed",
+        "delivered": "Delivered",
+        "pending": "Pending",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+    },
+    "common": {
+        "at": "at"
+    },
+    "errors": {
+        "loadFailed": "Failed to load order details",
+        "errorLoadingOrder": "Error Loading Order",
+        "unableToLoadOrderDetails": "Unable to load order details. Please try again."
+    }
+}

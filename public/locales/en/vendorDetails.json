@@ -1,0 +1,68 @@
+{
+    "pageHeader": {
+        "title": "Vendor Details",
+        "subtitle": "View vendor information"
+    },
+    "buttons": {
+        "backToVendors": "Back to Vendors",
+        "retry": "Retry"
+    },
+    "profile": {
+        "rating": "Rating",
+        "coverImage": "Cover Image"
+    },
+    "status": {
+        "approved": "Approved",
+        "pendingApproval": "Pending Approval",
+        "approvedActive": "Approved & Active"
+    },
+    "menu": {
+        "overview": "Menu Overview",
+        "products": "Products",
+        "categories": "Categories",
+        "avgPrice": "Avg. Price",
+        "totalValue": "Total Value",
+        "noProducts": "No products found in this vendor's menu"
+    },
+    "tabs": {
+        "vendorInformation": "Vendor Information",
+        "menuProducts": "Menu & Products ({{count}})",
+        "reviewsRatings": "Reviews & Ratings"
+    },
+    "details": {
+        "vendorId": "Vendor ID",
+        "fullName": "Full Name",
+        "emailAddress": "Email Address",
+        "businessName": "Business Name",
+        "businessType": "Business Type",
+        "taxNumber": "Tax Number",
+        "rating": "Rating",
+        "accountStatus": "Account Status"
+    },
+    "ratings": {
+        "averageRating": "Average Rating",
+        "totalReviews": "Total Reviews",
+        "noReviews": "No reviews found for this vendor",
+        "product": "Product"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} of {{total}} reviews"
+    },
+    "loading": {
+        "menu": "Loading menu...",
+        "reviews": "Loading reviews..."
+    },
+    "errors": {
+        "detailsFailed": "Failed to load vendor details",
+        "menuFailed": "Failed to load vendor menu",
+        "ratingsFailed": "Failed to load vendor ratings",
+        "errorLoadingVendor": "Error Loading Vendor",
+        "unableToLoadDetails": "Unable to load vendor details. Please try again.",
+        "vendorNotFound": "Vendor Not Found",
+        "vendorNotFoundDescription": "The requested vendor could not be found.",
+        "errorLoadingMenu": "Error Loading Menu",
+        "unableToLoadMenu": "Unable to load vendor menu. Please try again.",
+        "errorLoadingReviews": "Error Loading Reviews",
+        "unableToLoadReviews": "Unable to load vendor reviews. Please try again."
+    }
+}

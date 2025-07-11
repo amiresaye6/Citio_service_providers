@@ -1,0 +1,68 @@
+{
+    "pageHeader": {
+        "title": "تفاصيل المورد",
+        "subtitle": "عرض معلومات المورد"
+    },
+    "buttons": {
+        "backToVendors": "العودة إلى الموردين",
+        "retry": "إعادة المحاولة"
+    },
+    "profile": {
+        "rating": "التقييم",
+        "coverImage": "صورة الغلاف"
+    },
+    "status": {
+        "approved": "تمت الموافقة",
+        "pendingApproval": "في انتظار الموافقة",
+        "approvedActive": "تمت الموافقة ونشط"
+    },
+    "menu": {
+        "overview": "نظرة عامة على القائمة",
+        "products": "المنتجات",
+        "categories": "الفئات",
+        "avgPrice": "متوسط السعر",
+        "totalValue": "القيمة الإجمالية",
+        "noProducts": "لم يتم العثور على منتجات في قائمة هذا المورد"
+    },
+    "tabs": {
+        "vendorInformation": "معلومات المورد",
+        "menuProducts": "القائمة والمنتجات ({{count}})",
+        "reviewsRatings": "المراجعات والتقييمات"
+    },
+    "details": {
+        "vendorId": "معرف المورد",
+        "fullName": "الاسم الكامل",
+        "emailAddress": "البريد الإلكتروني",
+        "businessName": "اسم النشاط التجاري",
+        "businessType": "نوع النشاط التجاري",
+        "taxNumber": "الرقم الضريبي",
+        "rating": "التقييم",
+        "accountStatus": "حالة الحساب"
+    },
+    "ratings": {
+        "averageRating": "متوسط التقييم",
+        "totalReviews": "إجمالي المراجعات",
+        "noReviews": "لم يتم العثور على مراجعات لهذا المورد",
+        "product": "المنتج"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} مراجعة"
+    },
+    "loading": {
+        "menu": "جاري تحميل القائمة...",
+        "reviews": "جاري تحميل المراجعات..."
+    },
+    "errors": {
+        "detailsFailed": "فشل تحميل تفاصيل المورد",
+        "menuFailed": "فشل تحميل قائمة المورد",
+        "ratingsFailed": "فشل تحميل تقييمات المورد",
+        "errorLoadingVendor": "خطأ في تحميل المورد",
+        "unableToLoadDetails": "تعذر تحميل تفاصيل المورد. يرجى المحاولة مرة أخرى.",
+        "vendorNotFound": "لم يتم العثور على المورد",
+        "vendorNotFoundDescription": "تعذر العثور على المورد المطلوب.",
+        "errorLoadingMenu": "خطأ في تحميل القائمة",
+        "unableToLoadMenu": "تعذر تحميل قائمة المورد. يرجى المحاولة مرة أخرى.",
+        "errorLoadingReviews": "خطأ في تحميل المراجعات",
+        "unableToLoadReviews": "تعذر تحميل مراجعات المورد. يرجى المحاولة مرة أخرى."
+    }
+}

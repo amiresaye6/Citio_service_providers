@@ -1,0 +1,69 @@
+{
+    "pageHeader": {
+        "title": "تفاصيل الطلب",
+        "subtitle": "عرض معلومات الطلب",
+        "loadingSubtitle": "جاري تحميل معلومات الطلب...",
+        "orderDetails": "طلب #{{id}} - {{status}}"
+    },
+    "buttons": {
+        "backToOrders": "العودة إلى الطلبات",
+        "retry": "إعادة المحاولة"
+    },
+    "orderSummary": {
+        "orderNumber": "طلب رقم #{{id}}"
+    },
+    "orderStats": {
+        "title": "إحصائيات الطلب",
+        "products": "المنتجات",
+        "totalItems": "إجمالي العناصر",
+        "totalAmount": "إجمالي المبلغ"
+    },
+    "orderInfo": {
+        "title": "معلومات الطلب",
+        "orderId": "رقم الطلب",
+        "totalAmount": "إجمالي المبلغ",
+        "orderDate": "تاريخ الطلب",
+        "orderStatus": "حالة الطلب"
+    },
+    "payment": {
+        "title": "معلومات الدفع",
+        "amount": "مبلغ الدفع",
+        "status": "حالة الدفع",
+        "transactionDate": "تاريخ المعاملة"
+    },
+    "shipping": {
+        "title": "معلومات الشحن",
+        "status": "حالة الشحن",
+        "estimatedDelivery": "موعد التسليم المقدر"
+    },
+    "products": {
+        "title": "المنتجات ({{count}})",
+        "noProducts": "لم يتم العثور على منتجات في هذا الطلب",
+        "totals": "الإجمالي"
+    },
+    "table": {
+        "productId": "رقم المنتج",
+        "productNameEn": "اسم المنتج (الإنجليزية)",
+        "productNameAr": "اسم المنتج (العربية)",
+        "price": "السعر",
+        "quantity": "الكمية",
+        "total": "الإجمالي"
+    },
+    "status": {
+        "completed": "مكتمل",
+        "delivered": "تم التسليم",
+        "pending": "قيد الانتظار",
+        "processing": "قيد المعالجة",
+        "shipped": "تم الشحن",
+        "failed": "فشل",
+        "cancelled": "ملغي"
+    },
+    "common": {
+        "at": "في"
+    },
+    "errors": {
+        "loadFailed": "فشل تحميل تفاصيل الطلب",
+        "errorLoadingOrder": "خطأ في تحميل الطلب",
+        "unableToLoadOrderDetails": "تعذر تحميل تفاصيل الطلب. يرجى المحاولة مرة أخرى."
+    }
+}
