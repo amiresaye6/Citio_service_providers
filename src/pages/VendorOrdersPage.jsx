@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchVendorOrders, updateOrderStatus, clearVendorOrdersError, updateFilters, clearFilters, setSelectedOrder } from '../redux/slices/ordersSlice';
 import { format } from 'date-fns';
 import moment from 'moment';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -56,6 +57,7 @@ const FilterStatusIcons = {
 };
 
 const VendorOrdersPage = () => {
+  const { t, i18n } = useTranslation('vendorOrders');
   const dispatch = useDispatch();
   const {
     vendorOrders,
@@ -85,6 +87,8 @@ const VendorOrdersPage = () => {
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
 
   const vendorId = user?.id || localStorage.getItem("userId");
+  const direction = i18n.dir();
+  const isRTL = direction === "rtl";
 
   // Current timestamp and user for logging (updated to the new timestamp)
   const currentTimestamp = '2025-06-30 21:09:28';
@@ -115,20 +119,18 @@ const VendorOrdersPage = () => {
         ...filters
       }));
     }
-    // console.log(vendorOrders);
-    
   }, [dispatch, vendorId, filters]);
 
   // Handle errors
   useEffect(() => {
     if (vendorOrdersError) {
-      message.error(`Failed to load orders: ${vendorOrdersError.detail || 'Unknown error'}`);
+      message.error(t('errors.loadOrdersFailed', { error: vendorOrdersError.detail || t('errors.unknown') }));
       dispatch(clearVendorOrdersError());
     }
     if (orderUpdateError) {
-      message.error(`Failed to update order: ${orderUpdateError.detail || 'Unknown error'}`);
+      message.error(t('errors.updateOrderFailed', { error: orderUpdateError.detail || t('errors.unknown') }));
     }
-  }, [vendorOrdersError, orderUpdateError, dispatch]);
+  }, [vendorOrdersError, orderUpdateError, dispatch, t]);
 
   // Handle pagination
   const handlePagination = (page, pageSize) => {
@@ -192,6 +194,11 @@ const VendorOrdersPage = () => {
     }
   };
 
+  // Get translated status
+  const getTranslatedStatus = (status) => {
+    return t(`status.${status.toLowerCase()}`, status);
+  };
+
   // Handle order status update - show confirmation modal
   const handleOrderStatusUpdate = (order, status) => {
     console.log("update status", order, status);
@@ -213,7 +220,7 @@ const VendorOrdersPage = () => {
       setStatusUpdateLoading(false);
 
       if (!resultAction.error) {
-        message.success(`Order #${updatingOrder.id} status updated to ${newStatus}`);
+        message.success(t('notifications.statusUpdated', { id: updatingOrder.id, status: getTranslatedStatus(newStatus) }));
         // Refresh the orders list
         dispatch(fetchVendorOrders({
           vendorId,
@@ -222,11 +229,11 @@ const VendorOrdersPage = () => {
         // Close the modal
         setStatusModalVisible(false);
       } else {
-        message.error("Failed to update order status");
+        message.error(t('errors.updateStatusFailed'));
       }
     }).catch(() => {
       setStatusUpdateLoading(false);
-      message.error("Failed to update order status");
+      message.error(t('errors.updateStatusFailed'));
     });
   };
 
@@ -253,7 +260,7 @@ const VendorOrdersPage = () => {
     if (FilterStatusColors[status]) {
       return (
         <Tag color={FilterStatusColors[status]} icon={FilterStatusIcons[status]}>
-          {status}
+          {getTranslatedStatus(status)}
         </Tag>
       );
     }
@@ -261,7 +268,7 @@ const VendorOrdersPage = () => {
     // Fallback for any other status
     return (
       <Tag color="default">
-        {status}
+        {getTranslatedStatus(status)}
       </Tag>
     );
   };
@@ -269,7 +276,7 @@ const VendorOrdersPage = () => {
   // Column definition for orders table
   const columns = [
     {
-      title: 'Order ID',
+      title: t('table.orderId'),
       dataIndex: 'id',
       key: 'id',
       render: id => <Text strong>#{id}</Text>,
@@ -277,10 +284,10 @@ const VendorOrdersPage = () => {
       sorter: true,
       sortDirections: ['descend', 'ascend'],
       sortOrder: filters.sortColumn === 'id' ? (filters.sortDirection === 'desc' ? 'descend' : 'ascend') : null,
-      fixed: 'left'
+      fixed: isRTL ? 'right' : 'left'
     },
     {
-      title: 'Date',
+      title: t('table.date'),
       dataIndex: 'orderDate',
       key: 'orderDate',
       render: date => format(new Date(date), 'MMM dd, yyyy HH:mm'),
@@ -291,20 +298,20 @@ const VendorOrdersPage = () => {
       responsive: ['md']
     },
     {
-      title: 'Status',
+      title: t('table.status'),
       dataIndex: 'status',
       key: 'status',
       render: status => getStatusTag(status),
       width: 140,
       filters: Object.keys(FilterStatusColors).map(status => ({
-        text: status,
+        text: getTranslatedStatus(status),
         value: status
       })),
       filteredValue: filters.statuses,
       onFilter: (value, record) => record.status === value
     },
     {
-      title: 'Total',
+      title: t('table.total'),
       dataIndex: 'totalAmount',
       key: 'totalAmount',
       render: amount => formatCurrency(amount),
@@ -314,7 +321,7 @@ const VendorOrdersPage = () => {
       sortOrder: filters.sortColumn === 'totalAmount' ? (filters.sortDirection === 'desc' ? 'descend' : 'ascend') : null
     },
     {
-      title: 'Items',
+      title: t('table.items'),
       dataIndex: 'orderProducts',
       key: 'orderProducts',
       render: products => (
@@ -324,17 +331,17 @@ const VendorOrdersPage = () => {
       responsive: ['lg']
     },
     {
-      title: 'Actions',
+      title: t('table.actions'),
       key: 'actions',
       width: 100,
-      fixed: 'right',
+      fixed: isRTL ? 'left' : 'right',
       render: (_, record) => (
         <Space>
           <Button
             icon={<EyeOutlined />}
             size="small"
             onClick={() => handleViewOrderDetails(record)}
-            title="View Details"
+            title={t('buttons.viewDetails')}
           />
           <Dropdown
             overlay={
@@ -346,18 +353,18 @@ const VendorOrdersPage = () => {
                     onClick={() => handleOrderStatusUpdate(record, status)}
                     disabled={record.status === status || orderUpdateLoading}
                   >
-                    {status}
+                    {getTranslatedStatus(status)}
                   </Menu.Item>
                 ))}
               </Menu>
             }
             trigger={['click']}
-            placement="bottomRight"
+            placement={isRTL ? "bottomLeft" : "bottomRight"}
           >
             <Button
               icon={<EditOutlined />}
               size="small"
-              title="Update Status"
+              title={t('buttons.updateStatus')}
             />
           </Dropdown>
         </Space>
@@ -378,7 +385,7 @@ const VendorOrdersPage = () => {
           icon={<EyeOutlined />}
           onClick={() => handleViewOrderDetails(order)}
         >
-          Details
+          {t('buttons.details')}
         </Button>,
         <Dropdown
           key="update"
@@ -391,21 +398,21 @@ const VendorOrdersPage = () => {
                   onClick={() => handleOrderStatusUpdate(order, status)}
                   disabled={order.status === status}
                 >
-                  {status}
+                  {getTranslatedStatus(status)}
                 </Menu.Item>
               ))}
             </Menu>
           }
           trigger={['click']}
-          placement="bottomRight"
+          placement={isRTL ? "bottomLeft" : "bottomRight"}
         >
-          <Button type="text" icon={<EditOutlined />}>Update</Button>
+          <Button type="text" icon={<EditOutlined />}>{t('buttons.update')}</Button>
         </Dropdown>
       ]}
     >
       <div className="flex justify-between items-start mb-2">
         <div>
-          <Text strong>Order #{order.id}</Text>
+          <Text strong>{t('card.orderNumber', { id: order.id })}</Text>
           <div className="text-xs text-gray-500">
             {format(new Date(order.orderDate), 'MMM dd, yyyy HH:mm')}
           </div>
@@ -417,16 +424,16 @@ const VendorOrdersPage = () => {
 
       <div className="flex justify-between">
         <div>
-          <Text type="secondary">Items</Text>
+          <Text type="secondary">{t('card.items')}</Text>
           <div>
             <Badge
               count={order.orderProducts.length}
               style={{ backgroundColor: '#1890ff' }}
-            /> {order.orderProducts.length} {order.orderProducts.length === 1 ? 'item' : 'items'}
+            /> {order.orderProducts.length} {t(order.orderProducts.length === 1 ? 'card.item' : 'card.items')}
           </div>
         </div>
-        <div className="text-right">
-          <Text type="secondary">Total</Text>
+        <div className={`text-${isRTL ? 'left' : 'right'}`}>
+          <Text type="secondary">{t('card.total')}</Text>
           <div className="font-semibold">{formatCurrency(order.totalAmount)}</div>
         </div>
       </div>
@@ -455,13 +462,13 @@ const VendorOrdersPage = () => {
           size={isMobile ? "small" : "default"}
           className="mb-4"
         >
-          <Descriptions.Item label="Order ID">#{id}</Descriptions.Item>
-          <Descriptions.Item label="Total Amount">
+          <Descriptions.Item label={t('details.orderId')}>#{id}</Descriptions.Item>
+          <Descriptions.Item label={t('details.totalAmount')}>
             <Text strong>{formatCurrency(totalAmount)}</Text>
           </Descriptions.Item>
         </Descriptions>
 
-        <Divider orientation="left">Order Items</Divider>
+        <Divider orientation={isRTL ? "right" : "left"}>{t('details.orderItems')}</Divider>
 
         <List
           itemLayout="horizontal"
@@ -476,10 +483,10 @@ const VendorOrdersPage = () => {
                     style={{ backgroundColor: '#f5f5f5', color: '#1890ff' }}
                   />
                 }
-                title={item.nameEn}
+                title={isRTL && item.nameAr ? item.nameAr : item.nameEn}
                 description={
                   <Space>
-                    <Tag>{item.quantity} × {formatCurrency(item.price)}</Tag>
+                    <Tag>{t('details.quantityByPrice', { quantity: item.quantity, price: formatCurrency(item.price) })}</Tag>
                   </Space>
                 }
               />
@@ -491,7 +498,7 @@ const VendorOrdersPage = () => {
           className="mb-6"
         />
 
-        <Card title="Update Status" size="small" className="mb-4">
+        <Card title={t('details.updateStatus')} size="small" className="mb-4">
           <div className="flex flex-wrap gap-2">
             {Object.keys(OrderStatusColors).map(newStatus => (
               <Button
@@ -503,15 +510,15 @@ const VendorOrdersPage = () => {
                 icon={OrderStatusIcons[newStatus]}
                 size={isMobile ? "small" : "middle"}
               >
-                {newStatus}
+                {getTranslatedStatus(newStatus)}
               </Button>
             ))}
           </div>
         </Card>
 
         <div className="mt-8 pt-4 border-t border-gray-200 text-gray-400 text-xs">
-          <div>Viewed by: {currentUser}</div>
-          <div>Access timestamp: {currentTimestamp}</div>
+          <div>{t('details.viewedBy', { user: currentUser })}</div>
+          <div>{t('details.accessTimestamp', { timestamp: currentTimestamp })}</div>
         </div>
       </>
     );
@@ -520,25 +527,25 @@ const VendorOrdersPage = () => {
   // Render filters panel for mobile
   const renderMobileFilters = () => (
     <Modal
-      title="Filters"
+      title={t('filters.title')}
       open={filtersVisible}
       onCancel={() => setFiltersVisible(false)}
       footer={[
         <Button key="reset" onClick={handleResetFilters}>
-          Reset Filters
+          {t('buttons.resetFilters')}
         </Button>,
         <Button key="apply" type="primary" onClick={() => setFiltersVisible(false)}>
-          Apply
+          {t('buttons.apply')}
         </Button>
       ]}
     >
       <Space direction="vertical" className="w-full mb-4">
 
         <div>
-          <Text strong className="block mb-1">Filter by Status</Text>
+          <Text strong className="block mb-1">{t('filters.byStatus')}</Text>
           <Select
             mode="multiple"
-            placeholder="Select status"
+            placeholder={t('filters.selectStatus')}
             style={{ width: '100%' }}
             value={filters.statuses}
             onChange={handleStatusFilter}
@@ -548,7 +555,7 @@ const VendorOrdersPage = () => {
               <Option key={status} value={status}>
                 <Space>
                   {FilterStatusIcons[status]}
-                  {status}
+                  {getTranslatedStatus(status)}
                 </Space>
               </Option>
             ))}
@@ -556,11 +563,11 @@ const VendorOrdersPage = () => {
         </div>
 
         <div>
-          <Text strong className="block mb-1">Filter by Date</Text>
+          <Text strong className="block mb-1">{t('filters.byDate')}</Text>
           <DatePicker
             onChange={handleDateFilter}
             allowClear
-            placeholder="Select date"
+            placeholder={t('filters.selectDate')}
             format="YYYY-MM-DD"
             value={filters.dateFilter ? moment(filters.dateFilter) : null}
             style={{ width: '100%' }}
@@ -583,7 +590,7 @@ const VendorOrdersPage = () => {
   const statusCounts = getStatusCounts();
 
   return (
-    <div style={{ padding: isMobile ? '16px' : '24px', minHeight: '100vh' }}>
+    <div style={{ padding: isMobile ? '16px' : '24px', minHeight: '100vh' }} dir={direction}>
       <div style={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
@@ -592,9 +599,9 @@ const VendorOrdersPage = () => {
         marginBottom: isMobile ? '16px' : '24px'
       }}>
         <div>
-          <Title level={isMobile ? 3 : 2}>Orders Management</Title>
+          <Title level={isMobile ? 3 : 2}>{t('pageHeader.title')}</Title>
           <Text type="secondary" style={{ display: 'block', marginBottom: isMobile ? '8px' : '0' }}>
-            View and manage your customer orders
+            {t('pageHeader.subtitle')}
           </Text>
         </div>
 
@@ -604,7 +611,7 @@ const VendorOrdersPage = () => {
               icon={<FilterOutlined />}
               onClick={() => setFiltersVisible(true)}
             >
-              Filters
+              {t('buttons.filters')}
             </Button>
           )}
           <Button
@@ -616,7 +623,7 @@ const VendorOrdersPage = () => {
             }))}
             loading={vendorOrdersLoading}
           >
-            Refresh
+            {t('buttons.refresh')}
           </Button>
         </Space>
       </div>
@@ -627,10 +634,10 @@ const VendorOrdersPage = () => {
           <Row gutter={[16, 16]} align="bottom">
 
             <Col xs={24} md={8} lg={6}>
-              <Text strong style={{ display: 'block', marginBottom: '4px' }}>Filter by Status</Text>
+              <Text strong style={{ display: 'block', marginBottom: '4px' }}>{t('filters.byStatus')}</Text>
               <Select
                 mode="multiple"
-                placeholder="Select status"
+                placeholder={t('filters.selectStatus')}
                 style={{ width: '100%' }}
                 value={filters.statuses}
                 onChange={handleStatusFilter}
@@ -640,7 +647,7 @@ const VendorOrdersPage = () => {
                   <Option key={status} value={status}>
                     <Space>
                       {FilterStatusIcons[status]}
-                      {status}
+                      {getTranslatedStatus(status)}
                     </Space>
                   </Option>
                 ))}
@@ -648,11 +655,11 @@ const VendorOrdersPage = () => {
             </Col>
 
             <Col xs={24} md={8} lg={6}>
-              <Text strong style={{ display: 'block', marginBottom: '4px' }}>Filter by Date</Text>
+              <Text strong style={{ display: 'block', marginBottom: '4px' }}>{t('filters.byDate')}</Text>
               <DatePicker
                 onChange={handleDateFilter}
                 allowClear
-                placeholder="Select date"
+                placeholder={t('filters.selectDate')}
                 format="YYYY-MM-DD"
                 value={filters.dateFilter ? moment(filters.dateFilter) : null}
                 style={{ width: '100%' }}
@@ -664,7 +671,7 @@ const VendorOrdersPage = () => {
                 icon={<ReloadOutlined />}
                 onClick={handleResetFilters}
               >
-                Reset Filters
+                {t('buttons.resetFilters')}
               </Button>
             </Col>
           </Row>
@@ -675,11 +682,14 @@ const VendorOrdersPage = () => {
             <Col span={24}>
               <Space>
                 <Text>
-                  Showing {vendorOrders.items?.length || 0} of {vendorOrders.totalPages * filters.pageSize || 0} orders
+                  {t('filters.showing', {
+                    shown: vendorOrders.items?.length || 0,
+                    total: vendorOrders.totalPages * filters.pageSize || 0
+                  })}
                 </Text>
                 {filters.dateFilter && (
                   <Tag closable onClose={() => dispatch(updateFilters({ dateFilter: null }))}>
-                    Date: {filters.dateFilter}
+                    {t('filters.dateTag', { date: filters.dateFilter })}
                   </Tag>
                 )}
               </Space>
@@ -699,7 +709,7 @@ const VendorOrdersPage = () => {
         <TabPane
           tab={
             <Badge count={statusCounts.all || 0} offset={[10, 0]}>
-              <span>All Orders</span>
+              <span>{t('tabs.allOrders')}</span>
             </Badge>
           }
           key="all"
@@ -710,7 +720,7 @@ const VendorOrdersPage = () => {
               <Badge count={statusCounts[status] || 0} offset={[10, 0]}>
                 <Space>
                   {!isMobile && FilterStatusIcons[status]}
-                  <span>{status}</span>
+                  <span>{getTranslatedStatus(status)}</span>
                 </Space>
               </Badge>
             }
@@ -728,16 +738,16 @@ const VendorOrdersPage = () => {
             alignItems: 'center',
             padding: '48px 0'
           }}>
-            <Spin size="large" tip="Loading orders..." />
+            <Spin size="large" tip={t('loading')} />
           </div>
         ) : vendorOrders.items?.length === 0 ? (
           <Empty
             description={
               <div>
-                <p style={{ marginBottom: '8px' }}>No orders found</p>
+                <p style={{ marginBottom: '8px' }}>{t('empty.noOrders')}</p>
                 {(filters.statuses.length || filters.dateFilter) && (
                   <Button type="link" onClick={handleResetFilters}>
-                    Clear filters
+                    {t('buttons.clearFilters')}
                   </Button>
                 )}
               </div>
@@ -761,6 +771,7 @@ const VendorOrdersPage = () => {
                     pageSize={filters.pageSize}
                     total={vendorOrders.totalPages * filters.pageSize}
                     onChange={handlePagination}
+                    className={isRTL ? "rtl-pagination" : ""}
                   />
                 </div>
               </div>
@@ -779,10 +790,11 @@ const VendorOrdersPage = () => {
                   showSizeChanger: true,
                   pageSizeOptions: ['10', '20', '50'],
                   onChange: handlePagination,
-                  showTotal: (total) => `Total ${total} orders`
+                  showTotal: (total) => t('pagination.total', { total })
                 }}
                 scroll={{ x: 800 }}
                 size={isTablet ? "small" : "middle"}
+                className={isRTL ? "rtl-table" : ""}
               />
             )}
           </>
@@ -791,12 +803,12 @@ const VendorOrdersPage = () => {
 
       {/* Custom Status Update Modal */}
       <Modal
-        title={`Update Order Status`}
+        title={t('modal.updateStatusTitle')}
         open={statusModalVisible}
         onCancel={cancelStatusUpdate}
         footer={[
           <Button key="cancel" onClick={cancelStatusUpdate}>
-            Cancel
+            {t('buttons.cancel')}
           </Button>,
           <Button
             key="submit"
@@ -804,26 +816,26 @@ const VendorOrdersPage = () => {
             loading={statusUpdateLoading}
             onClick={confirmStatusUpdate}
           >
-            Update Status
+            {t('buttons.updateStatus')}
           </Button>,
         ]}
         width={windowWidth < 768 ? 320 : 420}
       >
         {updatingOrder && newStatus && (
           <div>
-            <p>Are you sure you want to update this order's status?</p>
+            <p>{t('modal.confirmUpdateQuestion')}</p>
 
             <div style={{ margin: '16px 0', padding: '12px', background: '#f5f5f5', borderRadius: '4px' }}>
-              <div>Order ID: <Text strong>#{updatingOrder.id}</Text></div>
+              <div>{t('modal.orderId')}: <Text strong>#{updatingOrder.id}</Text></div>
               <div style={{ marginTop: '12px' }}>
-                <div>From: <Tag color={OrderStatusColors[updatingOrder.status] || 'default'}>{updatingOrder.status}</Tag></div>
-                <div style={{ marginTop: '8px' }}>To: <Tag color={OrderStatusColors[newStatus] || 'default'}>{newStatus}</Tag></div>
+                <div>{t('modal.from')}: <Tag color={OrderStatusColors[updatingOrder.status] || 'default'}>{getTranslatedStatus(updatingOrder.status)}</Tag></div>
+                <div style={{ marginTop: '8px' }}>{t('modal.to')}: <Tag color={OrderStatusColors[newStatus] || 'default'}>{getTranslatedStatus(newStatus)}</Tag></div>
               </div>
             </div>
 
             <div style={{ fontSize: '12px', color: '#888', marginTop: '16px' }}>
-              <div>User: {currentUser}</div>
-              <div>Date: {currentTimestamp}</div>
+              <div>{t('modal.user', { user: currentUser })}</div>
+              <div>{t('modal.date', { date: currentTimestamp })}</div>
             </div>
           </div>
         )}
@@ -840,11 +852,11 @@ const VendorOrdersPage = () => {
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <span>Order #{selectedOrderDetails?.id}</span>
+            <span>{t('drawer.title', { id: selectedOrderDetails?.id })}</span>
             <CloseOutlined onClick={() => setDrawerVisible(false)} />
           </div>
         }
-        placement={isMobile ? "bottom" : "right"}
+        placement={isMobile ? "bottom" : isRTL ? "left" : "right"}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         width={isMobile ? "100%" : 420}

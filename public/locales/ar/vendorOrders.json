@@ -1,0 +1,90 @@
+{
+    "pageHeader": {
+        "title": "إدارة الطلبات",
+        "subtitle": "عرض وإدارة طلبات العملاء"
+    },
+    "buttons": {
+        "filters": "التصفية",
+        "refresh": "تحديث",
+        "resetFilters": "إعادة ضبط التصفية",
+        "clearFilters": "مسح التصفية",
+        "apply": "تطبيق",
+        "details": "التفاصيل",
+        "update": "تحديث",
+        "viewDetails": "عرض التفاصيل",
+        "updateStatus": "تحديث الحالة",
+        "cancel": "إلغاء"
+    },
+    "table": {
+        "orderId": "رقم الطلب",
+        "date": "التاريخ",
+        "status": "الحالة",
+        "total": "الإجمالي",
+        "items": "العناصر",
+        "actions": "الإجراءات"
+    },
+    "card": {
+        "orderNumber": "طلب #{{id}}",
+        "items": "العناصر",
+        "item": "عنصر",
+        "total": "الإجمالي"
+    },
+    "details": {
+        "orderId": "رقم الطلب",
+        "totalAmount": "إجمالي المبلغ",
+        "orderItems": "عناصر الطلب",
+        "quantityByPrice": "{{quantity}} × {{price}}",
+        "updateStatus": "تحديث الحالة",
+        "viewedBy": "تمت المشاهدة بواسطة: {{user}}",
+        "accessTimestamp": "وقت الوصول: {{timestamp}}"
+    },
+    "filters": {
+        "title": "التصفية",
+        "byStatus": "تصفية حسب الحالة",
+        "byDate": "تصفية حسب التاريخ",
+        "selectStatus": "اختر الحالة",
+        "selectDate": "اختر التاريخ",
+        "showing": "عرض {{shown}} من {{total}} طلب",
+        "dateTag": "التاريخ: {{date}}"
+    },
+    "tabs": {
+        "allOrders": "جميع الطلبات"
+    },
+    "status": {
+        "pending": "قيد الانتظار",
+        "processing": "قيد المعالجة",
+        "shipped": "تم الشحن",
+        "delivered": "تم التوصيل",
+        "cancelled": "ملغي",
+        "preparing": "قيد التجهيز",
+        "outfordelivery": "خارج للتوصيل"
+    },
+    "modal": {
+        "updateStatusTitle": "تحديث حالة الطلب",
+        "confirmUpdateQuestion": "هل أنت متأكد من رغبتك في تحديث حالة هذا الطلب؟",
+        "orderId": "رقم الطلب",
+        "from": "من",
+        "to": "إلى",
+        "user": "المستخدم: {{user}}",
+        "date": "التاريخ: {{date}}"
+    },
+    "drawer": {
+        "title": "طلب #{{id}}"
+    },
+    "pagination": {
+        "total": "إجمالي {{total}} طلب"
+    },
+    "loading": "جاري تحميل الطلبات...",
+    "empty": {
+        "noOrders": "لم يتم العثور على طلبات"
+    },
+    "errors": {
+        "loadOrdersFailed": "فشل في تحميل الطلبات: {{error}}",
+        "updateOrderFailed": "فشل في تحديث الطلب: {{error}}",
+        "updateStatusFailed": "فشل في تحديث حالة الطلب",
+        "unknown": "خطأ غير معروف"
+    },
+    "notifications": {
+        "statusUpdated": "تم تحديث حالة الطلب #{{id}} إلى {{status}}"
+    }
+}

@@ -1,0 +1,90 @@
+{
+    "pageHeader": {
+        "title": "Orders Management",
+        "subtitle": "View and manage your customer orders"
+    },
+    "buttons": {
+        "filters": "Filters",
+        "refresh": "Refresh",
+        "resetFilters": "Reset Filters",
+        "clearFilters": "Clear filters",
+        "apply": "Apply",
+        "details": "Details",
+        "update": "Update",
+        "viewDetails": "View Details",
+        "updateStatus": "Update Status",
+        "cancel": "Cancel"
+    },
+    "table": {
+        "orderId": "Order ID",
+        "date": "Date",
+        "status": "Status",
+        "total": "Total",
+        "items": "Items",
+        "actions": "Actions"
+    },
+    "card": {
+        "orderNumber": "Order #{{id}}",
+        "items": "Items",
+        "item": "item",
+        "total": "Total"
+    },
+    "details": {
+        "orderId": "Order ID",
+        "totalAmount": "Total Amount",
+        "orderItems": "Order Items",
+        "quantityByPrice": "{{quantity}} × {{price}}",
+        "updateStatus": "Update Status",
+        "viewedBy": "Viewed by: {{user}}",
+        "accessTimestamp": "Access timestamp: {{timestamp}}"
+    },
+    "filters": {
+        "title": "Filters",
+        "byStatus": "Filter by Status",
+        "byDate": "Filter by Date",
+        "selectStatus": "Select status",
+        "selectDate": "Select date",
+        "showing": "Showing {{shown}} of {{total}} orders",
+        "dateTag": "Date: {{date}}"
+    },
+    "tabs": {
+        "allOrders": "All Orders"
+    },
+    "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled",
+        "preparing": "Preparing",
+        "outfordelivery": "Out For Delivery"
+    },
+    "modal": {
+        "updateStatusTitle": "Update Order Status",
+        "confirmUpdateQuestion": "Are you sure you want to update this order's status?",
+        "orderId": "Order ID",
+        "from": "From",
+        "to": "To",
+        "user": "User: {{user}}",
+        "date": "Date: {{date}}"
+    },
+    "drawer": {
+        "title": "Order #{{id}}"
+    },
+    "pagination": {
+        "total": "Total {{total}} orders"
+    },
+    "loading": "Loading orders...",
+    "empty": {
+        "noOrders": "No orders found"
+    },
+    "errors": {
+        "loadOrdersFailed": "Failed to load orders: {{error}}",
+        "updateOrderFailed": "Failed to update order: {{error}}",
+        "updateStatusFailed": "Failed to update order status",
+        "unknown": "Unknown error"
+    },
+    "notifications": {
+        "statusUpdated": "Order #{{id}} status updated to {{status}}"
+    }
+}
