@@ -1,0 +1,57 @@
+{
+    "pageHeader": {
+        "title": "ملف المتجر",
+        "subtitle": "إدارة حساب عملك ومظهر المتجر"
+    },
+    "buttons": {
+        "editProfile": "تعديل الملف",
+        "changeBanner": "تغيير الغلاف",
+        "changeLogo": "تغيير الشعار",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "tryAgain": "حاول مرة أخرى"
+    },
+    "fields": {
+        "businessName": "اسم النشاط التجاري",
+        "status": "الحالة",
+        "fullName": "الاسم الكامل",
+        "email": "البريد الإلكتروني",
+        "businessType": "نوع النشاط التجاري",
+        "taxNumber": "الرقم الضريبي",
+        "rating": "التقييم"
+    },
+    "placeholders": {
+        "businessName": "اسم النشاط التجاري",
+        "fullName": "اسمك الكامل",
+        "email": "البريد الإلكتروني للتواصل",
+        "businessType": "نوع النشاط التجاري",
+        "taxNumber": "الرقم الضريبي"
+    },
+    "validation": {
+        "businessNameRequired": "أدخل اسم النشاط التجاري",
+        "fullNameRequired": "أدخل اسمك الكامل"
+    },
+    "status": {
+        "approved": "معتمد",
+        "notApproved": "غير معتمد"
+    },
+    "profile": {
+        "rating": "التقييم",
+        "reviews": "مراجعات"
+    },
+    "images": {
+        "storeBanner": "غلاف المتجر",
+        "logo": "شعار"
+    },
+    "links": {
+        "securitySettings": "إعدادات الأمان"
+    },
+    "notifications": {
+        "updateSuccess": "تم تحديث الملف الشخصي بنجاح"
+    },
+    "errors": {
+        "loadFailed": "فشل تحميل بيانات الملف الشخصي",
+        "updateFailed": "فشل تحديث الملف الشخصي"
+    },
+    "loading": "جاري تحميل الملف الشخصي..."
+}

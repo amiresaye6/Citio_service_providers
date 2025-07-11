@@ -4,11 +4,14 @@ import { LockOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icon
 import PageHeader from '../components/common/PageHeader';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateVendorPassword } from '../redux/slices/vendorsSlice';
+import { useTranslation } from 'react-i18next';
 
 const SecuritySettingsPage = () => {
+    const { t, i18n } = useTranslation('security');
     const [form] = Form.useForm();
     const dispatch = useDispatch();
     const { updateLoading } = useSelector(state => state.vendors);
+    const direction = i18n.dir();
 
     // Handle password change
     const handlePasswordChange = (values) => {
@@ -18,7 +21,7 @@ const SecuritySettingsPage = () => {
         }))
             .unwrap()
             .then(() => {
-                message.success('Password changed successfully');
+                message.success(t('notifications.passwordChanged'));
                 form.resetFields();
             })
             .catch((error) => {
@@ -26,22 +29,22 @@ const SecuritySettingsPage = () => {
                 if (error?.errors?.length > 0) {
                     message.error(error.errors[1] || error.errors[0]);
                 } else {
-                    message.error('Failed to change password. Please try again.');
+                    message.error(t('errors.changePasswordFailed'));
                 }
             });
     };
 
     return (
-        <div className="p-4 md:p-8 min-h-screen">
+        <div className="p-4 md:p-8 min-h-screen" dir={direction}>
             <PageHeader
-                title="Security Settings"
-                subtitle="Manage your account security"
+                title={t('pageHeader.title')}
+                subtitle={t('pageHeader.subtitle')}
             />
 
             <div className="max-w-2xl mx-auto">
                 <Card 
                     className="shadow-md rounded-lg"
-                    title={<div className="text-lg font-medium">Change Password</div>}
+                    title={<div className="text-lg font-medium">{t('changePassword.title')}</div>}
                 >
                     <Form
                         form={form}
@@ -51,48 +54,48 @@ const SecuritySettingsPage = () => {
                     >
                         <Form.Item
                             name="oldPassword"
-                            label="Current Password"
-                            rules={[{ required: true, message: 'Please enter your current password' }]}
+                            label={t('changePassword.currentPassword')}
+                            rules={[{ required: true, message: t('validation.currentPasswordRequired') }]}
                         >
                             <Input.Password
                                 prefix={<LockOutlined className="site-form-item-icon" />}
-                                placeholder="Current password"
+                                placeholder={t('placeholders.currentPassword')}
                                 iconRender={visible => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
                             />
                         </Form.Item>
                         <Form.Item
                             name="newPassword"
-                            label="New Password"
+                            label={t('changePassword.newPassword')}
                             rules={[
-                                { required: true, message: 'Please enter your new password' },
-                                { min: 6, message: 'Password must be at least 6 characters' }
+                                { required: true, message: t('validation.newPasswordRequired') },
+                                { min: 6, message: t('validation.passwordMinLength') }
                             ]}
                         >
                             <Input.Password
                                 prefix={<LockOutlined className="site-form-item-icon" />}
-                                placeholder="New password"
+                                placeholder={t('placeholders.newPassword')}
                                 iconRender={visible => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
                             />
                         </Form.Item>
                         <Form.Item
                             name="confirmPassword"
-                            label="Confirm New Password"
+                            label={t('changePassword.confirmPassword')}
                             dependencies={['newPassword']}
                             rules={[
-                                { required: true, message: 'Please confirm your new password' },
+                                { required: true, message: t('validation.confirmPasswordRequired') },
                                 ({ getFieldValue }) => ({
                                     validator(_, value) {
                                         if (!value || getFieldValue('newPassword') === value) {
                                             return Promise.resolve();
                                         }
-                                        return Promise.reject('The two passwords do not match!');
+                                        return Promise.reject(t('validation.passwordsDoNotMatch'));
                                     },
                                 }),
                             ]}
                         >
                             <Input.Password
                                 prefix={<LockOutlined className="site-form-item-icon" />}
-                                placeholder="Confirm new password"
+                                placeholder={t('placeholders.confirmPassword')}
                                 iconRender={visible => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
                             />
                         </Form.Item>
@@ -104,7 +107,7 @@ const SecuritySettingsPage = () => {
                                 loading={updateLoading}
                                 block
                             >
-                                Change Password
+                                {t('buttons.changePassword')}
                             </Button>
                         </Form.Item>
                     </Form>
@@ -113,14 +116,14 @@ const SecuritySettingsPage = () => {
                 <div className="mt-8">
                     <Card 
                         className="shadow-md rounded-lg"
-                        title={<div className="text-lg font-medium">Account Security Tips</div>}
+                        title={<div className="text-lg font-medium">{t('securityTips.title')}</div>}
                     >
                         <ul className="list-disc pl-5 space-y-2">
-                            <li>Use a strong, unique password that combines letters, numbers, and special characters.</li>
-                            <li>Change your password regularly for enhanced security.</li>
-                            <li>Never share your password with anyone, including support staff.</li>
-                            <li>Be cautious of phishing attempts requesting your login credentials.</li>
-                            <li>Sign out from your account when using shared or public computers.</li>
+                            <li>{t('securityTips.strongPassword')}</li>
+                            <li>{t('securityTips.changeRegularly')}</li>
+                            <li>{t('securityTips.neverShare')}</li>
+                            <li>{t('securityTips.phishing')}</li>
+                            <li>{t('securityTips.signOut')}</li>
                         </ul>
                     </Card>
                 </div>

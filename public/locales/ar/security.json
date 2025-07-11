@@ -1,0 +1,41 @@
+{
+    "pageHeader": {
+        "title": "إعدادات الأمان",
+        "subtitle": "إدارة أمان حسابك"
+    },
+    "changePassword": {
+        "title": "تغيير كلمة المرور",
+        "currentPassword": "كلمة المرور الحالية",
+        "newPassword": "كلمة المرور الجديدة",
+        "confirmPassword": "تأكيد كلمة المرور الجديدة"
+    },
+    "placeholders": {
+        "currentPassword": "كلمة المرور الحالية",
+        "newPassword": "كلمة المرور الجديدة",
+        "confirmPassword": "تأكيد كلمة المرور الجديدة"
+    },
+    "validation": {
+        "currentPasswordRequired": "الرجاء إدخال كلمة المرور الحالية",
+        "newPasswordRequired": "الرجاء إدخال كلمة المرور الجديدة",
+        "passwordMinLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+        "confirmPasswordRequired": "الرجاء تأكيد كلمة المرور الجديدة",
+        "passwordsDoNotMatch": "كلمات المرور غير متطابقة!"
+    },
+    "buttons": {
+        "changePassword": "تغيير كلمة المرور"
+    },
+    "securityTips": {
+        "title": "نصائح أمان الحساب",
+        "strongPassword": "استخدم كلمة مرور قوية وفريدة تجمع بين الأحرف والأرقام والرموز الخاصة.",
+        "changeRegularly": "قم بتغيير كلمة المرور بانتظام لتعزيز الأمان.",
+        "neverShare": "لا تشارك كلمة المرور الخاصة بك مع أي شخص، بما في ذلك موظفي الدعم.",
+        "phishing": "كن حذراً من محاولات التصيد التي تطلب بيانات تسجيل الدخول الخاصة بك.",
+        "signOut": "قم بتسجيل الخروج من حسابك عند استخدام أجهزة الكمبيوتر المشتركة أو العامة."
+    },
+    "notifications": {
+        "passwordChanged": "تم تغيير كلمة المرور بنجاح"
+    },
+    "errors": {
+        "changePasswordFailed": "فشل تغيير كلمة المرور. يرجى المحاولة مرة أخرى."
+    }
+}

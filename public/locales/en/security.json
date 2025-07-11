@@ -1,0 +1,41 @@
+{
+    "pageHeader": {
+        "title": "Security Settings",
+        "subtitle": "Manage your account security"
+    },
+    "changePassword": {
+        "title": "Change Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password"
+    },
+    "placeholders": {
+        "currentPassword": "Current password",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm new password"
+    },
+    "validation": {
+        "currentPasswordRequired": "Please enter your current password",
+        "newPasswordRequired": "Please enter your new password",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "confirmPasswordRequired": "Please confirm your new password",
+        "passwordsDoNotMatch": "The two passwords do not match!"
+    },
+    "buttons": {
+        "changePassword": "Change Password"
+    },
+    "securityTips": {
+        "title": "Account Security Tips",
+        "strongPassword": "Use a strong, unique password that combines letters, numbers, and special characters.",
+        "changeRegularly": "Change your password regularly for enhanced security.",
+        "neverShare": "Never share your password with anyone, including support staff.",
+        "phishing": "Be cautious of phishing attempts requesting your login credentials.",
+        "signOut": "Sign out from your account when using shared or public computers."
+    },
+    "notifications": {
+        "passwordChanged": "Password changed successfully"
+    },
+    "errors": {
+        "changePasswordFailed": "Failed to change password. Please try again."
+    }
+}

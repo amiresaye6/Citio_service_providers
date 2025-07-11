@@ -5,6 +5,7 @@ import PageHeader from '../components/common/PageHeader';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchVendorDetails, updateVendorProfile, clearUpdateErrors } from '../redux/slices/vendorsSlice';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const InfoRow = ({ label, value, editable, children }) => (
     <Row align="middle" className="mb-2">
@@ -16,6 +17,7 @@ const InfoRow = ({ label, value, editable, children }) => (
 );
 
 const VendorProfilePage = () => {
+    const { t, i18n } = useTranslation('vendorProfile');
     const [editMode, setEditMode] = useState(false);
     const [form] = Form.useForm();
     const [logoFile, setLogoFile] = useState(null);
@@ -29,6 +31,9 @@ const VendorProfilePage = () => {
         error,
         updateError
     } = useSelector(state => state.vendors);
+    
+    const direction = i18n.dir();
+    const isRTL = direction === "rtl";
 
     // Upload handlers
     const handleLogoUpload = ({ file }) => {
@@ -56,7 +61,7 @@ const VendorProfilePage = () => {
     // Show error message if update fails
     useEffect(() => {
         if (updateError) {
-            let errorMessage = "Failed to update profile";
+            let errorMessage = t('errors.updateFailed');
             if (typeof updateError === 'string') {
                 errorMessage = updateError;
             } else if (updateError.message) {
@@ -64,7 +69,7 @@ const VendorProfilePage = () => {
             }
             message.error(errorMessage);
         }
-    }, [updateError]);
+    }, [updateError, t]);
 
     // Save Profile
     const handleSaveProfile = (formValues) => {
@@ -81,7 +86,7 @@ const VendorProfilePage = () => {
                 setEditMode(false);
                 setLogoFile(null);
                 setBannerFile(null);
-                message.success('Profile updated successfully');
+                message.success(t('notifications.updateSuccess'));
                 // Refresh profile data
                 dispatch(fetchVendorDetails());
             })
@@ -115,21 +120,21 @@ const VendorProfilePage = () => {
 
     if (fetchLoading) {
         return (
-            <div className="p-4 md:p-8 min-h-screen flex justify-center items-center">
-                <Spin indicator={<LoadingOutlined style={{ fontSize: 40 }} spin />} tip="Loading profile..." />
+            <div className="p-4 md:p-8 min-h-screen flex justify-center items-center" dir={direction}>
+                <Spin indicator={<LoadingOutlined style={{ fontSize: 40 }} spin />} tip={t('loading')} />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="p-4 md:p-8 min-h-screen">
-                <PageHeader title="Store Profile" subtitle="Manage your business account and store appearance" />
+            <div className="p-4 md:p-8 min-h-screen" dir={direction}>
+                <PageHeader title={t('pageHeader.title')} subtitle={t('pageHeader.subtitle')} />
                 <Card className="shadow-lg mb-8 rounded-lg overflow-hidden">
                     <div className="p-8 text-center">
-                        <p className="text-red-500 mb-4">Failed to load profile data</p>
+                        <p className="text-red-500 mb-4">{t('errors.loadFailed')}</p>
                         <Button type="primary" onClick={() => dispatch(fetchVendorDetails())}>
-                            Try Again
+                            {t('buttons.tryAgain')}
                         </Button>
                     </div>
                 </Card>
@@ -138,10 +143,10 @@ const VendorProfilePage = () => {
     }
 
     return (
-        <div className="p-4 md:p-8 min-h-screen">
+        <div className="p-4 md:p-8 min-h-screen" dir={direction}>
             <PageHeader
-                title="Store Profile"
-                subtitle="Manage your business account and store appearance"
+                title={t('pageHeader.title')}
+                subtitle={t('pageHeader.subtitle')}
             />
 
             <Card className="shadow-lg mb-8 rounded-lg overflow-hidden">
@@ -151,7 +156,7 @@ const VendorProfilePage = () => {
                         {bannerUrl && (
                             <img
                                 src={bannerUrl}
-                                alt="Store Banner"
+                                alt={t('images.storeBanner')}
                                 style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 8 }}
                             />
                         )}
@@ -166,12 +171,16 @@ const VendorProfilePage = () => {
                             <Button
                                 icon={<UploadOutlined />}
                                 style={{
-                                    position: 'absolute', top: 16, right: 24, zIndex: 1,
-                                    borderRadius: 4, fontWeight: 500
+                                    position: 'absolute', 
+                                    top: 16, 
+                                    [isRTL ? 'left' : 'right']: 24, 
+                                    zIndex: 1,
+                                    borderRadius: 4, 
+                                    fontWeight: 500
                                 }}
                                 size="small"
                             >
-                                Change Banner
+                                {t('buttons.changeBanner')}
                             </Button>
                         </Upload>
                     )}
@@ -182,7 +191,7 @@ const VendorProfilePage = () => {
                         <Avatar
                             size={90}
                             src={logoUrl}
-                            alt="Logo"
+                            alt={t('images.logo')}
                             style={{ border: '3px solid #fff', boxShadow: '0 2px 8px #0002', marginBottom: 12 }}
                         />
                         {editMode && (
@@ -193,7 +202,7 @@ const VendorProfilePage = () => {
                                 showUploadList={false}
                             >
                                 <Button icon={<UploadOutlined />} size="small">
-                                    Change Logo
+                                    {t('buttons.changeLogo')}
                                 </Button>
                             </Upload>
                         )}
@@ -216,7 +225,7 @@ const VendorProfilePage = () => {
                                         fontSize: 13
                                     }}
                                 >
-                                    {vendorDetails.isApproved ? 'Approved' : 'Not Approved'}
+                                    {vendorDetails.isApproved ? t('status.approved') : t('status.notApproved')}
                                 </span>
                                 <span
                                     style={{
@@ -229,7 +238,7 @@ const VendorProfilePage = () => {
                                         fontSize: 13
                                     }}
                                 >
-                                    Rating: {vendorDetails.rating?.toFixed(1) || '0.0'} ({vendorDetails.numOfReviews || 0} reviews)
+                                    {t('profile.rating')}: {vendorDetails.rating?.toFixed(1) || '0.0'} ({vendorDetails.numOfReviews || 0} {t('profile.reviews')})
                                 </span>
                             </div>
                         </div>
@@ -242,10 +251,10 @@ const VendorProfilePage = () => {
                                 onClick={() => setEditMode(true)}
                                 size="middle"
                             >
-                                Edit Profile
+                                {t('buttons.editProfile')}
                             </Button>
                         ) : (
-                            <div className="flex gap-2 justify-end">
+                            <div className={`flex gap-2 ${isRTL ? 'justify-start' : 'justify-end'}`}>
                                 <Button
                                     icon={<CloseOutlined />}
                                     onClick={() => {
@@ -254,7 +263,7 @@ const VendorProfilePage = () => {
                                         setBannerFile(null);
                                     }}
                                 >
-                                    Cancel
+                                    {t('buttons.cancel')}
                                 </Button>
                                 <Button
                                     icon={<SaveOutlined />}
@@ -263,7 +272,7 @@ const VendorProfilePage = () => {
                                     htmlType="submit"
                                     loading={updateLoading}
                                 >
-                                    Save
+                                    {t('buttons.save')}
                                 </Button>
                             </div>
                         )}
@@ -277,47 +286,47 @@ const VendorProfilePage = () => {
                     <div className="px-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
                             <div>
-                                <div className="text-gray-500 text-sm mb-1">Business Name</div>
+                                <div className="text-gray-500 text-sm mb-1">{t('fields.businessName')}</div>
                                 <div className="text-lg">{vendorDetails.businessName || '—'}</div>
                             </div>
                             <div>
-                                <div className="text-gray-500 text-sm mb-1">Status</div>
+                                <div className="text-gray-500 text-sm mb-1">{t('fields.status')}</div>
                                 <div>
                                     <span style={{
                                         color: vendorDetails.isApproved ? "#13c2c2" : "#cf1322",
                                         fontWeight: 500
                                     }}>
-                                        {vendorDetails.isApproved ? "Approved" : "Not Approved"}
+                                        {vendorDetails.isApproved ? t('status.approved') : t('status.notApproved')}
                                     </span>
                                 </div>
                             </div>
                             <div>
-                                <div className="text-gray-500 text-sm mb-1">Full Name</div>
+                                <div className="text-gray-500 text-sm mb-1">{t('fields.fullName')}</div>
                                 <div className="text-lg">{vendorDetails.fullName || '—'}</div>
                             </div>
                             <div>
-                                <div className="text-gray-500 text-sm mb-1">Email</div>
+                                <div className="text-gray-500 text-sm mb-1">{t('fields.email')}</div>
                                 <div className="text-lg">{vendorDetails.email || '—'}</div>
                             </div>
                             <div>
-                                <div className="text-gray-500 text-sm mb-1">Business Type</div>
+                                <div className="text-gray-500 text-sm mb-1">{t('fields.businessType')}</div>
                                 <div className="text-lg">{vendorDetails.businessType || '—'}</div>
                             </div>
                             <div>
-                                <div className="text-gray-500 text-sm mb-1">Tax Number</div>
+                                <div className="text-gray-500 text-sm mb-1">{t('fields.taxNumber')}</div>
                                 <div className="text-lg">{vendorDetails.taxNumber || '—'}</div>
                             </div>
                             <div>
-                                <div className="text-gray-500 text-sm mb-1">Rating</div>
+                                <div className="text-gray-500 text-sm mb-1">{t('fields.rating')}</div>
                                 <div className="text-lg">
-                                    {vendorDetails.rating?.toFixed(1) || '0.0'} ({vendorDetails.numOfReviews || 0} reviews)
+                                    {vendorDetails.rating?.toFixed(1) || '0.0'} ({vendorDetails.numOfReviews || 0} {t('profile.reviews')})
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-8 flex justify-end">
+                        <div className={`mt-8 flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
                             <Link type="primary" to='/settings/security'>
-                                Security Settings
+                                {t('links.securitySettings')}
                             </Link>
                         </div>
                     </div>
@@ -333,44 +342,44 @@ const VendorProfilePage = () => {
                         <Row gutter={24}>
                             <Col xs={24} md={12}>
                                 <Form.Item
-                                    label="Business Name"
+                                    label={t('fields.businessName')}
                                     name="businessName"
-                                    rules={[{ required: true, message: 'Enter your business name' }]}
+                                    rules={[{ required: true, message: t('validation.businessNameRequired') }]}
                                 >
-                                    <Input placeholder="Your business name" />
+                                    <Input placeholder={t('placeholders.businessName')} />
                                 </Form.Item>
                             </Col>
                             <Col xs={24} md={12}>
                                 <Form.Item
-                                    label="Full Name"
+                                    label={t('fields.fullName')}
                                     name="fullName"
-                                    rules={[{ required: true, message: 'Enter your full name' }]}
+                                    rules={[{ required: true, message: t('validation.fullNameRequired') }]}
                                 >
-                                    <Input placeholder="Your full name" />
+                                    <Input placeholder={t('placeholders.fullName')} />
                                 </Form.Item>
                             </Col>
                             <Col xs={24} md={12}>
                                 <Form.Item
-                                    label="Email"
+                                    label={t('fields.email')}
                                     name="email"
                                 >
-                                    <Input placeholder="Contact email" disabled />
+                                    <Input placeholder={t('placeholders.email')} disabled />
                                 </Form.Item>
                             </Col>
                             <Col xs={24} md={12}>
                                 <Form.Item
-                                    label="Business Type"
+                                    label={t('fields.businessType')}
                                     name="businessType"
                                 >
-                                    <Input placeholder="Business type" disabled />
+                                    <Input placeholder={t('placeholders.businessType')} disabled />
                                 </Form.Item>
                             </Col>
                             <Col xs={24} md={12}>
                                 <Form.Item
-                                    label="Tax Number"
+                                    label={t('fields.taxNumber')}
                                     name="taxNumber"
                                 >
-                                    <Input placeholder="Tax number" disabled />
+                                    <Input placeholder={t('placeholders.taxNumber')} disabled />
                                 </Form.Item>
                             </Col>
                         </Row>

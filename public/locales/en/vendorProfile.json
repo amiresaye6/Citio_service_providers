@@ -1,0 +1,57 @@
+{
+    "pageHeader": {
+        "title": "Store Profile",
+        "subtitle": "Manage your business account and store appearance"
+    },
+    "buttons": {
+        "editProfile": "Edit Profile",
+        "changeBanner": "Change Banner",
+        "changeLogo": "Change Logo",
+        "save": "Save",
+        "cancel": "Cancel",
+        "tryAgain": "Try Again"
+    },
+    "fields": {
+        "businessName": "Business Name",
+        "status": "Status",
+        "fullName": "Full Name",
+        "email": "Email",
+        "businessType": "Business Type",
+        "taxNumber": "Tax Number",
+        "rating": "Rating"
+    },
+    "placeholders": {
+        "businessName": "Your business name",
+        "fullName": "Your full name",
+        "email": "Contact email",
+        "businessType": "Business type",
+        "taxNumber": "Tax number"
+    },
+    "validation": {
+        "businessNameRequired": "Enter your business name",
+        "fullNameRequired": "Enter your full name"
+    },
+    "status": {
+        "approved": "Approved",
+        "notApproved": "Not Approved"
+    },
+    "profile": {
+        "rating": "Rating",
+        "reviews": "reviews"
+    },
+    "images": {
+        "storeBanner": "Store Banner",
+        "logo": "Logo"
+    },
+    "links": {
+        "securitySettings": "Security Settings"
+    },
+    "notifications": {
+        "updateSuccess": "Profile updated successfully"
+    },
+    "errors": {
+        "loadFailed": "Failed to load profile data",
+        "updateFailed": "Failed to update profile"
+    },
+    "loading": "Loading profile..."
+}

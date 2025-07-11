@@ -17,79 +17,95 @@ import {
     ShoppingCartOutlined, StarFilled, PlusOutlined, UnorderedListOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // Enhanced StatsCard with trend
-const StatsCard = ({ title, value, suffix, trend, trendType, icon, color }) => (
-    <Card className="h-full shadow transition-shadow hover:shadow-lg">
-        <Row align="middle" gutter={8}>
-            <Col>
-                <div style={{
-                    backgroundColor: color || '#f5f5f5',
-                    borderRadius: '50%',
-                    padding: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 8
-                }}>
-                    {icon}
-                </div>
-            </Col>
-            <Col flex="auto">
-                <Statistic
-                    title={<span className="text-gray-500">{title}</span>}
-                    value={value}
-                    suffix={<span className="text-xs text-gray-500">{suffix}</span>}
-                    valueStyle={{ fontWeight: 600 }}
-                />
-                {trend !== undefined &&
-                    <div className={`text-xs mt-1 ${trendType === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                        {trendType === 'up' ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-                        {trend}% {trendType === 'up' ? 'Increase' : 'Decrease'}
+const StatsCard = ({ title, value, suffix, trend, trendType, icon, color }) => {
+    const { t, i18n } = useTranslation('vendorDashboard');
+    const isRTL = i18n.dir() === 'rtl';
+
+    return (
+        <Card className="h-full shadow transition-shadow hover:shadow-lg">
+            <Row align="middle" gutter={8}>
+                <Col>
+                    <div style={{
+                        backgroundColor: color || '#f5f5f5',
+                        borderRadius: '50%',
+                        padding: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: isRTL ? 0 : 8,
+                        marginLeft: isRTL ? 8 : 0
+                    }}>
+                        {icon}
                     </div>
-                }
-            </Col>
-        </Row>
-    </Card>
-);
+                </Col>
+                <Col flex="auto">
+                    <Statistic
+                        title={<span className="text-gray-500">{title}</span>}
+                        value={value}
+                        suffix={<span className="text-xs text-gray-500">{suffix}</span>}
+                        valueStyle={{ fontWeight: 600 }}
+                    />
+                    {trend !== undefined &&
+                        <div className={`text-xs mt-1 ${trendType === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                            {trendType === 'up' ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                            {trend}% {trendType === 'up' ? t('trends.increase') : t('trends.decrease')}
+                        </div>
+                    }
+                </Col>
+            </Row>
+        </Card>
+    );
+};
 
-const RatingStars = ({ rating }) => (
-    <Card bordered className="h-full shadow flex flex-col justify-center items-center hover:shadow-lg">
-        <Tooltip title="Average customer rating">
-            <div className="mb-2 text-gray-500">Average Rating</div>
-            <Rate disabled value={rating} allowHalf />
-            <span className="ml-2 text-base font-semibold text-yellow-600">{rating?.toFixed(2) ?? 0}</span>
-        </Tooltip>
-    </Card>
-);
+const RatingStars = ({ rating }) => {
+    const { t } = useTranslation('vendorDashboard');
 
-const ChartCard = ({ title, data, yLabel = "Revenue (USD)" }) => (
-    <Card bordered title={title} className="shadow h-full" bodyStyle={{ height: 350 }}>
-        {(!data || data.length === 0) ? (
-            <Empty description="No revenue data available" />
-        ) : (
-            <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis label={{ value: yLabel, angle: -90, position: 'insideLeft', offset: 10 }} />
-                    <RechartsTooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="amount" stroke="#8884d8" strokeWidth={3} activeDot={{ r: 8 }} />
-                </LineChart>
-            </ResponsiveContainer>
-        )}
-    </Card>
-);
+    return (
+        <Card bordered className="h-full shadow flex flex-col justify-center items-center hover:shadow-lg">
+            <Tooltip title={t('ratings.tooltip')}>
+                <div className="mb-2 text-gray-500">{t('ratings.title')}</div>
+                <Rate disabled value={rating} allowHalf />
+                <span className="ml-2 text-base font-semibold text-yellow-600">{rating?.toFixed(2) ?? 0}</span>
+            </Tooltip>
+        </Card>
+    );
+};
+
+const ChartCard = ({ title, data, yLabel = "Revenue (USD)" }) => {
+    const { t } = useTranslation('vendorDashboard');
+
+    return (
+        <Card bordered title={title} className="shadow h-full" bodyStyle={{ height: 350 }}>
+            {(!data || data.length === 0) ? (
+                <Empty description={t('charts.noRevenueData')} />
+            ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis label={{ value: yLabel, angle: -90, position: 'insideLeft', offset: 10 }} />
+                        <RechartsTooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="amount" stroke="#8884d8" strokeWidth={3} activeDot={{ r: 8 }} />
+                    </LineChart>
+                </ResponsiveContainer>
+            )}
+        </Card>
+    );
+};
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00c49f', '#ff6384'];
 
 const PaymentPieChart = ({ data, loading }) => {
     const [view, setView] = useState('pie'); // 'pie' | 'bar' | 'table'
+    const { t } = useTranslation('vendorDashboard');
 
     return (
         <Card
-            title="Revenue by Payment Method"
+            title={t('payment.title')}
             className="shadow h-full"
             style={{ minHeight: 350 }}
             extra={
@@ -99,29 +115,29 @@ const PaymentPieChart = ({ data, loading }) => {
                         size="small"
                         onClick={() => setView('pie')}
                     >
-                        Pie
+                        {t('payment.views.pie')}
                     </Button>
                     <Button
                         type={view === 'bar' ? 'primary' : 'default'}
                         size="small"
                         onClick={() => setView('bar')}
                     >
-                        Bar
+                        {t('payment.views.bar')}
                     </Button>
                     <Button
                         type={view === 'table' ? 'primary' : 'default'}
                         size="small"
                         onClick={() => setView('table')}
                     >
-                        Table
+                        {t('payment.views.table')}
                     </Button>
                 </Space>
             }
         >
             {loading ? (
-                <div style={{ padding: 60, textAlign: 'center' }}>Loading...</div>
+                <div style={{ padding: 60, textAlign: 'center' }}>{t('loading')}</div>
             ) : (!data || data.length === 0) ? (
-                <Empty description="No payment method data available" />
+                <Empty description={t('payment.noData')} />
             ) : (
                 <>
                     {view === 'pie' && (
@@ -167,8 +183,8 @@ const PaymentPieChart = ({ data, loading }) => {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #eee' }}>Payment Method</th>
-                                        <th style={{ textAlign: 'right', padding: 8, borderBottom: '1px solid #eee' }}>Revenue</th>
+                                        <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #eee' }}>{t('payment.table.method')}</th>
+                                        <th style={{ textAlign: 'right', padding: 8, borderBottom: '1px solid #eee' }}>{t('payment.table.revenue')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -191,6 +207,7 @@ const PaymentPieChart = ({ data, loading }) => {
 };
 
 const VendorDashboardPage = () => {
+    const { t, i18n } = useTranslation('vendorDashboard');
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { dashboard,
@@ -203,6 +220,7 @@ const VendorDashboardPage = () => {
         error
     } = useSelector((state) => state.vendors);
     const { user } = useSelector(state => state.auth);
+    const direction = i18n.dir();
 
     useEffect(() => {
         dispatch(fetchVendorDashboard());
@@ -213,18 +231,18 @@ const VendorDashboardPage = () => {
 
     useEffect(() => {
         if (error) {
-            ToastNotifier.error('Operation Failed', error);
+            ToastNotifier.error(t('notifications.operationFailed'), error);
             dispatch(clearError());
         }
-    }, [error, dispatch]);
+    }, [error, dispatch, t]);
 
     // Always fetch regardless of fulfilled state (fixes refresh bug)
     const handleRefresh = () => {
         dispatch(fetchVendorDashboard()).then((result) => {
             if (!result.error) {
-                ToastNotifier.success('Dashboard Refreshed', 'Vendor dashboard data fetched successfully.');
+                ToastNotifier.success(t('notifications.refreshed'), t('notifications.refreshedMessage'));
             } else {
-                ToastNotifier.error('Failed to refresh', result.error?.message || 'Unknown error');
+                ToastNotifier.error(t('notifications.refreshFailed'), result.error?.message || t('notifications.unknownError'));
             }
         });
         dispatch(fetchVendorOrders({ vendorId: user ? user.id : localStorage.getItem("userId"), pageNumber: 1, pageSize: 5 }));
@@ -249,29 +267,35 @@ const VendorDashboardPage = () => {
     }));
 
     if (loading) {
-        return <LoadingSpinner text="Loading dashboard data..." />;
+        return <LoadingSpinner text={t('loading')} />;
     }
 
     if (!dashboard) {
-        return <Empty description="No dashboard data available" />;
+        return <Empty description={t('noDashboardData')} />;
     }
 
     const recentOrders = vendorOrders?.items || [];
 
-    console.log(recentOrders);
-    
+    const getOrderStatusColor = (status) => {
+        switch (status) {
+            case "Completed": return "green";
+            case "Pending": return "orange";
+            case "Cancelled": return "red";
+            default: return "blue";
+        }
+    };
 
     return (
-        <div className="p-6 min-h-screen">
+        <div className="p-6 min-h-screen" dir={direction}>
             <PageHeader
-                title="Vendor Dashboard"
-                subtitle="Overview of your business performance"
+                title={t('pageHeader.title')}
+                subtitle={t('pageHeader.subtitle')}
                 actions={
                     <Button
                         type="primary"
                         onClick={handleRefresh}
                     >
-                        Refresh
+                        {t('buttons.refresh')}
                     </Button>
                 }
             />
@@ -280,17 +304,17 @@ const VendorDashboardPage = () => {
                 <Row gutter={[16, 16]}>
                     <Col>
                         <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/vendor/menu/add')}>
-                            Add New Product
+                            {t('buttons.addNewProduct')}
                         </Button>
                     </Col>
                     <Col>
                         <Button icon={<UnorderedListOutlined />} onClick={() => navigate('/vendor/orders')}>
-                            View Orders
+                            {t('buttons.viewOrders')}
                         </Button>
                     </Col>
                     <Col>
                         <Button icon={<StarFilled />} onClick={() => navigate('/vendor/ratings')}>
-                            Respond to Reviews
+                            {t('buttons.respondToReviews')}
                         </Button>
                     </Col>
                 </Row>
@@ -300,9 +324,9 @@ const VendorDashboardPage = () => {
             <Row gutter={[24, 24]} className="mb-8">
                 <Col xs={24} sm={12} md={6}>
                     <StatsCard
-                        title="Orders This Week"
+                        title={t('stats.ordersThisWeek')}
                         value={dashboard?.ordersThisWeek || 0}
-                        suffix="orders"
+                        suffix={t('stats.orders')}
                         trend={ordersWeekTrend?.trend}
                         trendType={ordersWeekTrend?.type}
                         color="#e6f7ff"
@@ -311,9 +335,9 @@ const VendorDashboardPage = () => {
                 </Col>
                 <Col xs={24} sm={12} md={6}>
                     <StatsCard
-                        title="Orders This Month"
+                        title={t('stats.ordersThisMonth')}
                         value={dashboard?.ordersThisMonth || 0}
-                        suffix="orders"
+                        suffix={t('stats.orders')}
                         trend={ordersMonthTrend?.trend}
                         trendType={ordersMonthTrend?.type}
                         color="#fffbe6"
@@ -322,7 +346,7 @@ const VendorDashboardPage = () => {
                 </Col>
                 <Col xs={24} sm={12} md={6}>
                     <StatsCard
-                        title="Current Revenue"
+                        title={t('stats.currentRevenue')}
                         value={dashboard?.currentRevenue || 0}
                         suffix="USD"
                         trend={revenueTrend?.trend}
@@ -341,7 +365,7 @@ const VendorDashboardPage = () => {
             {/* Main Visualization Row */}
             <Row gutter={[24, 24]} className="mb-8">
                 <Col xs={24} lg={12}>
-                    <ChartCard title="Revenue Trend" data={revenueTrendData} />
+                    <ChartCard title={t('charts.revenueTrend')} data={revenueTrendData} yLabel={t('charts.yLabel')} />
                 </Col>
                 <Col xs={24} lg={12}>
                     <PaymentPieChart data={pieChartData} loading={vendorRevenueByPaymentMethodLoading} />
@@ -351,11 +375,11 @@ const VendorDashboardPage = () => {
             <Row gutter={[24, 24]}>
                 {/* Recent Orders */}
                 <Col xs={24} lg={12}>
-                    <Card title="Recent Orders" className="shadow h-full">
+                    <Card title={t('orders.title')} className="shadow h-full">
                         <Row gutter={[16, 16]}>
                             {recentOrders.length === 0 && (
                                 <Col span={24}>
-                                    <Empty description="No recent orders" />
+                                    <Empty description={t('orders.noOrders')} />
                                 </Col>
                             )}
                             {recentOrders.map(order => (
@@ -368,15 +392,10 @@ const VendorDashboardPage = () => {
                                             <div className="flex items-center justify-between">
                                                 <span className="font-mono text-xs">#{order.id}</span>
                                                 <Tag
-                                                    color={
-                                                        order.status === "Completed" ? "green"
-                                                            : order.status === "Pending" ? "orange"
-                                                                : order.status === "Cancelled" ? "red"
-                                                                    : "blue"
-                                                    }
+                                                    color={getOrderStatusColor(order.status)}
                                                     style={{ fontWeight: 'bold' }}
                                                 >
-                                                    {order.status}
+                                                    {t(`status.${order.status.toLowerCase()}`, order.status)}
                                                 </Tag>
                                             </div>
                                         }
@@ -387,14 +406,14 @@ const VendorDashboardPage = () => {
                                         }
                                     >
                                         <div className="text-gray-500 text-xs mb-1">
-                                            {new Date(order.orderDate).toLocaleString()}
+                                            {new Date(order.orderDate).toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
                                         </div>
                                         <div>
-                                            <b>Products:</b>
+                                            <b>{t('orders.products')}:</b>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
                                                 {(order.orderProducts || []).map(p => (
                                                     <Tag key={p.productId} color="blue" style={{ marginBottom: 4 }}>
-                                                        {p.nameEn} ×{p.quantity}
+                                                        {i18n.language === 'ar' && p.nameAr ? p.nameAr : p.nameEn} ×{p.quantity}
                                                     </Tag>
                                                 ))}
                                             </div>
@@ -407,14 +426,14 @@ const VendorDashboardPage = () => {
                 </Col>
                 {/* Top Selling Products */}
                 <Col xs={24} lg={12}>
-                    <Card bordered title="Top-Selling Products" className="shadow h-full">
+                    <Card bordered title={t('products.topSelling')} className="shadow h-full">
                         {vendorTopSellingProductsLoading ? (
                             <div style={{ padding: '30px 0', textAlign: 'center' }}>
-                                <span>Loading...</span>
+                                <span>{t('loading')}</span>
                             </div>
                         ) : vendorTopSellingProducts.length === 0 ? (
                             <div style={{ padding: '30px 0', textAlign: 'center' }}>
-                                <span>No top-selling products</span>
+                                <span>{t('products.noTopSelling')}</span>
                             </div>
                         ) : (
                             <List
@@ -425,20 +444,24 @@ const VendorDashboardPage = () => {
                                         <List.Item.Meta
                                             title={
                                                 <div>
-                                                    <span style={{ fontWeight: 600, fontSize: 16 }}>{product.nameEn}</span>
-                                                    <span style={{ color: '#888', fontSize: 13, marginLeft: 10 }}>{product.nameAr}</span>
+                                                    <span style={{ fontWeight: 600, fontSize: 16 }}>
+                                                        {i18n.language === 'ar' && product.nameAr ? product.nameAr : product.nameEn}
+                                                    </span>
+                                                    <span style={{ color: '#888', fontSize: 13, marginLeft: 10 }}>
+                                                        {i18n.language === 'ar' ? product.nameEn : product.nameAr}
+                                                    </span>
                                                 </div>
                                             }
                                             description={
                                                 <div style={{ marginTop: 6 }}>
                                                     <span style={{ marginRight: 16 }}>
                                                         <Tag color="blue" style={{ fontSize: 14 }}>
-                                                            Sold: <b>{product.sold}</b>
+                                                            {t('products.sold')}: <b>{product.sold}</b>
                                                         </Tag>
                                                     </span>
                                                     <span>
                                                         <Tag color="green" style={{ fontSize: 14 }}>
-                                                            Revenue: <b>${product.revenue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</b>
+                                                            {t('products.revenue')}: <b>${product.revenue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</b>
                                                         </Tag>
                                                     </span>
                                                 </div>

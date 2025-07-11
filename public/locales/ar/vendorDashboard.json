@@ -1,0 +1,71 @@
+{
+    "pageHeader": {
+        "title": "لوحة تحكم البائع",
+        "subtitle": "نظرة عامة على أداء عملك"
+    },
+    "buttons": {
+        "refresh": "تحديث",
+        "addNewProduct": "إضافة منتج جديد",
+        "viewOrders": "عرض الطلبات",
+        "respondToReviews": "الرد على المراجعات"
+    },
+    "stats": {
+        "ordersThisWeek": "طلبات هذا الأسبوع",
+        "ordersThisMonth": "طلبات هذا الشهر",
+        "currentRevenue": "الإيرادات الحالية",
+        "orders": "طلبات"
+    },
+    "trends": {
+        "increase": "زيادة",
+        "decrease": "انخفاض"
+    },
+    "ratings": {
+        "title": "متوسط التقييم",
+        "tooltip": "متوسط تقييم العملاء"
+    },
+    "charts": {
+        "revenueTrend": "اتجاه الإيرادات",
+        "noRevenueData": "لا توجد بيانات إيرادات متاحة",
+        "yLabel": "الإيرادات (دولار أمريكي)"
+    },
+    "payment": {
+        "title": "الإيرادات حسب طريقة الدفع",
+        "noData": "لا توجد بيانات طريقة دفع متاحة",
+        "views": {
+            "pie": "دائري",
+            "bar": "شريطي",
+            "table": "جدول"
+        },
+        "table": {
+            "method": "طريقة الدفع",
+            "revenue": "الإيرادات"
+        }
+    },
+    "orders": {
+        "title": "الطلبات الأخيرة",
+        "noOrders": "لا توجد طلبات حديثة",
+        "products": "المنتجات"
+    },
+    "products": {
+        "topSelling": "المنتجات الأكثر مبيعاً",
+        "noTopSelling": "لا توجد منتجات أكثر مبيعاً",
+        "sold": "مباع",
+        "revenue": "الإيرادات"
+    },
+    "status": {
+        "completed": "مكتمل",
+        "pending": "قيد الانتظار",
+        "cancelled": "ملغي",
+        "shipped": "تم الشحن",
+        "processing": "قيد المعالجة"
+    },
+    "notifications": {
+        "operationFailed": "فشلت العملية",
+        "refreshed": "تم تحديث لوحة التحكم",
+        "refreshedMessage": "تم جلب بيانات لوحة تحكم البائع بنجاح.",
+        "refreshFailed": "فشل التحديث",
+        "unknownError": "خطأ غير معروف"
+    },
+    "loading": "جاري التحميل...",
+    "noDashboardData": "لا توجد بيانات لوحة تحكم متاحة"
+}

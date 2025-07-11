@@ -1,0 +1,71 @@
+{
+    "pageHeader": {
+        "title": "Vendor Dashboard",
+        "subtitle": "Overview of your business performance"
+    },
+    "buttons": {
+        "refresh": "Refresh",
+        "addNewProduct": "Add New Product",
+        "viewOrders": "View Orders",
+        "respondToReviews": "Respond to Reviews"
+    },
+    "stats": {
+        "ordersThisWeek": "Orders This Week",
+        "ordersThisMonth": "Orders This Month",
+        "currentRevenue": "Current Revenue",
+        "orders": "orders"
+    },
+    "trends": {
+        "increase": "Increase",
+        "decrease": "Decrease"
+    },
+    "ratings": {
+        "title": "Average Rating",
+        "tooltip": "Average customer rating"
+    },
+    "charts": {
+        "revenueTrend": "Revenue Trend",
+        "noRevenueData": "No revenue data available",
+        "yLabel": "Revenue (USD)"
+    },
+    "payment": {
+        "title": "Revenue by Payment Method",
+        "noData": "No payment method data available",
+        "views": {
+            "pie": "Pie",
+            "bar": "Bar",
+            "table": "Table"
+        },
+        "table": {
+            "method": "Payment Method",
+            "revenue": "Revenue"
+        }
+    },
+    "orders": {
+        "title": "Recent Orders",
+        "noOrders": "No recent orders",
+        "products": "Products"
+    },
+    "products": {
+        "topSelling": "Top-Selling Products",
+        "noTopSelling": "No top-selling products",
+        "sold": "Sold",
+        "revenue": "Revenue"
+    },
+    "status": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "cancelled": "Cancelled",
+        "shipped": "Shipped",
+        "processing": "Processing"
+    },
+    "notifications": {
+        "operationFailed": "Operation Failed",
+        "refreshed": "Dashboard Refreshed",
+        "refreshedMessage": "Vendor dashboard data fetched successfully.",
+        "refreshFailed": "Failed to refresh",
+        "unknownError": "Unknown error"
+    },
+    "loading": "Loading...",
+    "noDashboardData": "No dashboard data available"
+}
