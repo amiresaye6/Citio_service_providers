@@ -1,0 +1,61 @@
+{
+    "pageHeader": {
+        "title": "المعاملات",
+        "subtitle": "عرض وتصفية جميع المعاملات لحساب البائع الخاص بك"
+    },
+    "buttons": {
+        "refresh": "تحديث"
+    },
+    "table": {
+        "orderId": "رقم الطلب",
+        "customer": "العميل",
+        "amount": "المبلغ",
+        "paymentMethod": "طريقة الدفع",
+        "status": "الحالة",
+        "date": "التاريخ"
+    },
+    "card": {
+        "orderNumber": "طلب #{{id}}",
+        "customer": "العميل",
+        "email": "البريد الإلكتروني",
+        "amount": "المبلغ",
+        "date": "التاريخ",
+        "paymentMethod": "طريقة الدفع",
+        "products": "المنتجات"
+    },
+    "expandedRow": {
+        "customer": "العميل",
+        "email": "البريد الإلكتروني",
+        "amount": "المبلغ",
+        "products": "المنتجات",
+        "qty": "الكمية"
+    },
+    "filters": {
+        "date": "تصفية حسب التاريخ",
+        "paymentMethods": "طرق الدفع",
+        "statuses": "الحالات"
+    },
+    "status": {
+        "pending": "قيد الانتظار",
+        "completed": "مكتمل",
+        "failed": "فشل",
+        "refunded": "مسترد",
+        "cancelled": "ملغي"
+    },
+    "paymentMethod": {
+        "discover": "ديسكفر",
+        "mastercard": "ماستر كارد",
+        "visa": "فيزا",
+        "amex": "أمريكان إكسبرس",
+        "jcb": "جي سي بي",
+        "union_pay": "يونيون باي",
+        "cashondelivery": "الدفع عند الاستلام"
+    },
+    "loading": "جارٍ التحميل...",
+    "empty": {
+        "noTransactions": "لم يتم العثور على معاملات"
+    },
+    "aria": {
+        "sortByDate": "ترتيب حسب التاريخ"
+    }
+}

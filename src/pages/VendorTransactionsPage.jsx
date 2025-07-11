@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchVendorTransactions, clearVendorTransactionsError } from '../redux/slices/vendorsSlice';
 import moment from 'moment';
 import PageHeader from '../components/common/PageHeader';
+import { useTranslation } from 'react-i18next';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -41,6 +42,7 @@ const statusColors = {
 };
 
 const VendorTransactionsPage = () => {
+  const { t, i18n } = useTranslation('vendorTransactions');
   const dispatch = useDispatch();
   const screens = useBreakpoint();
 
@@ -53,6 +55,8 @@ const VendorTransactionsPage = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [statuses, setStatuses] = useState([]);
 
+  const direction = i18n.dir();
+  const isRTL = direction === "rtl";
   const isMobile = !screens.md;
   const isTablet = screens.md && !screens.lg;
 
@@ -81,15 +85,23 @@ const VendorTransactionsPage = () => {
     }
   }, [vendorTransactionsError, dispatch]);
 
+  const getLocalizedStatus = (status) => {
+    return t(`status.${status.toLowerCase()}`, status);
+  };
+
+  const getLocalizedPaymentMethod = (method) => {
+    return t(`paymentMethod.${method.toLowerCase().replace(/\s/g, '_')}`, method);
+  };
+
   const columns = [
     {
-      title: 'Order ID',
+      title: t('table.orderId'),
       dataIndex: 'orderId',
       key: 'orderId',
       render: id => <strong>#{id}</strong>
     },
     {
-      title: 'Customer',
+      title: t('table.customer'),
       dataIndex: 'userFullName',
       key: 'userFullName',
       render: (name, record) => (
@@ -100,31 +112,31 @@ const VendorTransactionsPage = () => {
       )
     },
     {
-      title: 'Amount',
+      title: t('table.amount'),
       dataIndex: 'amount',
       key: 'amount',
       render: amount => <span>${Number(amount).toFixed(2)}</span>
     },
     {
-      title: 'Payment Method',
+      title: t('table.paymentMethod'),
       dataIndex: 'paymentMethod',
       key: 'paymentMethod',
       render: (method) => (
-        <Tag color={paymentMethodColors[method] || 'default'}>{method}</Tag>
+        <Tag color={paymentMethodColors[method] || 'default'}>{getLocalizedPaymentMethod(method)}</Tag>
       )
     },
     {
-      title: 'Status',
+      title: t('table.status'),
       dataIndex: 'status',
       key: 'status',
       render: (status) => (
-        <Tag color={statusColors[status] || 'blue'}>{status}</Tag>
+        <Tag color={statusColors[status] || 'blue'}>{getLocalizedStatus(status)}</Tag>
       )
     },
     {
       title: (
         <span>
-          Date&nbsp;
+          {t('table.date')}&nbsp;
           <Button
             size="small"
             type="text"
@@ -135,7 +147,7 @@ const VendorTransactionsPage = () => {
                 : <SortDescendingOutlined />
             }
             onClick={() => setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')}
-            aria-label="Sort by date"
+            aria-label={t('aria.sortByDate')}
           />
         </span>
       ),
@@ -152,11 +164,11 @@ const VendorTransactionsPage = () => {
     <Card key={txn.orderId} className="mb-4" style={{ borderRadius: 12, marginBottom: 16 }}>
       <Row justify="space-between" align="middle" style={{ marginBottom: 8 }}>
         <Col>
-          <span style={{ fontWeight: 600, fontSize: 16 }}>Order #{txn.orderId}</span>
+          <span style={{ fontWeight: 600, fontSize: 16 }}>{t('card.orderNumber', { id: txn.orderId })}</span>
         </Col>
         <Col>
           <Tag color={statusColors[txn.status] || 'blue'} style={{ fontSize: 15, padding: "3px 12px" }}>
-            {txn.status}
+            {getLocalizedStatus(txn.status)}
           </Tag>
         </Col>
       </Row>
@@ -164,46 +176,47 @@ const VendorTransactionsPage = () => {
       <Descriptions column={1} size="small" layout="vertical" style={{ marginBottom: 8 }}>
         <Descriptions.Item
           label={
-            <span><UserOutlined style={{ color: "#888" }} /> Customer</span>
+            <span><UserOutlined style={{ color: "#888" }} /> {t('card.customer')}</span>
           }
         >
           {txn.userFullName}
         </Descriptions.Item>
         <Descriptions.Item
           label={
-            <span><MailOutlined style={{ color: "#888" }} /> Email</span>
+            <span><MailOutlined style={{ color: "#888" }} /> {t('card.email')}</span>
           }
         >
           <span style={{ color: "#666" }}>{txn.userEmail}</span>
         </Descriptions.Item>
         <Descriptions.Item
           label={
-            <span><DollarOutlined style={{ color: "#888" }} /> Amount</span>
+            <span><DollarOutlined style={{ color: "#888" }} /> {t('card.amount')}</span>
           }
         >
           <span style={{ fontWeight: 600, color: "#188048" }}>${Number(txn.amount).toFixed(2)}</span>
         </Descriptions.Item>
         <Descriptions.Item
           label={
-            <span><CalendarOutlined style={{ color: "#888" }} /> Date</span>
+            <span><CalendarOutlined style={{ color: "#888" }} /> {t('card.date')}</span>
           }
         >
           {moment(txn.transactionDate).format('YYYY-MM-DD HH:mm')}
         </Descriptions.Item>
         <Descriptions.Item
-          label="Payment Method"
+          label={t('card.paymentMethod')}
         >
           <Tag color={paymentMethodColors[txn.paymentMethod] || 'default'} style={{ fontSize: 14, padding: "3px 12px" }}>
-            {txn.paymentMethod}
+            {getLocalizedPaymentMethod(txn.paymentMethod)}
           </Tag>
         </Descriptions.Item>
       </Descriptions>
       <Divider style={{ margin: "8px 0" }} />
-      <div style={{ fontWeight: 500, marginBottom: 2 }}>Products:</div>
-      <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14 }}>
+      <div style={{ fontWeight: 500, marginBottom: 2 }}>{t('card.products')}:</div>
+      <ul style={{ margin: 0, paddingLeft: isRTL ? 0 : 18, paddingRight: isRTL ? 18 : 0, fontSize: 14 }}>
         {txn.products.map(p => (
           <li key={p.productId}>
-            <span style={{ fontWeight: 500 }}>{p.nameEn}</span> <span style={{ color: "#aaa" }}>({p.nameAr})</span>
+            <span style={{ fontWeight: 500 }}>{isRTL && p.nameAr ? p.nameAr : p.nameEn}</span>
+            <span style={{ color: "#aaa" }}>({isRTL ? p.nameEn : p.nameAr})</span>
             <span> - </span>
             <span style={{ color: "#666" }}>{p.quantity} × ${p.price}</span>
           </li>
@@ -228,28 +241,28 @@ const VendorTransactionsPage = () => {
         <Col xs={24} md={6}>
           <Space>
             <UserOutlined style={{ color: "#888" }} />
-            <strong>Customer:</strong>
+            <strong>{t('expandedRow.customer')}:</strong>
             <span>{record.userFullName}</span>
           </Space>
         </Col>
         <Col xs={24} md={6}>
           <Space>
             <MailOutlined style={{ color: "#888" }} />
-            <strong>Email:</strong>
+            <strong>{t('expandedRow.email')}:</strong>
             <span style={{ color: "#666" }}>{record.userEmail}</span>
           </Space>
         </Col>
         <Col xs={24} md={4}>
           <Space>
             <DollarOutlined style={{ color: "#888" }} />
-            <strong>Amount:</strong>
+            <strong>{t('expandedRow.amount')}:</strong>
             <span style={{ color: "#188048", fontWeight: 600 }}>${Number(record.amount).toFixed(2)}</span>
           </Space>
         </Col>
         <Col xs={24} md={4}>
           <Space>
             <Tag color={paymentMethodColors[record.paymentMethod] || 'default'}>
-              {record.paymentMethod}
+              {getLocalizedPaymentMethod(record.paymentMethod)}
             </Tag>
           </Space>
         </Col>
@@ -262,7 +275,7 @@ const VendorTransactionsPage = () => {
       </Row>
       <Divider style={{ margin: "8px 0" }} />
       <div style={{ fontWeight: 500, marginBottom: 2 }}>
-        <ShoppingOutlined style={{ color: "#888" }} /> Products:
+        <ShoppingOutlined style={{ color: "#888" }} /> {t('expandedRow.products')}:
       </div>
       <Row gutter={[8, 4]}>
         {record.products.map(p => (
@@ -271,12 +284,12 @@ const VendorTransactionsPage = () => {
               size="small"
               style={{ marginBottom: 8, borderRadius: 8, padding: 12 }}
             >
-              <div style={{ fontWeight: 500 }}>{p.nameEn}</div>
-              <div style={{ color: "#999", fontSize: 13 }}>{p.nameAr}</div>
+              <div style={{ fontWeight: 500 }}>{isRTL && p.nameAr ? p.nameAr : p.nameEn}</div>
+              <div style={{ color: "#999", fontSize: 13 }}>{isRTL ? p.nameEn : p.nameAr}</div>
               <Divider style={{ margin: "6px 0" }} />
               <div style={{ fontSize: 13 }}>
-                <span>Qty: <b>{p.quantity}</b></span>
-                <span style={{ float: "right", color: "#188048" }}>${Number(p.price).toFixed(2)}</span>
+                <span>{t('expandedRow.qty')}: <b>{p.quantity}</b></span>
+                <span style={{ float: isRTL ? "left" : "right", color: "#188048" }}>${Number(p.price).toFixed(2)}</span>
               </div>
             </Card>
           </Col>
@@ -297,7 +310,7 @@ const VendorTransactionsPage = () => {
         <Col xs={24} sm={12} md={8}>
           <DatePicker
             allowClear
-            placeholder="Filter by Date"
+            placeholder={t('filters.date')}
             onChange={d => setDateFilter(d)}
             style={{ width: "100%" }}
             value={dateFilter}
@@ -308,14 +321,14 @@ const VendorTransactionsPage = () => {
           <Select
             mode="multiple"
             allowClear
-            placeholder="Payment Methods"
+            placeholder={t('filters.paymentMethods')}
             style={{ width: "100%" }}
             value={paymentMethods}
             onChange={setPaymentMethods}
             size={isMobile ? "middle" : "large"}
           >
             {paymentMethodsList.map(method => (
-              <Option key={method} value={method}>{method}</Option>
+              <Option key={method} value={method}>{getLocalizedPaymentMethod(method)}</Option>
             ))}
           </Select>
         </Col>
@@ -323,14 +336,14 @@ const VendorTransactionsPage = () => {
           <Select
             mode="multiple"
             allowClear
-            placeholder="Statuses"
+            placeholder={t('filters.statuses')}
             style={{ width: "100%" }}
             value={statuses}
             onChange={setStatuses}
             size={isMobile ? "middle" : "large"}
           >
             {statusList.map(status => (
-              <Option key={status} value={status}>{status}</Option>
+              <Option key={status} value={status}>{getLocalizedStatus(status)}</Option>
             ))}
           </Select>
         </Col>
@@ -339,11 +352,11 @@ const VendorTransactionsPage = () => {
   );
 
   return (
-    <div className="p-2 md:p-6 min-h-screen">
+    <div className="p-2 md:p-6 min-h-screen" dir={direction}>
       <Card>
         <PageHeader
-          title="Transactions"
-          subtitle="View and filter all transactions for your vendor account"
+          title={t('pageHeader.title')}
+          subtitle={t('pageHeader.subtitle')}
           actions={
             <Button
               type="primary"
@@ -351,7 +364,7 @@ const VendorTransactionsPage = () => {
               onClick={fetchData}
               loading={vendorTransactionsLoading}
             >
-              Refresh
+              {t('buttons.refresh')}
             </Button>
           }
         />
@@ -359,11 +372,11 @@ const VendorTransactionsPage = () => {
         {isMobile || isTablet ? (
           <>
             {vendorTransactionsLoading && (!vendorTransactions.items || vendorTransactions.items.length === 0) ? (
-              <Spin tip="Loading..." style={{ width: "100%", margin: "32px 0" }} />
+              <Spin tip={t('loading')} style={{ width: "100%", margin: "32px 0" }} />
             ) : vendorTransactions.items && vendorTransactions.items.length > 0 ? (
               vendorTransactions.items.map(txn => renderTransactionCard(txn))
             ) : (
-              <Empty description="No transactions found" style={{ margin: '32px 0' }} />
+              <Empty description={t('empty.noTransactions')} style={{ margin: '32px 0' }} />
             )}
           </>
         ) : (
@@ -375,8 +388,8 @@ const VendorTransactionsPage = () => {
             pagination={false}
             locale={{
               emptyText: vendorTransactionsLoading
-                ? <Spin tip="Loading..." />
-                : <Empty description="No transactions found" />
+                ? <Spin tip={t('loading')} />
+                : <Empty description={t('empty.noTransactions')} />
             }}
             onChange={(pagination, filters, sorter) => {
               if (sorter && sorter.field === 'transactionDate') {
@@ -387,9 +400,10 @@ const VendorTransactionsPage = () => {
               expandedRowRender: renderExpandedRow,
               expandRowByClick: true
             }}
+            className={isRTL ? "rtl-table" : ""}
           />
         )}
-        <div style={{ marginTop: 16, textAlign: 'right' }}>
+        <div style={{ marginTop: 16, textAlign: isRTL ? 'left' : 'right' }}>
           <Pagination
             current={vendorTransactions.pageNumber}
             pageSize={pageSize}
@@ -400,6 +414,7 @@ const VendorTransactionsPage = () => {
               setPageNumber(page);
               setPageSize(size);
             }}
+            className={isRTL ? "rtl-pagination" : ""}
           />
         </div>
       </Card>

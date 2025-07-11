@@ -1,0 +1,61 @@
+{
+    "pageHeader": {
+        "title": "Transactions",
+        "subtitle": "View and filter all transactions for your vendor account"
+    },
+    "buttons": {
+        "refresh": "Refresh"
+    },
+    "table": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "amount": "Amount",
+        "paymentMethod": "Payment Method",
+        "status": "Status",
+        "date": "Date"
+    },
+    "card": {
+        "orderNumber": "Order #{{id}}",
+        "customer": "Customer",
+        "email": "Email",
+        "amount": "Amount",
+        "date": "Date",
+        "paymentMethod": "Payment Method",
+        "products": "Products"
+    },
+    "expandedRow": {
+        "customer": "Customer",
+        "email": "Email",
+        "amount": "Amount",
+        "products": "Products",
+        "qty": "Qty"
+    },
+    "filters": {
+        "date": "Filter by Date",
+        "paymentMethods": "Payment Methods",
+        "statuses": "Statuses"
+    },
+    "status": {
+        "pending": "Pending",
+        "completed": "Completed",
+        "failed": "Failed",
+        "refunded": "Refunded",
+        "cancelled": "Cancelled"
+    },
+    "paymentMethod": {
+        "discover": "Discover",
+        "mastercard": "Mastercard",
+        "visa": "Visa",
+        "amex": "Amex",
+        "jcb": "JCB",
+        "union_pay": "Union Pay",
+        "cashondelivery": "Cash On Delivery"
+    },
+    "loading": "Loading...",
+    "empty": {
+        "noTransactions": "No transactions found"
+    },
+    "aria": {
+        "sortByDate": "Sort by date"
+    }
+}
