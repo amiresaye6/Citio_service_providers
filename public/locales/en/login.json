@@ -1,14 +1,17 @@
 {
     "login": {
         "title": "Welcome Back",
-        "email": "Email Address",
+        "subtitle": "Please log in to your account",
+        "email": "Email",
+        "emailRequired": "Please enter your email",
+        "invalidEmail": "Please enter a valid email address",
         "password": "Password",
+        "passwordRequired": "Please enter your password",
+        "invalidCredentials": "Invalid email or password",
         "rememberMe": "Remember me",
         "forgotPassword": "Forgot password?",
-        "submit": "Log In",
-        "emailRequired": "Please enter your email address.",
-        "passwordRequired": "Please enter your password.",
-        "invalidEmail": "Please enter a valid email address.",
-        "invalidCredentials": "Invalid email or password. Please try again."
+        "submit": "Login",
+        "noAccount": "Don't have an account?",
+        "signup": "Register as Vendor"
     }
 }
