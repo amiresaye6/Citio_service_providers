@@ -60,7 +60,7 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
             dispatch(logout());
             navigate('/login');
         } else if (key === '1') {
-            navigate('/profile');
+            navigate('/');
         } else if (key === '2') {
             navigate('/settings');
         }
