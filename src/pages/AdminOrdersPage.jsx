@@ -9,6 +9,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import ToastNotifier from '../components/common/ToastNotifier';
 import { useNavigate } from 'react-router-dom';
 import { InfoCircleOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 const { Option } = Select;
 
 const OrderStatusColors = {
@@ -20,6 +21,7 @@ const OrderStatusColors = {
 };
 
 const AdminOrdersPage = () => {
+  const { t, i18n } = useTranslation('orders');
   const dispatch = useDispatch();
   const { orders, BusinessTypes, loading, error } = useSelector((state) => state.admin);
 
@@ -34,6 +36,8 @@ const AdminOrdersPage = () => {
   const [filterDate, setFilterDate] = useState(null);
 
   const navigate = useNavigate();
+  const direction = i18n.dir();
+  const isRTL = direction === "rtl";
 
   // Fetch orders
   useEffect(() => {
@@ -52,10 +56,10 @@ const AdminOrdersPage = () => {
   // Handle errors
   useEffect(() => {
     if (error) {
-      ToastNotifier.error('Failed to load orders', error);
+      ToastNotifier.error(t('errors.loadFailed'), error);
       dispatch(clearError());
     }
-  }, [error, dispatch]);
+  }, [error, dispatch, t]);
 
   useEffect(() => {
     // Try to get business types from session storage first
@@ -78,23 +82,28 @@ const AdminOrdersPage = () => {
     }
   }, [BusinessTypes.businessTypes]);
 
+  const getStatusTranslation = (status) => {
+    const statusKey = status?.toLowerCase();
+    return t(`status.${statusKey}`, status);
+  };
+
   // Table columns
   const columns = [
     {
-      title: 'Order ID',
+      title: t('table.columns.orderId'),
       dataIndex: 'id',
       key: 'id',
       sorter: true,
     },
     {
-      title: 'Customer',
+      title: t('table.columns.customer'),
       dataIndex: 'applicationUserFullName',
       key: 'applicationUserFullName',
       sorter: true,
       responsive: ['md'],
     },
     {
-      title: 'Vendors',
+      title: t('table.columns.vendors'),
       dataIndex: 'vendors',
       key: 'vendors',
       render: (vendors) => (
@@ -111,33 +120,33 @@ const AdminOrdersPage = () => {
       ),
     },
     {
-      title: 'Total',
+      title: t('table.columns.total'),
       dataIndex: 'totalAmount',
       key: 'totalAmount',
       sorter: true,
       render: (amount) => `$${amount.toFixed(2)}`
     },
     {
-      title: 'Date',
+      title: t('table.columns.date'),
       dataIndex: 'orderDate',
       key: 'orderDate',
       sorter: true,
-      render: (date) => new Date(date).toLocaleDateString(),
+      render: (date) => new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US'),
       responsive: ['lg'],
     },
     {
-      title: 'Status',
+      title: t('table.columns.status'),
       dataIndex: 'status',
       key: 'status',
       sorter: true,
       render: (status) => (
         <Tag color={OrderStatusColors[status] || 'default'}>
-          {status}
+          {getStatusTranslation(status)}
         </Tag>
       )
     },
     {
-      title: 'Actions',
+      title: t('table.columns.actions'),
       key: 'actions',
       width: 100,
       render: (_, record) => (
@@ -148,7 +157,7 @@ const AdminOrdersPage = () => {
             onClick={() => navigate(`/admin/orders/${record.id}`)}
             type="primary"
           >
-            Details
+            {t('buttons.details')}
           </Button>
         </Space>
       ),
@@ -208,10 +217,10 @@ const AdminOrdersPage = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 min-h-screen">
+    <div className="p-4 md:p-6 min-h-screen" dir={direction}>
       <PageHeader
-        title="Admin Orders"
-        subtitle="View and manage all orders across vendors"
+        title={t('pageHeader.title')}
+        subtitle={t('pageHeader.subtitle')}
         actions={
           <Button
             type="primary"
@@ -226,10 +235,10 @@ const AdminOrdersPage = () => {
                 BusinessTypes: vendorFilter.length > 0 ? vendorFilter : undefined,
                 DateFilter: filterDate ? filterDate.format('YYYY-MM-DD') : undefined
               }));
-              ToastNotifier.info('Refresh', 'Orders refreshed.');
+              ToastNotifier.info(t('notifications.refreshTitle'), t('notifications.refreshMessage'));
             }}
           >
-            Refresh
+            {t('buttons.refresh')}
           </Button>
         }
       />
@@ -237,7 +246,7 @@ const AdminOrdersPage = () => {
       <Row gutter={[16, 16]} className="mb-4">
         <Col xs={24} md={12}>
           <SearchInput
-            placeholder="Search by order ID, customer name..."
+            placeholder={t('search.placeholder')}
             onSearch={handleSearch}
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
@@ -250,23 +259,23 @@ const AdminOrdersPage = () => {
         <Col xs={24} sm={12} md={6} lg={6}>
           <Select
             mode="multiple"
-            placeholder="Filter by status"
+            placeholder={t('filters.statusPlaceholder')}
             onChange={handleStatusFilterChange}
             value={statusFilter}
             className="w-full"
             allowClear
           >
-            <Option value="Pending">Pending</Option>
-            <Option value="Processing">Processing</Option>
-            <Option value="Shipped">Shipped</Option>
-            <Option value="Delivered">Delivered</Option>
-            <Option value="Cancelled">Cancelled</Option>
+            <Option value="Pending">{t('status.pending')}</Option>
+            <Option value="Processing">{t('status.processing')}</Option>
+            <Option value="Shipped">{t('status.shipped')}</Option>
+            <Option value="Delivered">{t('status.delivered')}</Option>
+            <Option value="Cancelled">{t('status.cancelled')}</Option>
           </Select>
         </Col>
         <Col xs={24} sm={12} md={6} lg={6}>
           <Select
             mode="multiple"
-            placeholder="Filter by vendor type"
+            placeholder={t('filters.vendorTypePlaceholder')}
             onChange={handleVendorFilterChange}
             value={vendorFilter}
             className="w-full"
@@ -282,17 +291,19 @@ const AdminOrdersPage = () => {
             onChange={handleDateChange}
             value={filterDate}
             className="w-full"
+            placeholder={t('filters.datePlaceholder')}
+            format={isRTL ? "YYYY/MM/DD" : "MM/DD/YYYY"}
           />
         </Col>
         <Col xs={24} sm={8} md={4} lg={3}>
           <Button onClick={handleResetFilters} className="w-full">
-            Reset Filters
+            {t('buttons.resetFilters')}
           </Button>
         </Col>
       </Row>
 
       {loading ? (
-        <LoadingSpinner text="Loading orders..." />
+        <LoadingSpinner text={t('loading.orders')} />
       ) : (
         <TableWrapper
           dataSource={orders.items || []}
@@ -305,7 +316,7 @@ const AdminOrdersPage = () => {
             total: (orders?.totalPages || 1) * pageSize,
             showSizeChanger: true,
             pageSizeOptions: ['10', '20', '50'],
-            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} orders`,
+            showTotal: (total, range) => t('pagination.showTotal', { start: range[0], end: range[1], total }),
             position: ['bottomCenter'],
             showQuickJumper: true,
             hasNextPage: orders?.hasNextPage,
@@ -313,6 +324,8 @@ const AdminOrdersPage = () => {
           }}
           onChange={handleTableChange}
           scroll={{ x: 'max-content' }}
+          className={isRTL ? 'rtl-table' : ''}
+          dir={direction}
         />
       )}
     </div>

@@ -1,0 +1,50 @@
+{
+    "pageHeader": {
+        "title": "طلبات المسؤول",
+        "subtitle": "عرض وإدارة جميع الطلبات عبر الموردين"
+    },
+    "buttons": {
+        "refresh": "تحديث",
+        "resetFilters": "إعادة تعيين الفلاتر",
+        "details": "التفاصيل"
+    },
+    "table": {
+        "columns": {
+            "orderId": "رقم الطلب",
+            "customer": "العميل",
+            "vendors": "الموردين",
+            "total": "الإجمالي",
+            "date": "التاريخ",
+            "status": "الحالة",
+            "actions": "الإجراءات"
+        }
+    },
+    "search": {
+        "placeholder": "البحث عن طريق رقم الطلب، اسم العميل..."
+    },
+    "filters": {
+        "statusPlaceholder": "تصفية حسب الحالة",
+        "vendorTypePlaceholder": "تصفية حسب نوع المورد",
+        "datePlaceholder": "اختر التاريخ"
+    },
+    "status": {
+        "pending": "قيد الانتظار",
+        "processing": "قيد المعالجة",
+        "shipped": "تم الشحن",
+        "delivered": "تم التسليم",
+        "cancelled": "ملغي"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} طلب"
+    },
+    "loading": {
+        "orders": "جاري تحميل الطلبات..."
+    },
+    "notifications": {
+        "refreshTitle": "تحديث",
+        "refreshMessage": "تم تحديث الطلبات."
+    },
+    "errors": {
+        "loadFailed": "فشل تحميل الطلبات"
+    }
+}

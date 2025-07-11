@@ -1,0 +1,50 @@
+{
+    "pageHeader": {
+        "title": "Admin Orders",
+        "subtitle": "View and manage all orders across vendors"
+    },
+    "buttons": {
+        "refresh": "Refresh",
+        "resetFilters": "Reset Filters",
+        "details": "Details"
+    },
+    "table": {
+        "columns": {
+            "orderId": "Order ID",
+            "customer": "Customer",
+            "vendors": "Vendors",
+            "total": "Total",
+            "date": "Date",
+            "status": "Status",
+            "actions": "Actions"
+        }
+    },
+    "search": {
+        "placeholder": "Search by order ID, customer name..."
+    },
+    "filters": {
+        "statusPlaceholder": "Filter by status",
+        "vendorTypePlaceholder": "Filter by vendor type",
+        "datePlaceholder": "Select date"
+    },
+    "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} of {{total}} orders"
+    },
+    "loading": {
+        "orders": "Loading orders..."
+    },
+    "notifications": {
+        "refreshTitle": "Refresh",
+        "refreshMessage": "Orders refreshed."
+    },
+    "errors": {
+        "loadFailed": "Failed to load orders"
+    }
+}

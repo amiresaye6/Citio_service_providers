@@ -1,0 +1,45 @@
+{
+    "pageHeader": {
+        "title": "مراجعات العملاء",
+        "subtitle": "عرض وإدارة مراجعات وتقييمات المستخدمين للموردين"
+    },
+    "buttons": {
+        "refresh": "تحديث"
+    },
+    "table": {
+        "columns": {
+            "user": "المستخدم",
+            "email": "البريد الإلكتروني",
+            "vendor": "المورد",
+            "product": "المنتج",
+            "rating": "التقييم",
+            "comment": "التعليق",
+            "date": "التاريخ"
+        }
+    },
+    "search": {
+        "placeholder": "البحث عن طريق المستخدم، المورد، المنتج، أو التعليق..."
+    },
+    "filters": {
+        "ratingPlaceholder": "تصفية حسب التقييم",
+        "options": {
+            "allRatings": "جميع التقييمات",
+            "fiveStars": "5 نجوم فقط",
+            "fourToFive": "4-5 نجوم",
+            "oneToThree": "1-3 نجوم"
+        }
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} مراجعة"
+    },
+    "loading": {
+        "reviews": "جاري تحميل المراجعات..."
+    },
+    "notifications": {
+        "refreshTitle": "تحديث",
+        "refreshMessage": "تم تحديث المراجعات."
+    },
+    "errors": {
+        "loadFailed": "فشل في تحميل التقييمات"
+    }
+}

@@ -10,10 +10,12 @@ import TableWrapper from '../components/common/TableWrapper';
 import SearchInput from '../components/common/SearchInput';
 import ToastNotifier from '../components/common/ToastNotifier';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
 const AdminRatingsPage = () => {
+    const { t, i18n } = useTranslation('ratings');
     const dispatch = useDispatch();
     const { reviews, loading, error } = useSelector((state) => state.admin);
     const [currentPage, setCurrentPage] = useState(1);
@@ -23,6 +25,9 @@ const AdminRatingsPage = () => {
     const [sortDirection, setSortDirection] = useState('');
     const [minRating, setMinRating] = useState(null);
     const [maxRating, setMaxRating] = useState(null);
+
+    const direction = i18n.dir();
+    const isRTL = direction === "rtl";
 
     // Fetch ratings
     useEffect(() => {
@@ -40,55 +45,58 @@ const AdminRatingsPage = () => {
     // Handle errors
     useEffect(() => {
         if (error) {
-            ToastNotifier.error('Failed to load ratings', error);
+            ToastNotifier.error(t('errors.loadFailed'), error);
             dispatch(clearError());
         }
-    }, [error, dispatch]);
+    }, [error, dispatch, t]);
 
     // Table columns - Actions column removed
     const columns = [
         {
-            title: 'User',
+            title: t('table.columns.user'),
             dataIndex: 'userFullName',
             key: 'userFullName',
             sorter: true,
         },
         {
-            title: 'Email',
+            title: t('table.columns.email'),
             dataIndex: 'userEmail',
             key: 'userEmail',
             sorter: true,
         },
         {
-            title: 'Vendor',
+            title: t('table.columns.vendor'),
             dataIndex: 'vendorFullName',
             key: 'vendorFullName',
             sorter: true,
         },
         {
-            title: 'Product',
+            title: t('table.columns.product'),
             dataIndex: 'productNameEn',
             key: 'productNameEn',
             sorter: true,
+            render: (productNameEn, record) => (
+                isRTL && record.productNameAr ? record.productNameAr : productNameEn
+            ),
         },
         {
-            title: 'Rating',
+            title: t('table.columns.rating'),
             dataIndex: 'rating',
             key: 'rating',
             sorter: true,
             render: (rating) => <Rate disabled defaultValue={rating} />,
         },
         {
-            title: 'Comment',
+            title: t('table.columns.comment'),
             dataIndex: 'comment',
             key: 'comment',
         },
         {
-            title: 'Date',
+            title: t('table.columns.date'),
             dataIndex: 'createdAt',
             key: 'createdAt',
             sorter: true,
-            render: (date) => new Date(date).toLocaleDateString(),
+            render: (date) => new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US'),
         }
     ];
 
@@ -129,10 +137,10 @@ const AdminRatingsPage = () => {
     };
 
     return (
-        <div className="p-6 min-h-screen">
+        <div className="p-6 min-h-screen" dir={direction}>
             <PageHeader
-                title="Customer Reviews"
-                subtitle="View and manage user-vendor reviews and ratings"
+                title={t('pageHeader.title')}
+                subtitle={t('pageHeader.subtitle')}
                 actions={
                     <Button
                         type="primary"
@@ -146,35 +154,35 @@ const AdminRatingsPage = () => {
                                 minRating: minRating,
                                 maxRating: maxRating
                             }));
-                            ToastNotifier.info('Refresh', 'Reviews refreshed.');
+                            ToastNotifier.info(t('notifications.refreshTitle'), t('notifications.refreshMessage'));
                         }}
                     >
-                        Refresh
+                        {t('buttons.refresh')}
                     </Button>
                 }
             />
 
             <div className="flex justify-between items-center mb-4">
                 <SearchInput
-                    placeholder="Search by user, vendor, product, or comment..."
+                    placeholder={t('search.placeholder')}
                     onSearch={handleSearch}
                     className="w-1/2"
                 />
                 <Select
-                    placeholder="Filter by rating"
+                    placeholder={t('filters.ratingPlaceholder')}
                     onChange={handleRatingFilterChange}
                     className="w-48"
                     allowClear
                 >
-                    <Option value="all">All Ratings</Option>
-                    <Option value="5">5 Stars Only</Option>
-                    <Option value="4-5">4-5 Stars</Option>
-                    <Option value="1-3">1-3 Stars</Option>
+                    <Option value="all">{t('filters.options.allRatings')}</Option>
+                    <Option value="5">{t('filters.options.fiveStars')}</Option>
+                    <Option value="4-5">{t('filters.options.fourToFive')}</Option>
+                    <Option value="1-3">{t('filters.options.oneToThree')}</Option>
                 </Select>
             </div>
 
             {loading ? (
-                <LoadingSpinner text="Loading reviews..." />
+                <LoadingSpinner text={t('loading.reviews')} />
             ) : (
                 <TableWrapper
                     dataSource={reviews?.items || []}
@@ -187,13 +195,15 @@ const AdminRatingsPage = () => {
                         total: (reviews?.totalPages || 1) * pageSize,
                         showSizeChanger: true,
                         pageSizeOptions: ['10', '20', '50'],
-                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} reviews`,
+                        showTotal: (total, range) => t('pagination.showTotal', { start: range[0], end: range[1], total }),
                         position: ['bottomCenter'],
                         showQuickJumper: true,
                         hasNextPage: reviews?.hasNextPage,
                         hasPreviousPage: reviews?.hasPreviousPage,
                     }}
                     onChange={handleTableChange}
+                    className={isRTL ? 'rtl-table' : ''}
+                    dir={direction}
                 />
             )}
         </div>

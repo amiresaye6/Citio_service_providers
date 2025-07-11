@@ -1,0 +1,45 @@
+{
+    "pageHeader": {
+        "title": "Customer Reviews",
+        "subtitle": "View and manage user-vendor reviews and ratings"
+    },
+    "buttons": {
+        "refresh": "Refresh"
+    },
+    "table": {
+        "columns": {
+            "user": "User",
+            "email": "Email",
+            "vendor": "Vendor",
+            "product": "Product",
+            "rating": "Rating",
+            "comment": "Comment",
+            "date": "Date"
+        }
+    },
+    "search": {
+        "placeholder": "Search by user, vendor, product, or comment..."
+    },
+    "filters": {
+        "ratingPlaceholder": "Filter by rating",
+        "options": {
+            "allRatings": "All Ratings",
+            "fiveStars": "5 Stars Only",
+            "fourToFive": "4-5 Stars",
+            "oneToThree": "1-3 Stars"
+        }
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} of {{total}} reviews"
+    },
+    "loading": {
+        "reviews": "Loading reviews..."
+    },
+    "notifications": {
+        "refreshTitle": "Refresh",
+        "refreshMessage": "Reviews refreshed."
+    },
+    "errors": {
+        "loadFailed": "Failed to load ratings"
+    }
+}
