@@ -21,6 +21,7 @@
         "vendorOrders": "Vendor Orders",
         "vendorRatings": "Vendor Ratings",
         "vendorDashboard": "Vendor Dashboard",
-        "manageStore": "Manage Store"
+        "manageStore": "Manage Store",
+        "createProduct": "Create Product"
     }
 }

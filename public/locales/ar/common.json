@@ -21,6 +21,7 @@
         "vendorOrders": "طلبات البائع",
         "vendorRatings": "تقييمات البائع",
         "vendorDashboard": "لوحة القيادة للبائع",
-        "manageStore": "إدارة المتجر"
+        "manageStore": "إدارة المتجر",
+        "createProduct": "إنشاء منتج"
     }
 }
