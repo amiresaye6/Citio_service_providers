@@ -1,0 +1,88 @@
+{
+    "pageHeader": {
+        "title": "Product Details"
+    },
+    "breadcrumb": {
+        "menuItems": "Menu Items"
+    },
+    "buttons": {
+        "editItem": "Edit Item",
+        "saveChanges": "Save Changes",
+        "cancel": "Cancel",
+        "retry": "Retry",
+        "changeImage": "Change Image",
+        "viewReviews": "View Customer Reviews"
+    },
+    "tabs": {
+        "details": "Details",
+        "reviews": "Reviews"
+    },
+    "productInfo": {
+        "id": "ID",
+        "vendor": "Vendor",
+        "vendorFullName": "Vendor Full Name",
+        "rating": "Rating",
+        "lastUpdated": "Last Updated",
+        "by": "by {{user}}"
+    },
+    "productDetails": {
+        "description": "Description"
+    },
+    "editForm": {
+        "productInformation": "Product Information",
+        "nameEn": "Name (English)",
+        "nameAr": "Name (Arabic)",
+        "description": "Description",
+        "price": "Price",
+        "subcategory": "Subcategory"
+    },
+    "placeholders": {
+        "nameEn": "e.g. Beef Burger",
+        "nameAr": "e.g. برجر لحم",
+        "description": "Describe your product...",
+        "subcategory": "Select a subcategory"
+    },
+    "validation": {
+        "nameEnRequired": "Please enter English name",
+        "nameArRequired": "Please enter Arabic name",
+        "descriptionRequired": "Please enter description",
+        "priceRequired": "Please enter price",
+        "subcategoryRequired": "Please select a subcategory"
+    },
+    "reviews": {
+        "customerReviews": "Customer Reviews",
+        "basedOn": "Based on {{count}} {{review}}",
+        "review": "review",
+        "reviews": "reviews",
+        "filterTitle": "Filter Reviews",
+        "noReviewsFound": "No reviews found",
+        "noReviewsYet": "No reviews yet",
+        "beFirst": "Be the first to receive customer feedback",
+        "lastUpdated": "Last updated",
+        "filters": {
+            "all": "All",
+            "stars": "{{rating}}+ Stars"
+        }
+    },
+    "emptyState": {
+        "noProduct": "No product found"
+    },
+    "modal": {
+        "imagePreview": "Image Preview",
+        "preview": "Preview"
+    },
+    "loading": {
+        "productDetails": "Loading product details..."
+    },
+    "errors": {
+        "loadingProduct": "Error Loading Product",
+        "failedToLoad": "Failed to load product details. Please try again.",
+        "loadFailed": "Failed to load product: {{error}}",
+        "updateFailed": "Failed to update product: {{error}}",
+        "reviewsLoadFailed": "Failed to load reviews: {{error}}",
+        "unknown": "Unknown error"
+    },
+    "notifications": {
+        "updateSuccess": "Menu item updated successfully!"
+    }
+}

@@ -1,0 +1,58 @@
+{
+    "pageHeader": {
+        "title": "Menu Management"
+    },
+    "cardHeader": {
+        "title": "Add New Menu Item"
+    },
+    "buttons": {
+        "backToMenu": "Back to Menu",
+        "addMenuItem": "Add Menu Item",
+        "cancel": "Cancel"
+    },
+    "form": {
+        "basicInfo": "Basic Information",
+        "englishInfo": "English Information",
+        "arabicInfo": "Arabic Information",
+        "priceCategory": "Price & Category",
+        "nameEn": "Name (English)",
+        "nameAr": "Name (Arabic)",
+        "descriptionEn": "Description (English)",
+        "price": "Price",
+        "subcategory": "Subcategory"
+    },
+    "placeholders": {
+        "nameEn": "e.g. Cheeseburger",
+        "nameAr": "e.g. تشيز برجر",
+        "descriptionEn": "Describe your menu item...",
+        "subcategory": "Select a subcategory"
+    },
+    "validation": {
+        "nameEnRequired": "Please enter English name",
+        "nameArRequired": "Please enter Arabic name",
+        "descriptionEnRequired": "Please enter English description",
+        "priceRequired": "Please enter price",
+        "subcategoryRequired": "Please select a subcategory",
+        "imageRequired": "Please upload an image",
+        "imageTypeInvalid": "You can only upload image files!",
+        "imageSizeInvalid": "Image must be smaller than 2MB!"
+    },
+    "upload": {
+        "title": "Product Image",
+        "button": "Upload",
+        "preview": "Preview",
+        "tooltip": "Upload an image for your product.",
+        "requiredTooltip": "Image is required",
+        "requiredTitle": "Product Image Required",
+        "requiredDescription": "Please upload an image for your product.",
+        "infoTitle": "Information",
+        "infoDescription": "This version only supports uploading one image per product."
+    },
+    "notifications": {
+        "addSuccess": "Menu item added successfully!"
+    },
+    "errors": {
+        "addFailed": "Failed to add menu item. Please try again.",
+        "noSubcategories": "No subcategories available for your account. Please contact support."
+    }
+}

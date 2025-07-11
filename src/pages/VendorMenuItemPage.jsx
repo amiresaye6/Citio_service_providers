@@ -23,14 +23,19 @@ import {
   fetchProductReviews,
   clearProductReviews
 } from '../redux/slices/productsSlice';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
 
 const VendorMenuItemPage = () => {
+  const { t, i18n } = useTranslation('vendorMenuItem');
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const direction = i18n.dir();
+  const isRTL = direction === "rtl";
 
   // Current user and datetime
   const currentUser = 'amiresaye6';
@@ -108,15 +113,15 @@ const VendorMenuItemPage = () => {
   // Show error messages if any
   useEffect(() => {
     if (productError) {
-      message.error(`Failed to load product: ${productError.detail || 'Unknown error'}`);
+      message.error(t('errors.loadFailed', { error: productError.detail || t('errors.unknown') }));
     }
     if (updateError) {
-      message.error(`Failed to update product: ${updateError.detail || 'Unknown error'}`);
+      message.error(t('errors.updateFailed', { error: updateError.detail || t('errors.unknown') }));
     }
     if (reviewsError) {
-      message.error(`Failed to load reviews: ${reviewsError.detail || 'Unknown error'}`);
+      message.error(t('errors.reviewsLoadFailed', { error: reviewsError.detail || t('errors.unknown') }));
     }
-  }, [productError, updateError, reviewsError]);
+  }, [productError, updateError, reviewsError, t]);
 
   // Handle image preview
   const handlePreview = () => {
@@ -165,7 +170,7 @@ const VendorMenuItemPage = () => {
       productData: updateData
     })).then((result) => {
       if (!result.error) {
-        message.success('Menu item updated successfully!');
+        message.success(t('notifications.updateSuccess'));
         setEditMode(false);
         setImageFile(null);
       }
@@ -215,11 +220,17 @@ const VendorMenuItemPage = () => {
 
   const isLoading = productLoading || updateLoading;
 
+  // Get product name based on current language
+  const getProductName = () => {
+    if (!product) return '';
+    return isRTL && product.nameAr ? product.nameAr : product.nameEn;
+  };
+
   // Render loading state
   if (productLoading && !product) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spin size="large" tip="Loading product details..." />
+      <div className="flex items-center justify-center min-h-screen" dir={direction}>
+        <Spin size="large" tip={t('loading.productDetails')} />
       </div>
     );
   }
@@ -227,15 +238,15 @@ const VendorMenuItemPage = () => {
   // Render error state
   if (productError && !product) {
     return (
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-6 max-w-4xl mx-auto" dir={direction}>
         <Alert
-          message="Error Loading Product"
-          description={productError.detail || "Failed to load product details. Please try again."}
+          message={t('errors.loadingProduct')}
+          description={productError.detail || t('errors.failedToLoad')}
           type="error"
           showIcon
           action={
             <Button type="primary" onClick={() => dispatch(fetchProductById(parseInt(id)))}>
-              Retry
+              {t('buttons.retry')}
             </Button>
           }
         />
@@ -246,8 +257,8 @@ const VendorMenuItemPage = () => {
   // Render empty state
   if (!product) {
     return (
-      <div className="p-6 max-w-4xl mx-auto">
-        <Empty description="No product found" />
+      <div className="p-6 max-w-4xl mx-auto" dir={direction}>
+        <Empty description={t('emptyState.noProduct')} />
       </div>
     );
   }
@@ -276,18 +287,21 @@ const VendorMenuItemPage = () => {
                 </div>
                 <Rate disabled allowHalf defaultValue={calculateAverageRating()} />
                 <div className="mt-2 text-gray-500">
-                  Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                  {t('reviews.basedOn', {
+                    count: reviews.length,
+                    review: t(reviews.length === 1 ? 'reviews.review' : 'reviews.reviews')
+                  })}
                 </div>
               </Card>
             </Col>
             <Col xs={24} md={16}>
-              <Card title="Filter Reviews">
+              <Card title={t('reviews.filterTitle')}>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type={reviewFilters.minRating === undefined ? 'primary' : 'default'}
                     onClick={() => handleRatingFilter(undefined)}
                   >
-                    All
+                    {t('reviews.filters.all')}
                   </Button>
                   {[5, 4, 3, 2, 1].map(rating => (
                     <Button
@@ -296,7 +310,7 @@ const VendorMenuItemPage = () => {
                       icon={<StarOutlined />}
                       onClick={() => handleRatingFilter(rating)}
                     >
-                      {rating}+ Stars
+                      {t('reviews.filters.stars', { rating })}
                     </Button>
                   ))}
                 </div>
@@ -309,9 +323,9 @@ const VendorMenuItemPage = () => {
           className="mb-6"
           title={
             <div className="flex justify-between items-center">
-              <span>Customer Reviews</span>
+              <span>{t('reviews.customerReviews')}</span>
               <Text type="secondary">
-                Last updated: {new Date().toLocaleString()}
+                {t('reviews.lastUpdated')}: {new Date().toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
               </Text>
             </div>
           }
@@ -337,7 +351,7 @@ const VendorMenuItemPage = () => {
                       }
                       datetime={
                         <Text type="secondary">
-                          {new Date(review.createdAt).toLocaleDateString(undefined, {
+                          {new Date(review.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric',
@@ -350,14 +364,14 @@ const VendorMenuItemPage = () => {
                   </List.Item>
                 )}
                 pagination={false}
-                locale={{ emptyText: 'No reviews found' }}
+                locale={{ emptyText: t('reviews.noReviewsFound') }}
               />
             ) : (
               <Empty
                 description={
                   <div>
-                    <p>No reviews yet</p>
-                    <p className="text-gray-500 text-sm">Be the first to receive customer feedback</p>
+                    <p>{t('reviews.noReviewsYet')}</p>
+                    <p className="text-gray-500 text-sm">{t('reviews.beFirst')}</p>
                   </div>
                 }
               />
@@ -373,6 +387,7 @@ const VendorMenuItemPage = () => {
                 onChange={handleReviewsPageChange}
                 showSizeChanger
                 pageSizeOptions={['5', '10', '20']}
+                className={isRTL ? "rtl-pagination" : ""}
               />
             </div>
           )}
@@ -383,15 +398,15 @@ const VendorMenuItemPage = () => {
 
   // Main component render
   return (
-    <div className="p-6 min-h-screen">
+    <div className="p-6 min-h-screen" dir={direction}>
       {/* Breadcrumb */}
       <Breadcrumb className="mb-4">
         <Breadcrumb.Item>
           <a onClick={handleBack}>
-            <ShopOutlined /> Menu Items
+            <ShopOutlined /> {t('breadcrumb.menuItems')}
           </a>
         </Breadcrumb.Item>
-        <Breadcrumb.Item>{product.nameEn}</Breadcrumb.Item>
+        <Breadcrumb.Item>{getProductName()}</Breadcrumb.Item>
       </Breadcrumb>
 
       {/* Header */}
@@ -401,10 +416,10 @@ const VendorMenuItemPage = () => {
             icon={<ArrowLeftOutlined />}
             onClick={handleBack}
             type="text"
-            style={{ marginRight: 16 }}
+            style={{ marginRight: isRTL ? 0 : 16, marginLeft: isRTL ? 16 : 0 }}
           />
           <Title level={2} style={{ margin: 0 }}>
-            Product Details
+            {t('pageHeader.title')}
           </Title>
         </div>
         <Space>
@@ -415,7 +430,7 @@ const VendorMenuItemPage = () => {
                 onClick={handleCancel}
                 disabled={isLoading}
               >
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button
                 icon={updateLoading ? <LoadingOutlined /> : <SaveOutlined />}
@@ -423,7 +438,7 @@ const VendorMenuItemPage = () => {
                 onClick={() => form.submit()}
                 loading={updateLoading}
               >
-                Save Changes
+                {t('buttons.saveChanges')}
               </Button>
             </>
           ) : (
@@ -432,7 +447,7 @@ const VendorMenuItemPage = () => {
               type="primary"
               onClick={handleEdit}
             >
-              Edit Item
+              {t('buttons.editItem')}
             </Button>
           )}
         </Space>
@@ -443,7 +458,7 @@ const VendorMenuItemPage = () => {
           <TabPane
             tab={
               <span>
-                <TagOutlined /> Details
+                <TagOutlined /> {t('tabs.details')}
               </span>
             }
             key="details"
@@ -455,7 +470,7 @@ const VendorMenuItemPage = () => {
                   <div className="relative">
                     <Image
                       src={getImageUrl()}
-                      alt={product.nameEn}
+                      alt={getProductName()}
                       style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
                     />
                     {editMode && (
@@ -467,13 +482,13 @@ const VendorMenuItemPage = () => {
                           onChange={handleImageUpload}
                         >
                           <Button icon={<UploadOutlined />} className="bg-white">
-                            Change Image
+                            {t('buttons.changeImage')}
                           </Button>
                         </Upload>
                       </div>
                     )}
                     {!editMode && (
-                      <div className="absolute bottom-0 right-0 p-2">
+                      <div className={`absolute bottom-0 ${isRTL ? 'left-0' : 'right-0'} p-2`}>
                         <Button
                           icon={<EyeOutlined />}
                           shape="circle"
@@ -487,28 +502,28 @@ const VendorMenuItemPage = () => {
                 {/* Additional info in card */}
                 <Card className="mb-6">
                   <Descriptions column={1} bordered size="small">
-                    <Descriptions.Item label="ID">#{product.id}</Descriptions.Item>
+                    <Descriptions.Item label={t('productInfo.id')}>#{product.id}</Descriptions.Item>
                     {product.vendorBusinessName && (
-                      <Descriptions.Item label="Vendor">
+                      <Descriptions.Item label={t('productInfo.vendor')}>
                         {product.vendorBusinessName}
                       </Descriptions.Item>
                     )}
                     {product.vendorFullName && (
-                      <Descriptions.Item label="Vendor Full Name">
+                      <Descriptions.Item label={t('productInfo.vendorFullName')}>
                         {product.vendorFullName}
                       </Descriptions.Item>
                     )}
                     {product.rating !== undefined && (
-                      <Descriptions.Item label="Rating">
+                      <Descriptions.Item label={t('productInfo.rating')}>
                         <Space>
                           {product.rating} / 5
                           <Rate disabled defaultValue={product.rating} />
                         </Space>
                       </Descriptions.Item>
                     )}
-                    <Descriptions.Item label="Last Updated">
+                    <Descriptions.Item label={t('productInfo.lastUpdated')}>
                       <div className="text-xs text-gray-500">{currentDateTime}</div>
-                      <div className="text-xs text-gray-500">by {currentUser}</div>
+                      <div className="text-xs text-gray-500">{t('productInfo.by', { user: currentUser })}</div>
                     </Descriptions.Item>
                   </Descriptions>
                 </Card>
@@ -525,39 +540,39 @@ const VendorMenuItemPage = () => {
                     >
                       <Row gutter={16}>
                         <Col span={24}>
-                          <Title level={4}>Product Information</Title>
+                          <Title level={4}>{t('editForm.productInformation')}</Title>
                           <Divider />
                         </Col>
 
                         <Col xs={24} md={12}>
                           <Form.Item
                             name="nameEn"
-                            label="Name (English)"
-                            rules={[{ required: true, message: 'Please enter English name' }]}
+                            label={t('editForm.nameEn')}
+                            rules={[{ required: true, message: t('validation.nameEnRequired') }]}
                           >
-                            <Input placeholder="e.g. Beef Burger" />
+                            <Input placeholder={t('placeholders.nameEn')} />
                           </Form.Item>
                         </Col>
 
                         <Col xs={24} md={12}>
                           <Form.Item
                             name="nameAr"
-                            label="Name (Arabic)"
-                            rules={[{ required: true, message: 'Please enter Arabic name' }]}
+                            label={t('editForm.nameAr')}
+                            rules={[{ required: true, message: t('validation.nameArRequired') }]}
                           >
-                            <Input placeholder="e.g. برجر لحم" />
+                            <Input placeholder={t('placeholders.nameAr')} />
                           </Form.Item>
                         </Col>
 
                         <Col span={24}>
                           <Form.Item
                             name="description"
-                            label="Description"
-                            rules={[{ required: true, message: 'Please enter description' }]}
+                            label={t('editForm.description')}
+                            rules={[{ required: true, message: t('validation.descriptionRequired') }]}
                           >
                             <Input.TextArea
                               rows={4}
-                              placeholder="Describe your product..."
+                              placeholder={t('placeholders.description')}
                               showCount
                               maxLength={500}
                             />
@@ -567,8 +582,8 @@ const VendorMenuItemPage = () => {
                         <Col xs={24} md={12}>
                           <Form.Item
                             name="price"
-                            label="Price"
-                            rules={[{ required: true, message: 'Please enter price' }]}
+                            label={t('editForm.price')}
+                            rules={[{ required: true, message: t('validation.priceRequired') }]}
                           >
                             <InputNumber
                               min={0}
@@ -583,15 +598,15 @@ const VendorMenuItemPage = () => {
                         <Col xs={24} md={12}>
                           <Form.Item
                             name="subCategoryId"
-                            label="Subcategory"
-                            rules={[{ required: true, message: 'Please select a subcategory' }]}
+                            label={t('editForm.subcategory')}
+                            rules={[{ required: true, message: t('validation.subcategoryRequired') }]}
                           >
                             <Select
-                              placeholder="Select a subcategory"
+                              placeholder={t('placeholders.subcategory')}
                               loading={subcategoriesLoading}
                               options={subcategories?.map((s) => ({
                                 value: s.id,
-                                label: `${s.nameEn} (${s.nameAr})`,
+                                label: isRTL ? `${s.nameAr} (${s.nameEn})` : `${s.nameEn} (${s.nameAr})`,
                               }))}
                               showSearch
                               optionFilterProp="label"
@@ -604,12 +619,12 @@ const VendorMenuItemPage = () => {
                     <>
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <Title level={3} className="mb-1">{product.nameEn}</Title>
-                          <Text type="secondary" className="block text-lg">{product.nameAr}</Text>
+                          <Title level={3} className="mb-1">{isRTL ? product.nameAr : product.nameEn}</Title>
+                          <Text type="secondary" className="block text-lg">{isRTL ? product.nameEn : product.nameAr}</Text>
                         </div>
                         <div className="border border-blue-100 rounded-lg p-3">
                           <Title level={3} className="m-0">
-                            <DollarOutlined className="mr-1" />
+                            <DollarOutlined className={isRTL ? "ml-1" : "mr-1"} />
                             ${Number(product.price).toFixed(2)}
                           </Title>
                         </div>
@@ -618,17 +633,19 @@ const VendorMenuItemPage = () => {
                       <Divider />
 
                       <div>
-                        <Title level={5}>Description</Title>
-                        <Text className="block whitespace-pre-wrap">{product.description}</Text>
+                        <Title level={5}>{t('productDetails.description')}</Title>
+                        <Text className="block whitespace-pre-wrap">
+                          {isRTL && product.descriptionAr ? product.descriptionAr : product.description}
+                        </Text>
                       </div>
 
-                      <div className="mt-6 pt-4 border-t border-gray-200 text-right">
+                      <div className={`mt-6 pt-4 border-t border-gray-200 ${isRTL ? 'text-left' : 'text-right'}`}>
                         <Button
                           type="link"
                           icon={<MessageOutlined />}
                           onClick={() => setActiveTab('reviews')}
                         >
-                          View Customer Reviews
+                          {t('buttons.viewReviews')}
                         </Button>
                       </div>
                     </>
@@ -641,7 +658,7 @@ const VendorMenuItemPage = () => {
           <TabPane
             tab={
               <span>
-                <MessageOutlined /> Reviews
+                <MessageOutlined /> {t('tabs.reviews')}
                 {productReviews?.items?.length > 0 && ` (${productReviews.items.length})`}
               </span>
             }
@@ -654,12 +671,12 @@ const VendorMenuItemPage = () => {
         {/* Image preview modal */}
         <Modal
           open={previewVisible}
-          title="Image Preview"
+          title={t('modal.imagePreview')}
           footer={null}
           onCancel={() => setPreviewVisible(false)}
         >
           <img
-            alt="Preview"
+            alt={t('modal.preview')}
             style={{ width: '100%' }}
             src={previewImage}
           />

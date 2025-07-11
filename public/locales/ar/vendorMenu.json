@@ -1,0 +1,59 @@
+{
+    "pageHeader": {
+        "title": "القائمة",
+        "subtitle": "عرض وإدارة عناصر القائمة الخاصة بك"
+    },
+    "buttons": {
+        "addProduct": "إضافة منتج",
+        "clearSearch": "مسح البحث",
+        "addFirstItem": "إضافة أول عنصر للقائمة",
+        "edit": "تعديل",
+        "deactivate": "تعطيل"
+    },
+    "table": {
+        "image": "الصورة",
+        "name": "الاسم",
+        "description": "الوصف",
+        "price": "السعر",
+        "category": "التصنيف",
+        "status": "الحالة"
+    },
+    "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+    },
+    "actions": {
+        "viewEdit": "عرض وتعديل",
+        "deactivate": "تعطيل"
+    },
+    "search": {
+        "placeholder": "البحث في عناصر القائمة...",
+        "itemFound": "عنصر موجود",
+        "itemsFound": "عناصر موجودة"
+    },
+    "emptyState": {
+        "noItems": "لم يتم العثور على عناصر في القائمة"
+    },
+    "modal": {
+        "confirmDeactivation": "تأكيد التعطيل",
+        "yesDeactivate": "نعم، تعطيل",
+        "cancel": "إلغاء",
+        "deactivatePrompt": "هل أنت متأكد من رغبتك في تعطيل <strong>{{name}}</strong>؟",
+        "deactivateDescription": "سيؤدي هذا إلى جعل العنصر غير متاح للطلب من قبل العملاء. سيتم تسجيل هذا الإجراء."
+    },
+    "loading": {
+        "menuItems": "جاري تحميل عناصر القائمة..."
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} عنصر"
+    },
+    "notifications": {
+        "itemDeactivated": {
+            "title": "تم تعطيل العنصر",
+            "message": "تم تعطيل عنصر القائمة."
+        }
+    },
+    "errors": {
+        "operationFailed": "فشلت العملية"
+    }
+}

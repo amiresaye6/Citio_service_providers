@@ -1,0 +1,58 @@
+{
+    "pageHeader": {
+        "title": "إدارة القائمة"
+    },
+    "cardHeader": {
+        "title": "إضافة عنصر جديد للقائمة"
+    },
+    "buttons": {
+        "backToMenu": "العودة إلى القائمة",
+        "addMenuItem": "إضافة عنصر للقائمة",
+        "cancel": "إلغاء"
+    },
+    "form": {
+        "basicInfo": "معلومات أساسية",
+        "englishInfo": "المعلومات بالإنجليزية",
+        "arabicInfo": "المعلومات بالعربية",
+        "priceCategory": "السعر والتصنيف",
+        "nameEn": "الاسم (بالإنجليزية)",
+        "nameAr": "الاسم (بالعربية)",
+        "descriptionEn": "الوصف (بالإنجليزية)",
+        "price": "السعر",
+        "subcategory": "الفئة الفرعية"
+    },
+    "placeholders": {
+        "nameEn": "مثال: Cheeseburger",
+        "nameAr": "مثال: تشيز برجر",
+        "descriptionEn": "صف عنصر القائمة الخاص بك...",
+        "subcategory": "اختر فئة فرعية"
+    },
+    "validation": {
+        "nameEnRequired": "الرجاء إدخال الاسم باللغة الإنجليزية",
+        "nameArRequired": "الرجاء إدخال الاسم باللغة العربية",
+        "descriptionEnRequired": "الرجاء إدخال الوصف باللغة الإنجليزية",
+        "priceRequired": "الرجاء إدخال السعر",
+        "subcategoryRequired": "الرجاء اختيار فئة فرعية",
+        "imageRequired": "الرجاء تحميل صورة",
+        "imageTypeInvalid": "يمكنك فقط تحميل ملفات الصور!",
+        "imageSizeInvalid": "يجب أن تكون الصورة أصغر من 2 ميجابايت!"
+    },
+    "upload": {
+        "title": "صورة المنتج",
+        "button": "تحميل",
+        "preview": "معاينة",
+        "tooltip": "قم بتحميل صورة لمنتجك.",
+        "requiredTooltip": "الصورة مطلوبة",
+        "requiredTitle": "صورة المنتج مطلوبة",
+        "requiredDescription": "الرجاء تحميل صورة لمنتجك.",
+        "infoTitle": "معلومات",
+        "infoDescription": "هذا الإصدار يدعم فقط تحميل صورة واحدة لكل منتج."
+    },
+    "notifications": {
+        "addSuccess": "تمت إضافة عنصر القائمة بنجاح!"
+    },
+    "errors": {
+        "addFailed": "فشلت إضافة عنصر القائمة. يرجى المحاولة مرة أخرى.",
+        "noSubcategories": "لا توجد فئات فرعية متاحة لحسابك. يرجى الاتصال بالدعم."
+    }
+}

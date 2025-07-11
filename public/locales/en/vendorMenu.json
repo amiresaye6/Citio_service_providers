@@ -1,0 +1,59 @@
+{
+    "pageHeader": {
+        "title": "Menu",
+        "subtitle": "View and manage your menu items"
+    },
+    "buttons": {
+        "addProduct": "Add Product",
+        "clearSearch": "Clear search",
+        "addFirstItem": "Add Your First Menu Item",
+        "edit": "Edit",
+        "deactivate": "Deactivate"
+    },
+    "table": {
+        "image": "Image",
+        "name": "Name",
+        "description": "Description",
+        "price": "Price",
+        "category": "Category",
+        "status": "Status"
+    },
+    "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+    },
+    "actions": {
+        "viewEdit": "View & Edit",
+        "deactivate": "Deactivate"
+    },
+    "search": {
+        "placeholder": "Search menu items...",
+        "itemFound": "item found",
+        "itemsFound": "items found"
+    },
+    "emptyState": {
+        "noItems": "No menu items found"
+    },
+    "modal": {
+        "confirmDeactivation": "Confirm Deactivation",
+        "yesDeactivate": "Yes, Deactivate",
+        "cancel": "Cancel",
+        "deactivatePrompt": "Are you sure you want to deactivate <strong>{{name}}</strong>?",
+        "deactivateDescription": "This will make the item unavailable for customers to order. This action will be logged."
+    },
+    "loading": {
+        "menuItems": "Loading menu items..."
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} of {{total}} items"
+    },
+    "notifications": {
+        "itemDeactivated": {
+            "title": "Item Deactivated",
+            "message": "Menu item has been deactivated."
+        }
+    },
+    "errors": {
+        "operationFailed": "Operation Failed"
+    }
+}

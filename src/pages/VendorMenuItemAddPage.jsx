@@ -32,11 +32,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearProductCreationError, clearProviderSubcategories, createProduct, fetchProviderSubcategories } from '../redux/slices/productsSlice';
+import { useTranslation } from 'react-i18next';
 
 const { Title } = Typography;
 const { TextArea } = Input;
 
 const VendorMenuItemAddPage = () => {
+  const { t, i18n } = useTranslation('menuItemAdd');
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
@@ -46,7 +48,10 @@ const VendorMenuItemAddPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Get data from Redux store - changed state.product to state.products
+  const direction = i18n.dir();
+  const isRTL = direction === "rtl";
+
+  // Get data from Redux store
   const providerSubcategories = useSelector(state => state.products.providerSubcategories);
   const subcategoriesLoading = useSelector(state => state.products.providerSubcategoriesLoading);
   const loading = useSelector(state => state.products.productCreationLoading);
@@ -73,24 +78,24 @@ const VendorMenuItemAddPage = () => {
   // Navigate to menu page after successful product creation
   useEffect(() => {
     if (product) {
-      message.success('Menu item added successfully!');
+      message.success(t('notifications.addSuccess'));
       form.resetFields();
       setFileList([]);
       navigate('/vendor/menu');
     }
-  }, [product, navigate, form]);
+  }, [product, navigate, form, t]);
 
   // Show error message if creation fails
   useEffect(() => {
     if (error) {
-      message.error(error.detail || 'Failed to add menu item. Please try again.');
+      message.error(error.detail || t('errors.addFailed'));
     }
-  }, [error]);
+  }, [error, t]);
 
   // Form submission
   const handleFinish = (values) => {
     if (fileList.length === 0) {
-      message.error('Please upload an image');
+      message.error(t('validation.imageRequired'));
       return;
     }
 
@@ -109,7 +114,6 @@ const VendorMenuItemAddPage = () => {
     dispatch(createProduct(productData));
   };
 
-  // Rest of the component remains the same...
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
@@ -127,7 +131,7 @@ const VendorMenuItemAddPage = () => {
   const uploadButton = (
     <div className="flex flex-col items-center justify-center p-6 h-full">
       <PlusOutlined className="text-2xl mb-2" />
-      <div className="mt-2">Upload</div>
+      <div className="mt-2">{t('upload.button')}</div>
     </div>
   );
 
@@ -144,12 +148,12 @@ const VendorMenuItemAddPage = () => {
   const beforeUpload = (file) => {
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
-      message.error('You can only upload image files!');
+      message.error(t('validation.imageTypeInvalid'));
     }
 
     const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
-      message.error('Image must be smaller than 2MB!');
+      message.error(t('validation.imageSizeInvalid'));
     }
 
     return isImage && isLt2M;
@@ -159,17 +163,19 @@ const VendorMenuItemAddPage = () => {
   const isLoading = loading || subcategoriesLoading;
 
   return (
-    <div className="p-6 min-h-screen ">
+    <div className="p-6 min-h-screen" dir={direction}>
       <div className="flex items-center mb-6">
         <Button
           icon={<ArrowLeftOutlined />}
           onClick={() => navigate('/vendor/menu')}
           type="text"
-          style={{ marginRight: '16px' }}
+          style={{ marginRight: isRTL ? 0 : '16px', marginLeft: isRTL ? '16px' : 0 }}
         >
-          Back to Menu
+          {t('buttons.backToMenu')}
         </Button>
-        <Title level={2} style={{ margin: 0 }}>Menu Management</Title>
+        <Title level={2} style={{ margin: 0 }}>
+          {t('pageHeader.title')}
+        </Title>
       </div>
 
       <Card
@@ -180,7 +186,7 @@ const VendorMenuItemAddPage = () => {
         className="bg-white"
       >
         <Title level={3} style={{ marginBottom: '24px', color: '#1a1a1a' }}>
-          <PlusOutlined style={{ color: '#1890ff', marginRight: '10px' }} /> Add New Menu Item
+          <PlusOutlined style={{ color: '#1890ff', marginRight: isRTL ? 0 : '10px', marginLeft: isRTL ? '10px' : 0 }} /> {t('cardHeader.title')}
         </Title>
 
         <Divider />
@@ -195,37 +201,35 @@ const VendorMenuItemAddPage = () => {
             }}
             className="mt-6"
           >
-            {/* Form content remains the same... */}
             <Row gutter={32}>
               <Col xs={24} lg={14}>
-                {/* Form fields remain the same... */}
-                <div className=" p-6 rounded-lg mb-6">
-                  <Title level={4} className="mb-4">Basic Information</Title>
+                <div className="p-6 rounded-lg mb-6">
+                  <Title level={4} className="mb-4">{t('form.basicInfo')}</Title>
 
                   {/* English Fields */}
-                  <div className="mb-4 border-l-4 border-blue-400 pl-4">
+                  <div className={`mb-4 ${isRTL ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-blue-400`}>
                     <Title level={5} className="mb-2 flex items-center">
-                      <TranslationOutlined className="mr-2" /> English Information
+                      <TranslationOutlined className={isRTL ? "ml-2" : "mr-2"} /> {t('form.englishInfo')}
                     </Title>
                     <Row gutter={16}>
                       <Col span={24}>
                         <Form.Item
                           name="nameEn"
-                          label="Name (English)"
-                          rules={[{ required: true, message: 'Please enter English name' }]}
+                          label={t('form.nameEn')}
+                          rules={[{ required: true, message: t('validation.nameEnRequired') }]}
                         >
-                          <Input placeholder="e.g. Cheeseburger" />
+                          <Input placeholder={t('placeholders.nameEn')} />
                         </Form.Item>
                       </Col>
                       <Col span={24}>
                         <Form.Item
                           name="descriptionEn"
-                          label="Description (English)"
-                          rules={[{ required: true, message: 'Please enter English description' }]}
+                          label={t('form.descriptionEn')}
+                          rules={[{ required: true, message: t('validation.descriptionEnRequired') }]}
                         >
                           <TextArea
                             rows={3}
-                            placeholder="Describe your menu item..."
+                            placeholder={t('placeholders.descriptionEn')}
                             showCount
                             maxLength={200}
                           />
@@ -235,34 +239,34 @@ const VendorMenuItemAddPage = () => {
                   </div>
 
                   {/* Arabic Fields */}
-                  <div className="mb-4 border-l-4 border-green-400 pl-4">
+                  <div className={`mb-4 ${isRTL ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-400`}>
                     <Title level={5} className="mb-2 flex items-center">
-                      <TranslationOutlined className="mr-2" /> Arabic Information
+                      <TranslationOutlined className={isRTL ? "ml-2" : "mr-2"} /> {t('form.arabicInfo')}
                     </Title>
                     <Row gutter={16}>
                       <Col span={24}>
                         <Form.Item
                           name="nameAr"
-                          label="Name (Arabic)"
-                          rules={[{ required: true, message: 'Please enter Arabic name' }]}
+                          label={t('form.nameAr')}
+                          rules={[{ required: true, message: t('validation.nameArRequired') }]}
                         >
-                          <Input placeholder="e.g. تشيز برجر" />
+                          <Input placeholder={t('placeholders.nameAr')} />
                         </Form.Item>
                       </Col>
                     </Row>
                   </div>
 
                   {/* Price and Category */}
-                  <div className="border-l-4 border-yellow-400 pl-4">
+                  <div className={`${isRTL ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-yellow-400`}>
                     <Title level={5} className="mb-2 flex items-center">
-                      <DollarOutlined className="mr-2" /> Price & Category
+                      <DollarOutlined className={isRTL ? "ml-2" : "mr-2"} /> {t('form.priceCategory')}
                     </Title>
                     <Row gutter={16}>
                       <Col xs={24} md={12}>
                         <Form.Item
                           name="price"
-                          label="Price"
-                          rules={[{ required: true, message: 'Please enter price' }]}
+                          label={t('form.price')}
+                          rules={[{ required: true, message: t('validation.priceRequired') }]}
                         >
                           <InputNumber
                             min={0}
@@ -276,15 +280,15 @@ const VendorMenuItemAddPage = () => {
                       <Col xs={24} md={12}>
                         <Form.Item
                           name="subCategoryId"
-                          label="Subcategory"
-                          rules={[{ required: true, message: 'Please select a subcategory' }]}
+                          label={t('form.subcategory')}
+                          rules={[{ required: true, message: t('validation.subcategoryRequired') }]}
                         >
                           <Select
-                            placeholder="Select a subcategory"
+                            placeholder={t('placeholders.subcategory')}
                             loading={subcategoriesLoading}
                             options={providerSubcategories?.map((s) => ({
                               value: s.id,
-                              label: `${s.nameEn} (${s.nameAr})`,
+                              label: isRTL ? `${s.nameAr} (${s.nameEn})` : `${s.nameEn} (${s.nameAr})`,
                             }))}
                             showSearch
                             optionFilterProp="label"
@@ -292,7 +296,7 @@ const VendorMenuItemAddPage = () => {
                         </Form.Item>
                         {providerSubcategories.length === 0 && !subcategoriesLoading && (
                           <div className="text-xs text-red-500 mt-1">
-                            No subcategories available for your account. Please contact support.
+                            {t('errors.noSubcategories')}
                           </div>
                         )}
                       </Col>
@@ -308,30 +312,30 @@ const VendorMenuItemAddPage = () => {
                     size="large"
                     disabled={fileList.length === 0 || isLoading || providerSubcategories.length === 0}
                   >
-                    Add Menu Item
+                    {t('buttons.addMenuItem')}
                   </Button>
                   <Button
-                    style={{ marginLeft: '12px' }}
+                    style={{ marginLeft: isRTL ? 0 : '12px', marginRight: isRTL ? '12px' : 0 }}
                     onClick={() => navigate('/vendor/menu')}
                     disabled={isLoading}
                   >
-                    Cancel
+                    {t('buttons.cancel')}
                   </Button>
                 </Form.Item>
               </Col>
 
               <Col xs={24} lg={10}>
-                <div className=" p-6 rounded-lg h-full">
+                <div className="p-6 rounded-lg h-full">
                   <Title level={4} className="flex items-center mb-4">
-                    <PictureOutlined className="mr-2" /> Product Image
-                    <Tooltip title="Upload an image for your product.">
-                      <InfoCircleOutlined style={{ marginLeft: 8, fontSize: 16 }} />
+                    <PictureOutlined className={isRTL ? "ml-2" : "mr-2"} /> {t('upload.title')}
+                    <Tooltip title={t('upload.tooltip')}>
+                      <InfoCircleOutlined style={{ marginLeft: isRTL ? 0 : 8, marginRight: isRTL ? 8 : 0, fontSize: 16 }} />
                     </Tooltip>
                   </Title>
 
                   <Form.Item
                     required
-                    tooltip="Image is required"
+                    tooltip={t('upload.requiredTooltip')}
                   >
                     <Upload
                       listType="picture-card"
@@ -350,22 +354,22 @@ const VendorMenuItemAddPage = () => {
                       footer={null}
                       onCancel={() => setPreviewVisible(false)}
                     >
-                      <img alt="Preview" style={{ width: '100%' }} src={previewImage} />
+                      <img alt={t('upload.preview')} style={{ width: '100%' }} src={previewImage} />
                     </Modal>
                   </Form.Item>
 
                   {fileList.length === 0 ? (
                     <Alert
-                      message="Product Image Required"
-                      description="Please upload an image for your product."
+                      message={t('upload.requiredTitle')}
+                      description={t('upload.requiredDescription')}
                       type="warning"
                       showIcon
                     />
                   ) : null}
 
                   <Alert
-                    message="Information"
-                    description="This version only supports uploading one image per product."
+                    message={t('upload.infoTitle')}
+                    description={t('upload.infoDescription')}
                     type="info"
                     showIcon
                     style={{ marginTop: '16px' }}

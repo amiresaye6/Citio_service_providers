@@ -1,0 +1,88 @@
+{
+    "pageHeader": {
+        "title": "تفاصيل المنتج"
+    },
+    "breadcrumb": {
+        "menuItems": "عناصر القائمة"
+    },
+    "buttons": {
+        "editItem": "تعديل العنصر",
+        "saveChanges": "حفظ التغييرات",
+        "cancel": "إلغاء",
+        "retry": "إعادة المحاولة",
+        "changeImage": "تغيير الصورة",
+        "viewReviews": "عرض تقييمات العملاء"
+    },
+    "tabs": {
+        "details": "التفاصيل",
+        "reviews": "التقييمات"
+    },
+    "productInfo": {
+        "id": "المعرف",
+        "vendor": "البائع",
+        "vendorFullName": "الاسم الكامل للبائع",
+        "rating": "التقييم",
+        "lastUpdated": "آخر تحديث",
+        "by": "بواسطة {{user}}"
+    },
+    "productDetails": {
+        "description": "الوصف"
+    },
+    "editForm": {
+        "productInformation": "معلومات المنتج",
+        "nameEn": "الاسم (بالإنجليزية)",
+        "nameAr": "الاسم (بالعربية)",
+        "description": "الوصف",
+        "price": "السعر",
+        "subcategory": "الفئة الفرعية"
+    },
+    "placeholders": {
+        "nameEn": "مثال: Beef Burger",
+        "nameAr": "مثال: برجر لحم",
+        "description": "صف منتجك...",
+        "subcategory": "اختر فئة فرعية"
+    },
+    "validation": {
+        "nameEnRequired": "الرجاء إدخال الاسم باللغة الإنجليزية",
+        "nameArRequired": "الرجاء إدخال الاسم باللغة العربية",
+        "descriptionRequired": "الرجاء إدخال الوصف",
+        "priceRequired": "الرجاء إدخال السعر",
+        "subcategoryRequired": "الرجاء اختيار فئة فرعية"
+    },
+    "reviews": {
+        "customerReviews": "تقييمات العملاء",
+        "basedOn": "بناءً على {{count}} {{review}}",
+        "review": "تقييم",
+        "reviews": "تقييمات",
+        "filterTitle": "تصفية التقييمات",
+        "noReviewsFound": "لم يتم العثور على تقييمات",
+        "noReviewsYet": "لا توجد تقييمات حتى الآن",
+        "beFirst": "كن أول من يتلقى تقييمات العملاء",
+        "lastUpdated": "آخر تحديث",
+        "filters": {
+            "all": "الكل",
+            "stars": "{{rating}}+ نجوم"
+        }
+    },
+    "emptyState": {
+        "noProduct": "لم يتم العثور على منتج"
+    },
+    "modal": {
+        "imagePreview": "معاينة الصورة",
+        "preview": "معاينة"
+    },
+    "loading": {
+        "productDetails": "جاري تحميل تفاصيل المنتج..."
+    },
+    "errors": {
+        "loadingProduct": "خطأ في تحميل المنتج",
+        "failedToLoad": "فشل تحميل تفاصيل المنتج. الرجاء المحاولة مرة أخرى.",
+        "loadFailed": "فشل تحميل المنتج: {{error}}",
+        "updateFailed": "فشل تحديث المنتج: {{error}}",
+        "reviewsLoadFailed": "فشل تحميل التقييمات: {{error}}",
+        "unknown": "خطأ غير معروف"
+    },
+    "notifications": {
+        "updateSuccess": "تم تحديث عنصر القائمة بنجاح!"
+    }
+}
