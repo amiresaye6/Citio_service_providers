@@ -12,19 +12,14 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { UserOutlined, CalendarOutlined, MessageOutlined } from '@ant-design/icons';
 import { Grid } from "antd";
 import TableWrapper from '../components/common/TableWrapper';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
-const ratingFilterOptions = [
-    { label: 'All Ratings', value: 'all' },
-    { label: '5 Stars Only', value: '5' },
-    { label: '4-5 Stars', value: '4-5' },
-    { label: '1-3 Stars', value: '1-3' },
-];
-
 const VendorRatingsPage = () => {
+    const { t, i18n } = useTranslation('vendorRatings');
     const dispatch = useDispatch();
     const { vendorReviews, loading, error } = useSelector((state) => state.vendors);
     const [currentPage, setCurrentPage] = useState(1);
@@ -37,6 +32,15 @@ const VendorRatingsPage = () => {
 
     const screens = useBreakpoint();
     const isMobile = !screens.md;
+    const direction = i18n.dir();
+    const isRTL = direction === "rtl";
+
+    const ratingFilterOptions = [
+        { label: t('filters.allRatings'), value: 'all' },
+        { label: t('filters.fiveStarsOnly'), value: '5' },
+        { label: t('filters.fourToFiveStars'), value: '4-5' },
+        { label: t('filters.oneToThreeStars'), value: '1-3' },
+    ];
 
     // Fetch ratings
     useEffect(() => {
@@ -54,10 +58,10 @@ const VendorRatingsPage = () => {
     // Handle errors
     useEffect(() => {
         if (error) {
-            ToastNotifier.error('Failed to load ratings', error);
+            ToastNotifier.error(t('notifications.loadFailed'), error);
             dispatch(clearError());
         }
-    }, [error, dispatch]);
+    }, [error, dispatch, t]);
 
     // Handle search
     const handleSearch = (value) => {
@@ -82,6 +86,11 @@ const VendorRatingsPage = () => {
         }
     };
 
+    // Get product name based on current language
+    const getProductName = (review) => {
+        return isRTL && review.productNameAr ? review.productNameAr : review.productNameEn;
+    };
+
     // Enhanced Card UI for mobile/tablet; table for desktop
     const renderCard = (review) => (
         <Card
@@ -101,7 +110,7 @@ const VendorRatingsPage = () => {
                 </Col>
                 <Col flex="auto">
                     <Title level={5} style={{ margin: 0 }}>{review.userName}</Title>
-                    <Text type="secondary" style={{ fontSize: 13 }}>{review.productNameEn}</Text>
+                    <Text type="secondary" style={{ fontSize: 13 }}>{getProductName(review)}</Text>
                 </Col>
                 <Col>
                     <Rate disabled value={review.rating} style={{ color: "#ffb700" }} />
@@ -110,15 +119,15 @@ const VendorRatingsPage = () => {
             <Row style={{ marginBottom: 8 }}>
                 <Col flex="auto">
                     <Text>
-                        <MessageOutlined style={{ color: "#69c0ff", marginRight: 6 }} />
-                        {review.comment || <Text type="secondary">No comment.</Text>}
+                        <MessageOutlined style={{ color: "#69c0ff", marginRight: isRTL ? 0 : 6, marginLeft: isRTL ? 6 : 0 }} />
+                        {review.comment || <Text type="secondary">{t('reviews.noComment')}</Text>}
                     </Text>
                 </Col>
             </Row>
             <Row gutter={12} style={{ fontSize: 13 }}>
                 <Col>
                     <CalendarOutlined style={{ color: "#aaa" }} />{" "}
-                    <span>{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "-"}</span>
+                    <span>{review.createdAt ? new Date(review.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US') : "-"}</span>
                 </Col>
             </Row>
         </Card>
@@ -127,49 +136,50 @@ const VendorRatingsPage = () => {
     // Table columns for desktop
     const columns = [
         {
-            title: 'Reviewer',
+            title: t('table.reviewer'),
             dataIndex: 'userName',
             key: 'userName',
             sorter: true,
         },
         {
-            title: 'Product',
-            dataIndex: 'productNameEn',
-            key: 'productNameEn',
+            title: t('table.product'),
+            dataIndex: isRTL ? 'productNameAr' : 'productNameEn',
+            key: 'product',
             sorter: true,
+            render: (text, record) => getProductName(record),
         },
         {
-            title: 'Rating',
+            title: t('table.rating'),
             dataIndex: 'rating',
             key: 'rating',
             sorter: true,
             render: (rating) => <Rate disabled value={rating} style={{ color: "#ffb700" }} />,
         },
         {
-            title: 'Comment',
+            title: t('table.comment'),
             dataIndex: 'comment',
             key: 'comment',
             render: (comment) =>
                 <span>
-                    <MessageOutlined style={{ color: "#69c0ff", marginRight: 4 }} />
-                    {comment || <Text type="secondary">No comment.</Text>}
+                    <MessageOutlined style={{ color: "#69c0ff", marginRight: isRTL ? 0 : 4, marginLeft: isRTL ? 4 : 0 }} />
+                    {comment || <Text type="secondary">{t('reviews.noComment')}</Text>}
                 </span>
         },
         {
-            title: 'Date',
+            title: t('table.date'),
             dataIndex: 'createdAt',
             key: 'createdAt',
             sorter: true,
             render: (date) =>
-                date ? new Date(date).toLocaleDateString() : "-",
+                date ? new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US') : "-",
         }
     ];
 
     return (
-        <div className="p-6 min-h-screen">
+        <div className="p-6 min-h-screen" dir={direction}>
             <PageHeader
-                title="Vendor Ratings"
-                subtitle="View and manage user-submitted reviews and ratings"
+                title={t('pageHeader.title')}
+                subtitle={t('pageHeader.subtitle')}
                 actions={
                     <Button
                         type="primary"
@@ -183,10 +193,10 @@ const VendorRatingsPage = () => {
                                 MinRating: minRating,
                                 MaxRating: maxRating,
                             }));
-                            ToastNotifier.info('Refresh', 'Ratings refreshed.');
+                            ToastNotifier.info(t('notifications.refreshTitle'), t('notifications.refreshMessage'));
                         }}
                     >
-                        Refresh
+                        {t('buttons.refresh')}
                     </Button>
                 }
             />
@@ -194,14 +204,14 @@ const VendorRatingsPage = () => {
             <Row gutter={[16, 16]} className="mb-5" align="middle" wrap>
                 <Col xs={24} md={12}>
                     <SearchInput
-                        placeholder="Search by reviewer, product, or comment..."
+                        placeholder={t('search.placeholder')}
                         onSearch={handleSearch}
                         className="w-full"
                     />
                 </Col>
                 <Col xs={24} md={12}>
                     <Select
-                        placeholder="Filter by rating"
+                        placeholder={t('filters.placeholder')}
                         onChange={handleRatingFilterChange}
                         className="w-full md:w-48"
                         allowClear
@@ -215,7 +225,7 @@ const VendorRatingsPage = () => {
             </Row>
 
             {loading ? (
-                <LoadingSpinner text="Loading ratings..." />
+                <LoadingSpinner text={t('loading')} />
             ) : (
                 <>
                     {isMobile ? (
@@ -223,9 +233,9 @@ const VendorRatingsPage = () => {
                             {vendorReviews.items && vendorReviews.items.length > 0 ? (
                                 vendorReviews.items.map(review => renderCard(review))
                             ) : (
-                                <Empty description="No ratings found" style={{ margin: '32px 0' }} />
+                                <Empty description={t('empty.noRatings')} style={{ margin: '32px 0' }} />
                             )}
-                            <div style={{ marginTop: 16, textAlign: 'right' }}>
+                            <div style={{ marginTop: 16, textAlign: isRTL ? 'left' : 'right' }}>
                                 <Pagination
                                     current={vendorReviews.pageNumber + 1}
                                     pageSize={pageSize}
@@ -236,6 +246,7 @@ const VendorRatingsPage = () => {
                                         setCurrentPage(page);
                                         setPageSize(size);
                                     }}
+                                    className={isRTL ? "rtl-pagination" : ""}
                                 />
                             </div>
                         </div>
@@ -252,7 +263,7 @@ const VendorRatingsPage = () => {
                                     total: vendorReviews.totalPages * pageSize,
                                     showSizeChanger: true,
                                     pageSizeOptions: ['10', '20', '50'],
-                                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} ratings`,
+                                    showTotal: (total, range) => t('pagination.showTotal', { start: range[0], end: range[1], total }),
                                     position: ['bottomCenter'],
                                     showQuickJumper: true,
                                 }}
@@ -267,6 +278,7 @@ const VendorRatingsPage = () => {
                                         setSortDirection('');
                                     }
                                 }}
+                                className={isRTL ? "rtl-table" : ""}
                             />
                         </div>
                     )}

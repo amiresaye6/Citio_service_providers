@@ -1,0 +1,41 @@
+{
+    "pageHeader": {
+        "title": "Vendor Ratings",
+        "subtitle": "View and manage user-submitted reviews and ratings"
+    },
+    "buttons": {
+        "refresh": "Refresh"
+    },
+    "search": {
+        "placeholder": "Search by reviewer, product, or comment..."
+    },
+    "filters": {
+        "placeholder": "Filter by rating",
+        "allRatings": "All Ratings",
+        "fiveStarsOnly": "5 Stars Only",
+        "fourToFiveStars": "4-5 Stars",
+        "oneToThreeStars": "1-3 Stars"
+    },
+    "table": {
+        "reviewer": "Reviewer",
+        "product": "Product",
+        "rating": "Rating",
+        "comment": "Comment",
+        "date": "Date"
+    },
+    "reviews": {
+        "noComment": "No comment."
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} of {{total}} ratings"
+    },
+    "notifications": {
+        "loadFailed": "Failed to load ratings",
+        "refreshTitle": "Refresh",
+        "refreshMessage": "Ratings refreshed."
+    },
+    "loading": "Loading ratings...",
+    "empty": {
+        "noRatings": "No ratings found"
+    }
+}

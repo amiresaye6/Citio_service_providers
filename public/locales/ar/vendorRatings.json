@@ -1,0 +1,41 @@
+{
+    "pageHeader": {
+        "title": "تقييمات البائع",
+        "subtitle": "عرض وإدارة المراجعات والتقييمات المقدمة من المستخدمين"
+    },
+    "buttons": {
+        "refresh": "تحديث"
+    },
+    "search": {
+        "placeholder": "البحث حسب المراجع أو المنتج أو التعليق..."
+    },
+    "filters": {
+        "placeholder": "تصفية حسب التقييم",
+        "allRatings": "جميع التقييمات",
+        "fiveStarsOnly": "5 نجوم فقط",
+        "fourToFiveStars": "4-5 نجوم",
+        "oneToThreeStars": "1-3 نجوم"
+    },
+    "table": {
+        "reviewer": "المراجع",
+        "product": "المنتج",
+        "rating": "التقييم",
+        "comment": "التعليق",
+        "date": "التاريخ"
+    },
+    "reviews": {
+        "noComment": "لا يوجد تعليق."
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} تقييم"
+    },
+    "notifications": {
+        "loadFailed": "فشل تحميل التقييمات",
+        "refreshTitle": "تحديث",
+        "refreshMessage": "تم تحديث التقييمات."
+    },
+    "loading": "جاري تحميل التقييمات...",
+    "empty": {
+        "noRatings": "لم يتم العثور على تقييمات"
+    }
+}
