@@ -1,0 +1,90 @@
+{
+    "pageHeader": {
+        "title": "إدارة الموردين",
+        "subtitle": "إدارة الموردين وحالاتهم"
+    },
+    "buttons": {
+        "addVendor": "إضافة مورد",
+        "viewShop": "عرض المتجر",
+        "approve": "الموافقة",
+        "deactivate": "إلغاء التفعيل"
+    },
+    "search": {
+        "placeholder": "البحث بالاسم، البريد الإلكتروني، أو جهة الاتصال..."
+    },
+    "filters": {
+        "statusPlaceholder": "اختر الحالة",
+        "options": {
+            "active": "نشط",
+            "pending": "قيد الانتظار"
+        }
+    },
+    "table": {
+        "columns": {
+            "id": "المعرف",
+            "vendorId": "معرف المورد",
+            "profile": "الملف الشخصي",
+            "businessName": "اسم النشاط التجاري",
+            "owner": "المالك",
+            "email": "البريد الإلكتروني",
+            "businessType": "نوع النشاط التجاري",
+            "rating": "التقييم",
+            "status": "الحالة",
+            "actions": "الإجراءات"
+        }
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} مورد"
+    },
+    "modal": {
+        "addVendor": {
+            "title": "إضافة مورد",
+            "okText": "إضافة",
+            "cancelText": "إلغاء",
+            "businessName": "اسم النشاط التجاري",
+            "businessNameRequired": "يرجى إدخال اسم النشاط التجاري",
+            "ownerName": "اسم المالك",
+            "ownerNameRequired": "يرجى إدخال اسم المالك",
+            "email": "البريد الإلكتروني",
+            "emailRequired": "يرجى إدخال البريد الإلكتروني",
+            "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+            "password": "كلمة المرور",
+            "passwordRequired": "يرجى إدخال كلمة المرور",
+            "businessType": "نوع النشاط التجاري",
+            "businessTypeRequired": "يرجى إدخال نوع النشاط التجاري",
+            "businessTypePlaceholder": "اختر أو اكتب نوع النشاط التجاري",
+            "taxNumber": "الرقم الضريبي",
+            "taxNumberRequired": "يرجى إدخال الرقم الضريبي",
+            "subcategories": "الفئات الفرعية",
+            "subcategoriesRequired": "يرجى اختيار فئة فرعية واحدة على الأقل",
+            "subcategoriesPlaceholder": "اختر الفئات الفرعية"
+        },
+        "confirmActivate": {
+            "title": "الموافقة على المورد",
+            "message": "هل أنت متأكد من أنك تريد الموافقة على {{businessName}}؟",
+            "okText": "موافقة"
+        },
+        "confirmDeactivate": {
+            "title": "إلغاء تفعيل المورد",
+            "message": "هل أنت متأكد من أنك تريد إلغاء تفعيل {{businessName}}؟",
+            "okText": "إلغاء التفعيل"
+        },
+        "common": {
+            "cancelText": "إلغاء"
+        }
+    },
+    "notifications": {
+        "vendorAdded": "تمت إضافة المورد",
+        "vendorAddedMessage": "تم تسجيل {{businessName}}.",
+        "vendorApproved": "تمت الموافقة على المورد",
+        "vendorApprovedMessage": "تمت الموافقة على {{businessName}}.",
+        "vendorDeactivated": "تم إلغاء تفعيل المورد",
+        "vendorDeactivatedMessage": "تم إلغاء تفعيل {{businessName}}."
+    },
+    "errors": {
+        "loadFailed": "فشل تحميل بيانات الموردين",
+        "registerFailed": "فشل تسجيل المورد",
+        "validationFailed": "فشل التحقق من البيانات",
+        "fillRequiredFields": "يرجى ملء جميع الحقول المطلوبة."
+    }
+}

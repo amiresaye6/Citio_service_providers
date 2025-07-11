@@ -24,10 +24,12 @@ import StatusTag from '../components/common/StatusTag';
 import ToastNotifier from '../components/common/ToastNotifier';
 import { fetchBusinessTypes } from '../redux/slices/adminSlice';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
 const VendorManagementPage = () => {
+    const { t, i18n } = useTranslation('vendors');
     const dispatch = useDispatch();
     const { vendors, subcategories, loading, error } = useSelector((state) => state.vendors);
     const { loading: authLoading, error: authError } = useSelector((state) => state.auth);
@@ -46,6 +48,9 @@ const VendorManagementPage = () => {
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
+    const direction = i18n.dir();
+    const isRTL = direction === "rtl";
+
     useEffect(() => {
         dispatch(fetchVendors({
             PageNumer: currentPage,
@@ -60,14 +65,14 @@ const VendorManagementPage = () => {
 
     useEffect(() => {
         if (error) {
-            ToastNotifier.error('Failed to load vendor data', error);
+            ToastNotifier.error(t('errors.loadFailed'), error);
             dispatch(clearError());
         }
         if (authError) {
-            ToastNotifier.error('Failed to register vendor', authError);
+            ToastNotifier.error(t('errors.registerFailed'), authError);
             dispatch(clearError());
         }
-    }, [error, authError, dispatch]);
+    }, [error, authError, dispatch, t]);
 
     useEffect(() => {
         // Try to get business types from session storage first
@@ -92,12 +97,12 @@ const VendorManagementPage = () => {
 
     const columns = [
         {
-            title: 'ID',
+            title: t('table.columns.id'),
             dataIndex: 'id',
             key: 'id',
             width: 100,
             render: (id) => (
-                <Tooltip title={`Vendor ID: ${id}`}>
+                <Tooltip title={`${t('table.columns.vendorId')}: ${id}`}>
                     <span className="text-xs text-gray-500 font-mono">
                         {id.substring(0, 8)}...
                     </span>
@@ -106,7 +111,7 @@ const VendorManagementPage = () => {
             sorter: true,
         },
         {
-            title: 'Profile',
+            title: t('table.columns.profile'),
             dataIndex: 'profilePictureUrl',
             key: 'profilePictureUrl',
             width: 80,
@@ -120,38 +125,38 @@ const VendorManagementPage = () => {
             ),
         },
         {
-            title: 'Business Name',
+            title: t('table.columns.businessName'),
             dataIndex: 'businessName',
             key: 'businessName',
             sorter: true,
         },
         {
-            title: 'Owner',
+            title: t('table.columns.owner'),
             dataIndex: 'fullName',
             key: 'fullName',
             sorter: true,
         },
         {
-            title: 'Email',
+            title: t('table.columns.email'),
             dataIndex: 'email',
             key: 'email',
             sorter: true,
             responsive: ['md'],
         },
         {
-            title: 'Business Type',
+            title: t('table.columns.businessType'),
             dataIndex: 'businessType',
             key: 'businessType',
             sorter: true,
             responsive: ['lg'],
         },
         {
-            title: 'Rating',
+            title: t('table.columns.rating'),
             dataIndex: 'rating',
             key: 'rating',
             width: 120,
             render: (rating) => (
-                <Tooltip title={`Rating: ${rating}`}>
+                <Tooltip title={`${t('table.columns.rating')}: ${rating}`}>
                     <div className="flex items-center gap-2">
                         <Rate disabled defaultValue={rating} className="text-sm" style={{ fontSize: "10px" }} />
                     </div>
@@ -160,14 +165,14 @@ const VendorManagementPage = () => {
             sorter: true,
         },
         {
-            title: 'Status',
+            title: t('table.columns.status'),
             dataIndex: 'isApproved',
             key: 'isApproved',
             render: (isApproved) => <StatusTag status={isApproved ? 'active' : 'pending'} />,
             sorter: true,
         },
         {
-            title: 'Actions',
+            title: t('table.columns.actions'),
             key: 'actions',
             width: 220,
             render: (_, record) => (
@@ -179,7 +184,7 @@ const VendorManagementPage = () => {
                         onClick={() => handleViewShop(record)}
                         size="small"
                     >
-                        View Shop
+                        {t('buttons.viewShop')}
                     </Button>
 
                     {record.isApproved ? (
@@ -189,7 +194,7 @@ const VendorManagementPage = () => {
                             onClick={() => handleDeactivate(record)}
                             size="small"
                         >
-                            Deactivate
+                            {t('buttons.deactivate')}
                         </Button>
                     ) : (
                         <Button
@@ -198,7 +203,7 @@ const VendorManagementPage = () => {
                             onClick={() => handleActivate(record)}
                             size="small"
                         >
-                            Approve
+                            {t('buttons.approve')}
                         </Button>
                     )}
                 </Space>
@@ -209,10 +214,10 @@ const VendorManagementPage = () => {
     const filters = [
         {
             key: 'isApproved',
-            placeholder: 'Select Status',
+            placeholder: t('filters.statusPlaceholder'),
             options: [
-                { label: 'Active', value: true },
-                { label: 'Pending', value: false },
+                { label: t('filters.options.active'), value: true },
+                { label: t('filters.options.pending'), value: false },
             ],
         },
     ];
@@ -249,9 +254,9 @@ const VendorManagementPage = () => {
         }
     };
 
-const handleViewShop = (vendor) => {
-    navigate(`/admin/vendors/${vendor.id}`);
-};
+    const handleViewShop = (vendor) => {
+        navigate(`/admin/vendors/${vendor.id}`);
+    };
 
     const handleAddVendor = () => {
         form.validateFields().then((values) => {
@@ -268,7 +273,10 @@ const handleViewShop = (vendor) => {
 
             dispatch(register(vendorData)).then((result) => {
                 if (result.meta.requestStatus === 'fulfilled') {
-                    ToastNotifier.success('Vendor Added', `${values.businessName} has been registered.`);
+                    ToastNotifier.success(
+                        t('notifications.vendorAdded'),
+                        t('notifications.vendorAddedMessage', { businessName: values.businessName })
+                    );
                     dispatch(fetchVendors({
                         PageNumer: currentPage,
                         PageSize: pageSize,
@@ -282,7 +290,7 @@ const handleViewShop = (vendor) => {
             setIsAddModalVisible(false);
             form.resetFields();
         }).catch(() => {
-            ToastNotifier.error('Validation Failed', 'Please fill in all required fields.');
+            ToastNotifier.error(t('errors.validationFailed'), t('errors.fillRequiredFields'));
         });
     };
 
@@ -295,7 +303,10 @@ const handleViewShop = (vendor) => {
     const handleConfirmActivate = () => {
         dispatch(approveVendor(selectedVendor.id)).then((result) => {
             if (result.meta.requestStatus === 'fulfilled') {
-                ToastNotifier.success('Vendor Approved', `${selectedVendor.businessName} has been approved.`);
+                ToastNotifier.success(
+                    t('notifications.vendorApproved'),
+                    t('notifications.vendorApprovedMessage', { businessName: selectedVendor.businessName })
+                );
                 dispatch(fetchVendors({
                     PageNumer: currentPage,
                     PageSize: pageSize,
@@ -318,7 +329,10 @@ const handleViewShop = (vendor) => {
     const handleConfirmDeactivate = () => {
         dispatch(deactivateVendor(selectedVendor.id)).then((result) => {
             if (result.meta.requestStatus === 'fulfilled') {
-                ToastNotifier.success('Vendor Deactivated', `${selectedVendor.businessName} has been deactivated.`);
+                ToastNotifier.success(
+                    t('notifications.vendorDeactivated'),
+                    t('notifications.vendorDeactivatedMessage', { businessName: selectedVendor.businessName })
+                );
                 dispatch(fetchVendors({
                     PageNumer: currentPage,
                     PageSize: pageSize,
@@ -333,22 +347,22 @@ const handleViewShop = (vendor) => {
     };
 
     return (
-        <div className="p-6 min-h-screen">
+        <div className="p-6 min-h-screen" dir={direction}>
             <PageHeader
-                title="Vendor Management"
-                subtitle="Manage your vendors and their statuses"
+                title={t('pageHeader.title')}
+                subtitle={t('pageHeader.subtitle')}
                 actions={
                     <Button
                         type="primary"
                         onClick={() => setIsAddModalVisible(true)}
                     >
-                        Add Vendor
+                        {t('buttons.addVendor')}
                     </Button>
                 }
             />
 
             <SearchInput
-                placeholder="Search by name, email, or contact..."
+                placeholder={t('search.placeholder')}
                 onSearch={handleSearch}
                 className="mb-4"
             />
@@ -371,16 +385,17 @@ const handleViewShop = (vendor) => {
                     total: vendors.totalCount,
                     showSizeChanger: true,
                     pageSizeOptions: ['10', '20', '50'],
-                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} vendors`,
+                    showTotal: (total, range) => t('pagination.showTotal', { start: range[0], end: range[1], total }),
                     position: ['bottomCenter'],
                     showQuickJumper: true,
                 }}
                 onChange={handleTableChange}
                 scroll={{ x: 'max-content' }}
+                className={isRTL ? 'rtl-table' : ''}
             />
 
             <Modal
-                title="Add Vendor"
+                title={t('modal.addVendor.title')}
                 open={isAddModalVisible}
                 onOk={handleAddVendor}
                 onCancel={() => {
@@ -389,47 +404,49 @@ const handleViewShop = (vendor) => {
                 }}
                 confirmLoading={authLoading}
                 width={600}
+                okText={t('modal.addVendor.okText')}
+                cancelText={t('modal.addVendor.cancelText')}
             >
-                <Form form={form} layout="vertical">
+                <Form form={form} layout="vertical" dir={direction}>
                     <Form.Item
                         name="businessName"
-                        label="Business Name"
-                        rules={[{ required: true, message: 'Please enter business name' }]}
+                        label={t('modal.addVendor.businessName')}
+                        rules={[{ required: true, message: t('modal.addVendor.businessNameRequired') }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         name="fullName"
-                        label="Owner Name"
-                        rules={[{ required: true, message: 'Please enter owner name' }]}
+                        label={t('modal.addVendor.ownerName')}
+                        rules={[{ required: true, message: t('modal.addVendor.ownerNameRequired') }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         name="email"
-                        label="Email"
+                        label={t('modal.addVendor.email')}
                         rules={[
-                            { required: true, message: 'Please enter email' },
-                            { type: 'email', message: 'Please enter a valid email' },
+                            { required: true, message: t('modal.addVendor.emailRequired') },
+                            { type: 'email', message: t('modal.addVendor.invalidEmail') },
                         ]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         name="password"
-                        label="Password"
-                        rules={[{ required: true, message: 'Please enter password' }]}
+                        label={t('modal.addVendor.password')}
+                        rules={[{ required: true, message: t('modal.addVendor.passwordRequired') }]}
                     >
                         <Input.Password />
                     </Form.Item>
                     <Form.Item
                         name="businessType"
-                        label="Business Type"
-                        rules={[{ required: true, message: 'Please enter business type' }]}
+                        label={t('modal.addVendor.businessType')}
+                        rules={[{ required: true, message: t('modal.addVendor.businessTypeRequired') }]}
                     >
                         <Select
                             mode="tags"
-                            placeholder="Select or type business type"
+                            placeholder={t('modal.addVendor.businessTypePlaceholder')}
                             style={{ width: '100%' }}
                         >
                             {allBusinessTypes.map(type => (
@@ -439,19 +456,19 @@ const handleViewShop = (vendor) => {
                     </Form.Item>
                     <Form.Item
                         name="taxNumber"
-                        label="Tax Number"
-                        rules={[{ required: true, message: 'Please enter tax number' }]}
+                        label={t('modal.addVendor.taxNumber')}
+                        rules={[{ required: true, message: t('modal.addVendor.taxNumberRequired') }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         name="subCategoryIds"
-                        label="Subcategories"
-                        rules={[{ required: true, message: 'Please select at least one subcategory' }]}
+                        label={t('modal.addVendor.subcategories')}
+                        rules={[{ required: true, message: t('modal.addVendor.subcategoriesRequired') }]}
                     >
-                        <Select mode="tags" placeholder="Select subcategories">
+                        <Select mode="tags" placeholder={t('modal.addVendor.subcategoriesPlaceholder')}>
                             {subcategories.map(sub => (
-                                <Option key={sub.id} value={sub.id}>{sub.nameEn}</Option>
+                                <Option key={sub.id} value={sub.id}>{isRTL && sub.nameAr ? sub.nameAr : sub.nameEn}</Option>
                             ))}
                         </Select>
                     </Form.Item>
@@ -459,18 +476,18 @@ const handleViewShop = (vendor) => {
             </Modal>
 
             <Modal
-                title={confirmAction === 'activate' ? 'Approve Vendor' : 'Deactivate Vendor'}
+                title={confirmAction === 'activate' ? t('modal.confirmActivate.title') : t('modal.confirmDeactivate.title')}
                 open={isConfirmModalVisible}
                 onOk={confirmAction === 'activate' ? handleConfirmActivate : handleConfirmDeactivate}
                 onCancel={() => setIsConfirmModalVisible(false)}
-                okText={confirmAction === 'activate' ? 'Approve' : 'Deactivate'}
-                cancelText="Cancel"
+                okText={confirmAction === 'activate' ? t('modal.confirmActivate.okText') : t('modal.confirmDeactivate.okText')}
+                cancelText={t('modal.common.cancelText')}
                 okButtonProps={{ danger: confirmAction === 'deactivate' }}
             >
                 <p>
                     {confirmAction === 'activate'
-                        ? `Are you sure you want to approve ${selectedVendor?.businessName}?`
-                        : `Are you sure you want to deactivate ${selectedVendor?.businessName}?`}
+                        ? t('modal.confirmActivate.message', { businessName: selectedVendor?.businessName })
+                        : t('modal.confirmDeactivate.message', { businessName: selectedVendor?.businessName })}
                 </p>
             </Modal>
         </div>

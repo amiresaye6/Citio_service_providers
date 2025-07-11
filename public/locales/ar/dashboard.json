@@ -1,0 +1,57 @@
+{
+    "pageHeader": {
+        "title": "لوحة تحكم المسؤول",
+        "subtitle": "ملخص النظام وأفضل الموردين"
+    },
+    "buttons": {
+        "refresh": "تحديث"
+    },
+    "stats": {
+        "newUsersToday": "المستخدمين الجدد اليوم",
+        "ordersToday": "طلبات اليوم",
+        "revenueToday": "إيرادات اليوم",
+        "vendorsToday": "الموردين الجدد اليوم",
+        "totalUsers": "إجمالي المستخدمين",
+        "totalVendors": "إجمالي الموردين",
+        "totalRevenue": "إجمالي الإيرادات"
+    },
+    "tooltips": {
+        "newUsersToday": "المستخدمون المسجلون في آخر 24 ساعة",
+        "ordersToday": "إجمالي الطلبات اليوم",
+        "revenueToday": "إجمالي الإيرادات المحققة اليوم",
+        "vendorsToday": "الموردون الذين انضموا اليوم",
+        "totalUsers": "جميع المستخدمين المسجلين في النظام",
+        "totalVendors": "جميع الموردين المسجلين في النظام",
+        "totalRevenue": "إجمالي الإيرادات المحققة"
+    },
+    "trends": {
+        "increase": "زيادة",
+        "decrease": "انخفاض"
+    },
+    "columns": {
+        "vendor": "المورد",
+        "owner": "المالك",
+        "businessType": "نوع النشاط",
+        "revenue": "الإيرادات",
+        "orders": "الطلبات"
+    },
+    "loading": {
+        "statistics": "جاري تحميل الإحصائيات...",
+        "vendors": "جاري تحميل بيانات الموردين..."
+    },
+    "tables": {
+        "topVendors": "أفضل الموردين حسب الإيرادات"
+    },
+    "labels": {
+        "updated": "تم التحديث"
+    },
+    "topVendor": {
+        "title": "أفضل مورد"
+    },
+    "errors": {
+        "failedToLoad": "فشل تحميل بيانات لوحة التحكم"
+    },
+    "notifications": {
+        "refreshed": "تم تحديث لوحة التحكم"
+    }
+}

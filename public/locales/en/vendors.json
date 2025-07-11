@@ -1,0 +1,90 @@
+{
+    "pageHeader": {
+        "title": "Vendor Management",
+        "subtitle": "Manage your vendors and their statuses"
+    },
+    "buttons": {
+        "addVendor": "Add Vendor",
+        "viewShop": "View Shop",
+        "approve": "Approve",
+        "deactivate": "Deactivate"
+    },
+    "search": {
+        "placeholder": "Search by name, email, or contact..."
+    },
+    "filters": {
+        "statusPlaceholder": "Select Status",
+        "options": {
+            "active": "Active",
+            "pending": "Pending"
+        }
+    },
+    "table": {
+        "columns": {
+            "id": "ID",
+            "vendorId": "Vendor ID",
+            "profile": "Profile",
+            "businessName": "Business Name",
+            "owner": "Owner",
+            "email": "Email",
+            "businessType": "Business Type",
+            "rating": "Rating",
+            "status": "Status",
+            "actions": "Actions"
+        }
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} of {{total}} vendors"
+    },
+    "modal": {
+        "addVendor": {
+            "title": "Add Vendor",
+            "okText": "Add",
+            "cancelText": "Cancel",
+            "businessName": "Business Name",
+            "businessNameRequired": "Please enter business name",
+            "ownerName": "Owner Name",
+            "ownerNameRequired": "Please enter owner name",
+            "email": "Email",
+            "emailRequired": "Please enter email",
+            "invalidEmail": "Please enter a valid email",
+            "password": "Password",
+            "passwordRequired": "Please enter password",
+            "businessType": "Business Type",
+            "businessTypeRequired": "Please enter business type",
+            "businessTypePlaceholder": "Select or type business type",
+            "taxNumber": "Tax Number",
+            "taxNumberRequired": "Please enter tax number",
+            "subcategories": "Subcategories",
+            "subcategoriesRequired": "Please select at least one subcategory",
+            "subcategoriesPlaceholder": "Select subcategories"
+        },
+        "confirmActivate": {
+            "title": "Approve Vendor",
+            "message": "Are you sure you want to approve {{businessName}}?",
+            "okText": "Approve"
+        },
+        "confirmDeactivate": {
+            "title": "Deactivate Vendor",
+            "message": "Are you sure you want to deactivate {{businessName}}?",
+            "okText": "Deactivate"
+        },
+        "common": {
+            "cancelText": "Cancel"
+        }
+    },
+    "notifications": {
+        "vendorAdded": "Vendor Added",
+        "vendorAddedMessage": "{{businessName}} has been registered.",
+        "vendorApproved": "Vendor Approved",
+        "vendorApprovedMessage": "{{businessName}} has been approved.",
+        "vendorDeactivated": "Vendor Deactivated",
+        "vendorDeactivatedMessage": "{{businessName}} has been deactivated."
+    },
+    "errors": {
+        "loadFailed": "Failed to load vendor data",
+        "registerFailed": "Failed to register vendor",
+        "validationFailed": "Validation Failed",
+        "fillRequiredFields": "Please fill in all required fields."
+    }
+}

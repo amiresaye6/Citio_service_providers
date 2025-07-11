@@ -1,0 +1,57 @@
+{
+    "pageHeader": {
+        "title": "Admin Dashboard",
+        "subtitle": "System summary & top vendors"
+    },
+    "buttons": {
+        "refresh": "Refresh"
+    },
+    "stats": {
+        "newUsersToday": "New Users Today",
+        "ordersToday": "Orders Today",
+        "revenueToday": "Revenue Today",
+        "vendorsToday": "Vendors Today",
+        "totalUsers": "Total Users",
+        "totalVendors": "Total Vendors",
+        "totalRevenue": "Total Revenue"
+    },
+    "tooltips": {
+        "newUsersToday": "Users registered in the last 24 hours",
+        "ordersToday": "Total orders placed today",
+        "revenueToday": "Gross revenue generated today",
+        "vendorsToday": "Vendors who joined today",
+        "totalUsers": "All users registered on the platform",
+        "totalVendors": "All vendors registered on the platform",
+        "totalRevenue": "Total gross revenue generated"
+    },
+    "trends": {
+        "increase": "Increase",
+        "decrease": "Decrease"
+    },
+    "columns": {
+        "vendor": "Vendor",
+        "owner": "Owner",
+        "businessType": "Business Type",
+        "revenue": "Revenue",
+        "orders": "Orders"
+    },
+    "loading": {
+        "statistics": "Loading statistics...",
+        "vendors": "Loading vendor data..."
+    },
+    "tables": {
+        "topVendors": "Top Vendors by Revenue"
+    },
+    "labels": {
+        "updated": "Updated"
+    },
+    "topVendor": {
+        "title": "Top Vendor"
+    },
+    "errors": {
+        "failedToLoad": "Failed to load dashboard data"
+    },
+    "notifications": {
+        "refreshed": "Dashboard refreshed"
+    }
+}

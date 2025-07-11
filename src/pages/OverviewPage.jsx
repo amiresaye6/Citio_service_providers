@@ -24,46 +24,52 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import ToastNotifier from '../components/common/ToastNotifier';
 import UserCard from '../components/common/UserCard';
 import { debounce } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
-const StatCard = ({ title, value, prefix, suffix, trend, trendType, tooltip }) => (
-  <Card
-    bordered
-    className="shadow transition-shadow hover:shadow-lg h-full"
-    bodyStyle={{ padding: 20 }}
-  >
-    <Row align="middle" gutter={12}>
-      <Col>
-        <span style={{ fontSize: 30 }}>{prefix}</span>
-      </Col>
-      <Col flex="auto">
-        <Statistic
-          title={
-            tooltip ? (
-              <Tooltip title={tooltip}>
-                <span>{title}</span>
-              </Tooltip>
-            ) : (
-              title
-            )
-          }
-          value={value}
-          valueStyle={{ fontWeight: 600, fontSize: 22 }}
-          suffix={suffix}
-        />
-        {trend !== undefined && (
-          <div className={`text-xs mt-1 ${trendType === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-            {trendType === 'up' ? <RiseOutlined /> : <RiseOutlined style={{ transform: 'rotate(180deg)' }} />}
-            {trend}% {trendType === 'up' ? 'Increase' : 'Decrease'}
-          </div>
-        )}
-      </Col>
-    </Row>
-  </Card>
-);
+const StatCard = ({ title, value, prefix, suffix, trend, trendType, tooltip }) => {
+  const { t } = useTranslation('dashboard');
+
+  return (
+    <Card
+      bordered
+      className="shadow transition-shadow hover:shadow-lg h-full"
+      bodyStyle={{ padding: 20 }}
+    >
+      <Row align="middle" gutter={12}>
+        <Col>
+          <span style={{ fontSize: 30 }}>{prefix}</span>
+        </Col>
+        <Col flex="auto">
+          <Statistic
+            title={
+              tooltip ? (
+                <Tooltip title={tooltip}>
+                  <span>{title}</span>
+                </Tooltip>
+              ) : (
+                title
+              )
+            }
+            value={value}
+            valueStyle={{ fontWeight: 600, fontSize: 22 }}
+            suffix={suffix}
+          />
+          {trend !== undefined && (
+            <div className={`text-xs mt-1 ${trendType === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+              {trendType === 'up' ? <RiseOutlined /> : <RiseOutlined style={{ transform: 'rotate(180deg)' }} />}
+              {trend}% {trendType === 'up' ? t('trends.increase') : t('trends.decrease')}
+            </div>
+          )}
+        </Col>
+      </Row>
+    </Card>
+  );
+};
 
 const OverviewPage = () => {
+  const { t, i18n } = useTranslation('dashboard');
   const dispatch = useDispatch();
   const {
     todayStats,
@@ -73,6 +79,9 @@ const OverviewPage = () => {
     error,
   } = useSelector((state) => state.admin);
 
+  const direction = i18n.dir();
+  const isRTL = direction === "rtl";
+
   useEffect(() => {
     dispatch(fetchTodayStats());
     dispatch(fetchTopVendors());
@@ -81,21 +90,21 @@ const OverviewPage = () => {
 
   useEffect(() => {
     if (error) {
-      ToastNotifier.error('Failed to load dashboard data', error);
+      ToastNotifier.error(t('errors.failedToLoad'), error);
       dispatch(clearError());
     }
-  }, [error, dispatch]);
+  }, [error, dispatch, t]);
 
   const handleRefresh = debounce(() => {
     dispatch(fetchTodayStats());
     dispatch(fetchTopVendors());
     dispatch(fetchProjectSummary());
-    ToastNotifier.success('Dashboard refreshed');
+    ToastNotifier.success(t('notifications.refreshed'));
   }, 300);
 
   const vendorColumns = [
     {
-      title: 'Vendor',
+      title: t('columns.vendor'),
       dataIndex: 'businessName',
       key: 'businessName',
       render: (_, record) => (
@@ -107,18 +116,18 @@ const OverviewPage = () => {
       ),
     },
     {
-      title: 'Owner',
+      title: t('columns.owner'),
       dataIndex: 'fullName',
       key: 'fullName',
     },
     {
-      title: 'Business Type',
+      title: t('columns.businessType'),
       dataIndex: 'businessType',
       key: 'businessType',
       render: (bt) => <Tag color="blue">{bt}</Tag>,
     },
     {
-      title: 'Revenue',
+      title: t('columns.revenue'),
       dataIndex: 'totalRevenue',
       key: 'totalRevenue',
       render: (revenue) => (
@@ -130,7 +139,7 @@ const OverviewPage = () => {
       defaultSortOrder: 'descend',
     },
     {
-      title: 'Orders',
+      title: t('columns.orders'),
       dataIndex: 'totalOrderCount',
       key: 'totalOrderCount',
       sorter: (a, b) => a.totalOrderCount - b.totalOrderCount,
@@ -142,24 +151,24 @@ const OverviewPage = () => {
   const topVendor = Array.isArray(topVendors) && topVendors.length > 0 ? topVendors[0] : null;
 
   return (
-    <div className="page-container" style={{ padding: 24 }}>
+    <div className="page-container" style={{ padding: 24 }} dir={direction}>
       <PageHeader
-        title="Admin Dashboard"
-        subtitle="System summary & top vendors"
+        title={t('pageHeader.title')}
+        subtitle={t('pageHeader.subtitle')}
         actions={
           <Button
             icon={<ReloadOutlined />}
             onClick={handleRefresh}
             loading={loading}
           >
-            Refresh
+            {t('buttons.refresh')}
           </Button>
         }
       />
 
       {loading ? (
         <Card className="mb-6">
-          <LoadingSpinner text="Loading statistics..." />
+          <LoadingSpinner text={t('loading.statistics')} />
         </Card>
       ) : (
         <>
@@ -167,62 +176,62 @@ const OverviewPage = () => {
           <Row gutter={[24, 24]} className="mb-6">
             <Col xs={24} sm={12} md={4}>
               <StatCard
-                title="New Users Today"
+                title={t('stats.newUsersToday')}
                 value={todayStats.newUsersCount}
                 prefix={<UserAddOutlined />}
-                tooltip="Users registered in the last 24 hours"
+                tooltip={t('tooltips.newUsersToday')}
               />
             </Col>
             <Col xs={24} sm={12} md={4}>
               <StatCard
-                title="Orders Today"
+                title={t('stats.ordersToday')}
                 value={todayStats.ordersCount}
                 prefix={<FileTextOutlined />}
-                tooltip="Total orders placed today"
+                tooltip={t('tooltips.ordersToday')}
               />
             </Col>
             <Col xs={24} sm={12} md={4}>
               <StatCard
-                title="Revenue Today"
+                title={t('stats.revenueToday')}
                 value={todayStats.revenueToday}
                 prefix={<DollarOutlined />}
                 suffix="USD"
-                tooltip="Gross revenue generated today"
+                tooltip={t('tooltips.revenueToday')}
               />
             </Col>
             <Col xs={24} sm={12} md={4}>
               <StatCard
-                title="Vendors Today"
+                title={t('stats.vendorsToday')}
                 value={todayStats.vendorsCount}
                 prefix={<ShopOutlined />}
-                tooltip="Vendors who joined today"
+                tooltip={t('tooltips.vendorsToday')}
               />
             </Col>
             <Col xs={24} sm={12} md={4}>
               <StatCard
-                title="Total Users"
+                title={t('stats.totalUsers')}
                 value={projectSummary.totalUsersCount}
                 prefix={<UserOutlined />}
-                tooltip="All users registered on the platform"
+                tooltip={t('tooltips.totalUsers')}
               />
             </Col>
             <Col xs={24} sm={12} md={4}>
               <StatCard
-                title="Total Vendors"
+                title={t('stats.totalVendors')}
                 value={projectSummary.totalVendorsCount}
                 prefix={<ShopOutlined />}
-                tooltip="All vendors registered on the platform"
+                tooltip={t('tooltips.totalVendors')}
               />
             </Col>
           </Row>
           <Row gutter={[24, 24]} className="mb-6">
             <Col xs={24} sm={12} md={8}>
               <StatCard
-                title="Total Revenue"
+                title={t('stats.totalRevenue')}
                 value={projectSummary.totalRevenue}
                 prefix={<DollarOutlined />}
                 suffix="USD"
-                tooltip="Total gross revenue generated"
+                tooltip={t('tooltips.totalRevenue')}
               />
             </Col>
             {topVendor && (
@@ -233,9 +242,10 @@ const OverviewPage = () => {
                   title={
                     <Space>
                       <TrophyOutlined style={{ color: "#faad14" }} />
-                      <Text strong style={{ fontSize: 18 }}>Top Vendor</Text>
+                      <Text strong style={{ fontSize: 18 }}>{t('topVendor.title')}</Text>
                     </Space>
                   }
+                  className={isRTL ? "rtl" : "ltr"}
                 >
                   <Row gutter={24} align="middle">
                     <Col xs={24} sm={12} md={8}>
@@ -250,7 +260,7 @@ const OverviewPage = () => {
                     </Col>
                     <Col xs={12} sm={6} md={8}>
                       <Statistic
-                        title="Revenue"
+                        title={t('columns.revenue')}
                         value={topVendor.totalRevenue}
                         prefix={<DollarOutlined />}
                         valueStyle={{ color: "#52c41a" }}
@@ -260,7 +270,7 @@ const OverviewPage = () => {
                     </Col>
                     <Col xs={12} sm={6} md={8}>
                       <Statistic
-                        title="Orders"
+                        title={t('columns.orders')}
                         value={topVendor.totalOrderCount}
                         prefix={<RiseOutlined />}
                         valueStyle={{ color: "#faad14" }}
@@ -278,15 +288,15 @@ const OverviewPage = () => {
       <Card
         title={
           <div className="flex justify-between items-center">
-            <span>Top Vendors by Revenue</span>
-            <Text type="secondary">Updated: {new Date().toLocaleString()}</Text>
+            <span>{t('tables.topVendors')}</span>
+            <Text type="secondary">{t('labels.updated')}: {new Date().toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}</Text>
           </div>
         }
-        className="mb-6"
+        className={`mb-6 ${isRTL ? "rtl" : "ltr"}`}
         bordered
       >
         {loading ? (
-          <LoadingSpinner text="Loading vendor data..." />
+          <LoadingSpinner text={t('loading.vendors')} />
         ) : (
           <TableWrapper
             dataSource={topVendors}
@@ -294,6 +304,7 @@ const OverviewPage = () => {
             loading={loading}
             pagination={{ pageSize: 5 }}
             rowKey="vendorId"
+            dir={direction}
           />
         )}
       </Card>
