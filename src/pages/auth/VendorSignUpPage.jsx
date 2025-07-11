@@ -7,11 +7,13 @@ import { fetchBusinessTypes } from '../../redux/slices/adminSlice';
 import { register } from '../../redux/slices/authSlice';
 import ToastNotifier from '../../components/common/ToastNotifier';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const VendorSignUpPage = () => {
+    const { t, i18n } = useTranslation('signup');
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { subcategories } = useSelector((state) => state.vendors);
@@ -20,6 +22,9 @@ const VendorSignUpPage = () => {
     const [form] = Form.useForm();
     const [allBusinessTypes, setAllBusinessTypes] = useState([]);
     const [loadingTypes, setLoadingTypes] = useState(true);
+
+    const direction = i18n.dir();
+    const isRTL = direction === "rtl";
 
     useEffect(() => {
         dispatch(fetchSubcategories());
@@ -43,9 +48,9 @@ const VendorSignUpPage = () => {
 
     useEffect(() => {
         if (authError) {
-            ToastNotifier.error('Sign Up Failed', authError);
+            ToastNotifier.error(t('signup.failedTitle'), authError);
         }
-    }, [authError]);
+    }, [authError, t]);
 
     const handleSubmit = (values) => {
         const vendorData = {
@@ -59,7 +64,7 @@ const VendorSignUpPage = () => {
         };
         dispatch(register(vendorData)).then((result) => {
             if (result.meta.requestStatus === 'fulfilled') {
-                ToastNotifier.success('Sign Up Successful', 'Your vendor account has been created. Please log in.');
+                ToastNotifier.success(t('signup.successTitle'), t('signup.successMessage'));
                 form.resetFields();
                 navigate('/login');
             }
@@ -85,6 +90,7 @@ const VendorSignUpPage = () => {
                         padding: "24px 4vw 32px 4vw",
                         background: "#fff",
                     }}
+                    className={`signup-card ${isRTL ? "rtl" : "ltr"}`}
                 >
                     <div style={{ textAlign: "center", marginBottom: 24 }}>
                         <img
@@ -97,11 +103,11 @@ const VendorSignUpPage = () => {
                                 margin: "0 auto"
                             }}
                         />
-                        <Title level={3} style={{ marginBottom: 0 }}>Vendor Sign Up</Title>
-                        <Text type="secondary">Create your vendor account</Text>
+                        <Title level={3} style={{ marginBottom: 0 }}>{t('signup.title')}</Title>
+                        <Text type="secondary">{t('signup.subtitle')}</Text>
                     </div>
                     {loadingTypes ? (
-                        <Spin tip="Loading..." style={{ width: "100%", margin: "32px 0" }} />
+                        <Spin tip={t('signup.loading')} style={{ width: "100%", margin: "32px 0" }} />
                     ) : (
                         <Form
                             form={form}
@@ -109,47 +115,48 @@ const VendorSignUpPage = () => {
                             onFinish={handleSubmit}
                             disabled={authLoading}
                             size="large"
+                            dir={direction}
                         >
                             <Form.Item
                                 name="businessName"
-                                label="Business Name"
-                                rules={[{ required: true, message: 'Please enter business name' }]}
+                                label={t('signup.businessName')}
+                                rules={[{ required: true, message: t('signup.businessNameRequired') }]}
                             >
-                                <Input prefix={<ShopOutlined />} placeholder="Your business name" />
+                                <Input prefix={<ShopOutlined />} placeholder={t('signup.businessNamePlaceholder')} />
                             </Form.Item>
                             <Form.Item
                                 name="fullName"
-                                label="Owner Name"
-                                rules={[{ required: true, message: 'Please enter owner name' }]}
+                                label={t('signup.ownerName')}
+                                rules={[{ required: true, message: t('signup.ownerNameRequired') }]}
                             >
-                                <Input prefix={<UserOutlined />} placeholder="Your full name" />
+                                <Input prefix={<UserOutlined />} placeholder={t('signup.ownerNamePlaceholder')} />
                             </Form.Item>
                             <Form.Item
                                 name="email"
-                                label="Email"
+                                label={t('signup.email')}
                                 rules={[
-                                    { required: true, message: 'Please enter email' },
-                                    { type: 'email', message: 'Please enter a valid email' },
+                                    { required: true, message: t('signup.emailRequired') },
+                                    { type: 'email', message: t('signup.invalidEmail') },
                                 ]}
                             >
-                                <Input prefix={<MailOutlined />} placeholder="youremail@example.com" autoComplete="email" />
+                                <Input prefix={<MailOutlined />} placeholder={t('signup.emailPlaceholder')} autoComplete="email" />
                             </Form.Item>
                             <Form.Item
                                 name="password"
-                                label="Password"
-                                rules={[{ required: true, message: 'Please enter password' }]}
+                                label={t('signup.password')}
+                                rules={[{ required: true, message: t('signup.passwordRequired') }]}
                                 hasFeedback
                             >
-                                <Input.Password prefix={<LockOutlined />} placeholder="Create a password" autoComplete="new-password" />
+                                <Input.Password prefix={<LockOutlined />} placeholder={t('signup.passwordPlaceholder')} autoComplete="new-password" />
                             </Form.Item>
                             <Form.Item
                                 name="businessType"
-                                label="Business Type"
-                                rules={[{ required: true, message: 'Please select your business type' }]}
+                                label={t('signup.businessType')}
+                                rules={[{ required: true, message: t('signup.businessTypeRequired') }]}
                             >
                                 <Select
                                     mode="tags"
-                                    placeholder="Select or type your business type"
+                                    placeholder={t('signup.businessTypePlaceholder')}
                                     style={{ width: '100%' }}
                                     prefix={<AppstoreOutlined />}
                                 >
@@ -160,32 +167,32 @@ const VendorSignUpPage = () => {
                             </Form.Item>
                             <Form.Item
                                 name="taxNumber"
-                                label="Tax Number"
-                                rules={[{ required: true, message: 'Please enter your tax number' }]}
+                                label={t('signup.taxNumber')}
+                                rules={[{ required: true, message: t('signup.taxNumberRequired') }]}
                             >
-                                <Input prefix={<NumberOutlined />} placeholder="e.g. 123456789" />
+                                <Input prefix={<NumberOutlined />} placeholder={t('signup.taxNumberPlaceholder')} />
                             </Form.Item>
                             <Form.Item
                                 name="subCategoryIds"
-                                label="Subcategories"
-                                rules={[{ required: true, message: 'Please select at least one subcategory' }]}
+                                label={t('signup.subcategories')}
+                                rules={[{ required: true, message: t('signup.subcategoriesRequired') }]}
                             >
-                                <Select mode="tags" placeholder="Select subcategories">
+                                <Select mode="tags" placeholder={t('signup.subcategoriesPlaceholder')}>
                                     {subcategories.map(sub => (
-                                        <Option key={sub.id} value={sub.id}>{sub.nameEn}</Option>
+                                        <Option key={sub.id} value={sub.id}>{isRTL && sub.nameAr ? sub.nameAr : sub.nameEn}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
                             <Form.Item className="mb-0">
                                 <Button type="primary" htmlType="submit" block loading={authLoading} size="large">
-                                    Sign Up
+                                    {t('signup.submit')}
                                 </Button>
                             </Form.Item>
                             <div style={{ textAlign: "center", marginTop: 24 }}>
                                 <Text>
-                                    Already have an account?{' '}
+                                    {t('signup.haveAccount')}{' '}
                                     <Button type="link" onClick={() => navigate('/login')} style={{ padding: 0 }}>
-                                        Log in
+                                        {t('signup.login')}
                                     </Button>
                                 </Text>
                             </div>
