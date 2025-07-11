@@ -59,18 +59,12 @@ const HeaderComponent = ({ collapsed, toggleCollapsed, isMobile }) => {
         if (key === '3') {
             dispatch(logout());
             navigate('/login');
-        } else if (key === '1') {
-            navigate('/');
         } else if (key === '2') {
             navigate('/settings');
         }
     };
 
     const userMenuItems = [
-        {
-            key: '1',
-            label: t('header.profile'),
-        },
         {
             key: '2',
             label: t('header.settings'),
