@@ -1,0 +1,31 @@
+{
+    "pageHeader": {
+        "title": "Settings",
+        "subtitle": "Manage your account preferences and store settings"
+    },
+    "cards": {
+        "security": {
+            "title": "Security",
+            "description": "Change your password and manage account security settings"
+        },
+        "storeSettings": {
+            "title": "Store Settings",
+            "description": "Configure your store appearance, hours, and policies"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "description": "Customize email and in-app notification preferences"
+        },
+        "languageRegion": {
+            "title": "Language & Region",
+            "description": "Set your preferred language and regional preferences"
+        }
+    },
+    "help": {
+        "title": "Need Help?",
+        "message": "If you need assistance with your settings or have questions about your account, visit our",
+        "helpCenter": "Help Center",
+        "or": "or",
+        "contactSupport": "contact support"
+    }
+}

@@ -37,10 +37,12 @@ import {
 } from '../redux/slices/adminSlice';
 import PageHeader from '../components/common/PageHeader';
 import ToastNotifier from '../components/common/ToastNotifier';
+import { useTranslation } from 'react-i18next';
 
 const { Text, Title } = Typography;
 
 const UserDetailsPage = () => {
+    const { t, i18n } = useTranslation('userDetails');
     const { userId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -54,6 +56,9 @@ const UserDetailsPage = () => {
 
     const [transactionsPage, setTransactionsPage] = useState(1);
     const [transactionsPageSize, setTransactionsPageSize] = useState(10);
+
+    const direction = i18n.dir();
+    const isRTL = direction === "rtl";
 
     // Get user details from the users list - only use what's available from API
     const userDetails = users?.items?.find(user => user.id === userId);
@@ -75,10 +80,10 @@ const UserDetailsPage = () => {
 
     useEffect(() => {
         if (userTransactionsError) {
-            ToastNotifier.error('Failed to load user transactions', userTransactionsError);
+            ToastNotifier.error(t('errors.transactionsLoadFailed'), userTransactionsError);
             dispatch(clearError());
         }
-    }, [userTransactionsError, dispatch]);
+    }, [userTransactionsError, dispatch, t]);
 
     const handleGoBack = () => {
         navigate('/admin/users');
@@ -122,30 +127,35 @@ const UserDetailsPage = () => {
         }
     };
 
+    const getStatusTranslation = (status) => {
+        const statusKey = status?.toLowerCase();
+        return t(`status.${statusKey}`, status);
+    };
+
     // Only show columns for data that exists in the API
     const transactionColumns = [
         {
-            title: 'Transaction ID',
+            title: t('table.transactionId'),
             dataIndex: 'id',
             key: 'id',
             width: 120,
             render: (id) => <Text code className="text-xs">{id}</Text>
         },
         {
-            title: 'Order ID',
+            title: t('table.orderId'),
             dataIndex: 'orderId',
             key: 'orderId',
             width: 120,
             render: (orderId) => <Text className="text-xs">{orderId}</Text>
         },
         {
-            title: 'Customer',
+            title: t('table.customer'),
             dataIndex: 'applicationUserFullName',
             key: 'applicationUserFullName',
             width: 150,
         },
         {
-            title: 'Total Amount',
+            title: t('table.totalAmount'),
             dataIndex: 'totalAmount',
             key: 'totalAmount',
             width: 120,
@@ -156,7 +166,7 @@ const UserDetailsPage = () => {
             )
         },
         {
-            title: 'Status',
+            title: t('table.status'),
             dataIndex: 'status',
             key: 'status',
             width: 100,
@@ -165,26 +175,26 @@ const UserDetailsPage = () => {
                     icon={getStatusIcon(status)}
                     color={getStatusColor(status)}
                 >
-                    {status}
+                    {getStatusTranslation(status)}
                 </Tag>
             )
         },
         {
-            title: 'Transaction Date',
+            title: t('table.transactionDate'),
             dataIndex: 'transactionDate',
             key: 'transactionDate',
             width: 150,
             render: (date) => (
                 <div>
-                    <div>{new Date(date).toLocaleDateString()}</div>
+                    <div>{new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}</div>
                     <div className="text-xs text-gray-500">
-                        {new Date(date).toLocaleTimeString()}
+                        {new Date(date).toLocaleTimeString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
                     </div>
                 </div>
             )
         },
         {
-            title: 'Payment Method',
+            title: t('table.paymentMethod'),
             dataIndex: 'paymentMethod',
             key: 'paymentMethod',
             width: 130,
@@ -214,16 +224,16 @@ const UserDetailsPage = () => {
     // Show loading if user details are not available
     if (!userDetails) {
         return (
-            <div className="p-4 md:p-6 min-h-screen">
+            <div className="p-4 md:p-6 min-h-screen" dir={direction}>
                 <PageHeader
-                    title="User Details"
-                    subtitle="Loading user information..."
+                    title={t('pageHeader.title')}
+                    subtitle={t('pageHeader.loadingSubtitle')}
                     actions={
                         <Button
                             icon={<ArrowLeftOutlined />}
                             onClick={handleGoBack}
                         >
-                            Back to Users
+                            {t('buttons.backToUsers')}
                         </Button>
                     }
                 />
@@ -235,17 +245,17 @@ const UserDetailsPage = () => {
     }
 
     return (
-        <div className="p-4 md:p-6 min-h-screen">
+        <div className="p-4 md:p-6 min-h-screen" dir={direction}>
             <PageHeader
-                title="User Details"
-                subtitle={`${userDetails.fullName} - Customer Information`}
+                title={t('pageHeader.title')}
+                subtitle={t('pageHeader.userInfoSubtitle', { name: userDetails.fullName })}
                 actions={
                     <Space>
                         <Button
                             icon={<ArrowLeftOutlined />}
                             onClick={handleGoBack}
                         >
-                            Back to Users
+                            {t('buttons.backToUsers')}
                         </Button>
                     </Space>
                 }
@@ -270,20 +280,20 @@ const UserDetailsPage = () => {
                         </h2>
 
                         <p className="text-gray-600 mb-3">
-                            Customer
+                            {t('profile.customer')}
                         </p>
 
                         <Divider />
 
                         <Space direction="vertical" className="w-full">
                             <div className="flex items-center justify-center text-gray-600">
-                                <MailOutlined className="mr-2" />
+                                <MailOutlined className={isRTL ? "ml-2" : "mr-2"} />
                                 <span className="text-sm">{userDetails.email}</span>
                             </div>
 
                             {userDetails.phoneNumber && (
                                 <div className="flex items-center justify-center text-gray-600">
-                                    <PhoneOutlined className="mr-2" />
+                                    <PhoneOutlined className={isRTL ? "ml-2" : "mr-2"} />
                                     <span className="text-sm">{userDetails.phoneNumber}</span>
                                 </div>
                             )}
@@ -296,9 +306,9 @@ const UserDetailsPage = () => {
 
                             {userDetails.registrationDate && (
                                 <div className="flex items-center justify-center text-gray-600">
-                                    <CalendarOutlined className="mr-2" />
+                                    <CalendarOutlined className={isRTL ? "ml-2" : "mr-2"} />
                                     <span className="text-sm">
-                                        Joined {new Date(userDetails.registrationDate).toLocaleDateString()}
+                                        {t('profile.joined')} {new Date(userDetails.registrationDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
                                     </span>
                                 </div>
                             )}
@@ -310,32 +320,32 @@ const UserDetailsPage = () => {
                 <Col xs={24} lg={16}>
                     <Card>
                         <Title level={4} className="mb-4">
-                            <UserOutlined className="mr-2" />
-                            User Information
+                            <UserOutlined className={isRTL ? "ml-2" : "mr-2"} />
+                            {t('userInfo.title')}
                         </Title>
                         <Descriptions
                             bordered
                             column={1}
                             size="medium"
                         >
-                            <Descriptions.Item label="User ID">
+                            <Descriptions.Item label={t('userInfo.userId')}>
                                 <Text code copyable className="text-xs">
                                     {userDetails.id}
                                 </Text>
                             </Descriptions.Item>
 
-                            <Descriptions.Item label="Full Name">
+                            <Descriptions.Item label={t('userInfo.fullName')}>
                                 {userDetails.fullName}
                             </Descriptions.Item>
 
-                            <Descriptions.Item label="Email Address">
+                            <Descriptions.Item label={t('userInfo.emailAddress')}>
                                 <a href={`mailto:${userDetails.email}`}>
                                     {userDetails.email}
                                 </a>
                             </Descriptions.Item>
 
                             {userDetails.phoneNumber && (
-                                <Descriptions.Item label="Phone Number">
+                                <Descriptions.Item label={t('userInfo.phoneNumber')}>
                                     <a href={`tel:${userDetails.phoneNumber}`}>
                                         {userDetails.phoneNumber}
                                     </a>
@@ -343,15 +353,15 @@ const UserDetailsPage = () => {
                             )}
 
                             {userDetails.address && (
-                                <Descriptions.Item label="Address">
+                                <Descriptions.Item label={t('userInfo.address')}>
                                     {userDetails.address}
                                 </Descriptions.Item>
                             )}
 
                             {userDetails.registrationDate && (
-                                <Descriptions.Item label="Registration Date">
-                                    {new Date(userDetails.registrationDate).toLocaleDateString()} at{' '}
-                                    {new Date(userDetails.registrationDate).toLocaleTimeString()}
+                                <Descriptions.Item label={t('userInfo.registrationDate')}>
+                                    {new Date(userDetails.registrationDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')} {t('common.at')}{' '}
+                                    {new Date(userDetails.registrationDate).toLocaleTimeString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
                                 </Descriptions.Item>
                             )}
                         </Descriptions>
@@ -362,13 +372,13 @@ const UserDetailsPage = () => {
             {/* Transaction Stats Section */}
             <Card className="mb-6">
                 <Title level={4} className="mb-4">
-                    <ShoppingCartOutlined className="mr-2" />
-                    Transaction Overview
+                    <ShoppingCartOutlined className={isRTL ? "ml-2" : "mr-2"} />
+                    {t('transactionOverview.title')}
                 </Title>
                 <Row gutter={[24, 16]}>
                     <Col xs={12} sm={6}>
                         <Statistic
-                            title="Total Transactions"
+                            title={t('transactionOverview.totalTransactions')}
                             value={userStats.totalTransactions}
                             prefix={<ShoppingCartOutlined />}
                             valueStyle={{ color: '#1890ff' }}
@@ -376,7 +386,7 @@ const UserDetailsPage = () => {
                     </Col>
                     <Col xs={12} sm={6}>
                         <Statistic
-                            title="Completed"
+                            title={t('transactionOverview.completed')}
                             value={userStats.completedTransactions}
                             prefix={<CheckCircleOutlined />}
                             valueStyle={{ color: '#52c41a' }}
@@ -384,7 +394,7 @@ const UserDetailsPage = () => {
                     </Col>
                     <Col xs={12} sm={6}>
                         <Statistic
-                            title="Total Spent"
+                            title={t('transactionOverview.totalSpent')}
                             value={userStats.totalSpent}
                             prefix="$"
                             precision={2}
@@ -393,7 +403,7 @@ const UserDetailsPage = () => {
                     </Col>
                     <Col xs={12} sm={6}>
                         <Statistic
-                            title="Average Transaction"
+                            title={t('transactionOverview.averageTransaction')}
                             value={userStats.averageOrderValue}
                             prefix="$"
                             precision={2}
@@ -407,20 +417,20 @@ const UserDetailsPage = () => {
             <Card>
                 <div className="flex justify-between items-center mb-4">
                     <Title level={4} className="mb-0">
-                        <ShoppingCartOutlined className="mr-2" />
-                        Transaction History ({userTransactions.items?.length || 0})
+                        <ShoppingCartOutlined className={isRTL ? "ml-2" : "mr-2"} />
+                        {t('transactionHistory.title', { count: userTransactions.items?.length || 0 })}
                     </Title>
                 </div>
 
                 {userTransactionsLoading ? (
                     <div className="text-center py-12">
                         <Spin size="large" />
-                        <p className="mt-4 text-gray-500">Loading transactions...</p>
+                        <p className="mt-4 text-gray-500">{t('loading.transactions')}</p>
                     </div>
                 ) : userTransactionsError ? (
                     <Alert
-                        message="Error Loading Transactions"
-                        description="Unable to load user transactions. Please try again."
+                        message={t('errors.errorLoadingTransactions')}
+                        description={t('errors.unableToLoadTransactions')}
                         type="error"
                         showIcon
                         action={
@@ -432,14 +442,14 @@ const UserDetailsPage = () => {
                                     pageSize: transactionsPageSize
                                 }))}
                             >
-                                Retry
+                                {t('buttons.retry')}
                             </Button>
                         }
                     />
                 ) : !userTransactions.items || userTransactions.items.length === 0 ? (
                     <Empty
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description="No transactions found for this user"
+                        description={t('transactionHistory.noTransactions')}
                     />
                 ) : (
                     <Table
@@ -454,11 +464,12 @@ const UserDetailsPage = () => {
                             showSizeChanger: true,
                             showQuickJumper: userTransactions.totalPages > 1,
                             showTotal: (total, range) =>
-                                `${range[0]}-${range[1]} of ${total} transactions`,
+                                t('pagination.showTotal', { start: range[0], end: range[1], total }),
                             pageSizeOptions: ['5', '10', '20', '50'],
                             disabled: userTransactionsLoading
                         }}
                         scroll={{ x: 'max-content' }}
+                        className={isRTL ? "rtl-table" : ""}
                     />
                 )}
             </Card>

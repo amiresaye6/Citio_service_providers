@@ -12,42 +12,50 @@ import {
   GlobalOutlined,
   TeamOutlined
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
-const SettingCard = ({ icon, title, description, to }) => (
-  <Link to={to} className="no-underline">
-    <Card
-      hoverable
-      className="h-full transition-all duration-300 hover:shadow-md"
-      style={{ padding: '24px' }}
-    >
-      <div className="flex items-start">
-        <div className="mr-4 p-3 rounded-lg" style={{ background: 'rgba(0,0,0,0.03)' }}>
-          {icon}
+const SettingCard = ({ icon, title, description, to }) => {
+  const { i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
+
+  return (
+    <Link to={to} className="no-underline">
+      <Card
+        hoverable
+        className="h-full transition-all duration-300 hover:shadow-md"
+        style={{ padding: '24px' }}
+      >
+        <div className="flex items-start">
+          <div className={`${isRTL ? 'ml-4' : 'mr-4'} p-3 rounded-lg`} style={{ background: 'rgba(0,0,0,0.03)' }}>
+            {icon}
+          </div>
+          <div>
+            <h3 className="text-lg font-medium mb-2">{title}</h3>
+            <p className="text-gray-500 m-0">{description}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-medium mb-2">{title}</h3>
-          <p className="text-gray-500 m-0">{description}</p>
-        </div>
-      </div>
-    </Card>
-  </Link>
-);
+      </Card>
+    </Link>
+  );
+};
 
 const SettingsPage = () => {
+  const { t, i18n } = useTranslation('settings');
+  const direction = i18n.dir();
+
   return (
-    <div className="p-4 md:p-8 min-h-screen">
+    <div className="p-4 md:p-8 min-h-screen" dir={direction}>
       <PageHeader
-        title="Settings"
-        subtitle="Manage your account preferences and store settings"
+        title={t('pageHeader.title')}
+        subtitle={t('pageHeader.subtitle')}
       />
 
       <Row gutter={[24, 24]}>
-
         <Col xs={24} md={12} lg={8}>
           <SettingCard
             icon={<LockOutlined style={{ fontSize: 24 }} />}
-            title="Security"
-            description="Change your password and manage account security settings"
+            title={t('cards.security.title')}
+            description={t('cards.security.description')}
             to="/settings/security"
           />
         </Col>
@@ -55,8 +63,8 @@ const SettingsPage = () => {
         <Col xs={24} md={12} lg={8}>
           <SettingCard
             icon={<ShopOutlined style={{ fontSize: 24 }} />}
-            title="Store Settings"
-            description="Configure your store appearance, hours, and policies"
+            title={t('cards.storeSettings.title')}
+            description={t('cards.storeSettings.description')}
             to="/vendor/manage-store"
           />
         </Col>
@@ -64,31 +72,28 @@ const SettingsPage = () => {
         <Col xs={24} md={12} lg={8}>
           <SettingCard
             icon={<BellOutlined style={{ fontSize: 24 }} />}
-            title="Notifications"
-            description="Customize email and in-app notification preferences"
+            title={t('cards.notifications.title')}
+            description={t('cards.notifications.description')}
             to="/settings/notifications"
           />
         </Col>
 
-
-
         <Col xs={24} md={12} lg={8}>
           <SettingCard
             icon={<GlobalOutlined style={{ fontSize: 24 }} />}
-            title="Language & Region"
-            description="Set your preferred language and regional preferences"
+            title={t('cards.languageRegion.title')}
+            description={t('cards.languageRegion.description')}
             to="/settings/region"
           />
         </Col>
-
       </Row>
 
       <div className="mt-8 p-4 rounded-lg border border-gray-100">
-        <h3 className="text-lg font-medium mb-2">Need Help?</h3>
+        <h3 className="text-lg font-medium mb-2">{t('help.title')}</h3>
         <p className="text-gray-600">
-          If you need assistance with your settings or have questions about your account,
-          visit our <Link to="/help" className="font-medium">Help Center</Link> or
-          <Link to="/contact" className="font-medium"> contact support</Link>.
+          {t('help.message')}
+          <Link to="/help" className="font-medium"> {t('help.helpCenter')}</Link> {t('help.or')}
+          <Link to="/contact" className="font-medium"> {t('help.contactSupport')}</Link>.
         </p>
       </div>
     </div>

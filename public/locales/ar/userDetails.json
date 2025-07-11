@@ -1,0 +1,66 @@
+{
+    "pageHeader": {
+        "title": "تفاصيل المستخدم",
+        "subtitle": "عرض معلومات المستخدم",
+        "loadingSubtitle": "جاري تحميل معلومات المستخدم...",
+        "userInfoSubtitle": "{{name}} - معلومات العميل"
+    },
+    "buttons": {
+        "backToUsers": "العودة إلى المستخدمين",
+        "retry": "إعادة المحاولة"
+    },
+    "profile": {
+        "customer": "عميل",
+        "joined": "انضم في"
+    },
+    "userInfo": {
+        "title": "معلومات المستخدم",
+        "userId": "معرف المستخدم",
+        "fullName": "الاسم الكامل",
+        "emailAddress": "البريد الإلكتروني",
+        "phoneNumber": "رقم الهاتف",
+        "address": "العنوان",
+        "registrationDate": "تاريخ التسجيل"
+    },
+    "transactionOverview": {
+        "title": "نظرة عامة على المعاملات",
+        "totalTransactions": "إجمالي المعاملات",
+        "completed": "مكتملة",
+        "totalSpent": "إجمالي المدفوعات",
+        "averageTransaction": "متوسط المعاملة"
+    },
+    "transactionHistory": {
+        "title": "سجل المعاملات ({{count}})",
+        "noTransactions": "لم يتم العثور على معاملات لهذا المستخدم"
+    },
+    "table": {
+        "transactionId": "رقم المعاملة",
+        "orderId": "رقم الطلب",
+        "customer": "العميل",
+        "totalAmount": "إجمالي المبلغ",
+        "status": "الحالة",
+        "transactionDate": "تاريخ المعاملة",
+        "paymentMethod": "طريقة الدفع"
+    },
+    "status": {
+        "completed": "مكتملة",
+        "pending": "قيد الانتظار",
+        "failed": "فشلت",
+        "cancelled": "ملغية",
+        "refunded": "مستردة"
+    },
+    "common": {
+        "at": "في"
+    },
+    "loading": {
+        "transactions": "جاري تحميل المعاملات..."
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} معاملة"
+    },
+    "errors": {
+        "transactionsLoadFailed": "فشل تحميل معاملات المستخدم",
+        "errorLoadingTransactions": "خطأ في تحميل المعاملات",
+        "unableToLoadTransactions": "تعذر تحميل معاملات المستخدم. يرجى المحاولة مرة أخرى."
+    }
+}
