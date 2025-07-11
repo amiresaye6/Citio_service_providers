@@ -1,0 +1,45 @@
+{
+    "pageHeader": {
+        "title": "User Management",
+        "subtitle": "View users and their details"
+    },
+    "buttons": {
+        "refresh": "Refresh",
+        "resetFilters": "Reset Filters"
+    },
+    "search": {
+        "placeholder": "Search by name or email..."
+    },
+    "filters": {
+        "datePlaceholder": "Select date"
+    },
+    "table": {
+        "columns": {
+            "user": "User",
+            "id": "ID",
+            "phone": "Phone",
+            "registrationDate": "Registration Date",
+            "actions": "Actions"
+        },
+        "notFound": "Not found"
+    },
+    "tooltips": {
+        "viewUserDetails": "View User Details"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} of {{total}} users",
+        "pageInfo": "Page {{current}} of {{total}}"
+    },
+    "card": {
+        "usersCount": "Users ({{count}})"
+    },
+    "loading": {
+        "users": "Loading users..."
+    },
+    "notifications": {
+        "refreshSuccess": "Users list refreshed"
+    },
+    "errors": {
+        "loadFailed": "Failed to load users"
+    }
+}

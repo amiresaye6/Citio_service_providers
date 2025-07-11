@@ -15,10 +15,12 @@ import {
   ReloadOutlined
 } from '@ant-design/icons';
 import moment from 'moment';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
 const AllTransactionsPage = () => {
+  const { t, i18n } = useTranslation('transactions');
   const dispatch = useDispatch();
   const { transactions, transactionStatus: tStats, loading, error } = useSelector(state => state.admin);
 
@@ -31,6 +33,8 @@ const AllTransactionsPage = () => {
   const [dateFilter, setDateFilter] = useState(null);
   const [paymentMethodFilter, setPaymentMethodFilter] = useState([]);
 
+  const direction = i18n.dir();
+  const isRTL = direction === "rtl";
 
   // Fetch transactions
   useEffect(() => {
@@ -56,28 +60,34 @@ const AllTransactionsPage = () => {
   // Handle errors
   useEffect(() => {
     if (error) {
-      ToastNotifier.error('Failed to load transactions', error);
+      ToastNotifier.error(t('errors.loadFailed'), error);
       dispatch(clearError());
     }
-  }, [error, dispatch]);
+  }, [error, dispatch, t]);
+
+  // Get status translation
+  const getStatusTranslation = (status) => {
+    const statusKey = status?.toLowerCase();
+    return t(`status.${statusKey}`, status);
+  };
 
   // Table columns
   const columns = [
     {
-      title: 'Transaction ID',
+      title: t('table.columns.transactionId'),
       dataIndex: 'id',
       key: 'id',
       sorter: true,
       render: (id) => <span className="font-mono text-sm">TXN-{id}</span>
     },
     {
-      title: 'Customer',
+      title: t('table.columns.customer'),
       dataIndex: 'applicationUserFullName',
       key: 'applicationUserFullName',
       sorter: true,
     },
     {
-      title: 'Order ID',
+      title: t('table.columns.orderId'),
       dataIndex: 'orderId',
       key: 'orderId',
       sorter: true,
@@ -85,7 +95,7 @@ const AllTransactionsPage = () => {
       render: (orderId) => <span className="font-mono text-sm">ORD-{orderId}</span>
     },
     {
-      title: 'Amount',
+      title: t('table.columns.amount'),
       dataIndex: 'totalAmount',
       key: 'totalAmount',
       sorter: true,
@@ -96,7 +106,7 @@ const AllTransactionsPage = () => {
       ),
     },
     {
-      title: 'Payment Method',
+      title: t('table.columns.paymentMethod'),
       dataIndex: 'paymentMethod',
       key: 'paymentMethod',
       responsive: ['lg'],
@@ -107,7 +117,7 @@ const AllTransactionsPage = () => {
       )
     },
     {
-      title: 'Transaction Date',
+      title: t('table.columns.transactionDate'),
       dataIndex: 'transactionDate',
       key: 'transactionDate',
       sorter: true,
@@ -120,7 +130,7 @@ const AllTransactionsPage = () => {
       responsive: ['md'],
     },
     {
-      title: 'Status',
+      title: t('table.columns.status'),
       dataIndex: 'status',
       key: 'status',
       sorter: true,
@@ -152,7 +162,7 @@ const AllTransactionsPage = () => {
 
         return (
           <Tag color={color} icon={icon}>
-            {status}
+            {getStatusTranslation(status)}
           </Tag>
         );
       }
@@ -200,6 +210,7 @@ const AllTransactionsPage = () => {
   const handleResetFilters = () => {
     setSearchValue('');
     setStatusFilter([]);
+    setPaymentMethodFilter([]);
     setDateFilter(null);
     setSortColumn('');
     setSortDirection('');
@@ -224,7 +235,7 @@ const AllTransactionsPage = () => {
       PaymentMethods: paymentMethodFilter.length > 0 ? paymentMethodFilter : undefined
     }));
 
-    ToastNotifier.success('Transactions refreshed');
+    ToastNotifier.success(t('notifications.refreshed'));
   };
 
   // Calculate statistics
@@ -236,10 +247,10 @@ const AllTransactionsPage = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 min-h-screen">
+    <div className="p-4 md:p-6 min-h-screen" dir={direction}>
       <PageHeader
-        title="All Transactions"
-        subtitle="View and manage all transactions in the system"
+        title={t('pageHeader.title')}
+        subtitle={t('pageHeader.subtitle')}
         actions={
           <Button
             icon={<ReloadOutlined />}
@@ -247,7 +258,7 @@ const AllTransactionsPage = () => {
             onClick={handleRefresh}
             loading={loading}
           >
-            Refresh
+            {t('buttons.refresh')}
           </Button>
         }
       />
@@ -260,7 +271,7 @@ const AllTransactionsPage = () => {
               <div className="text-2xl font-bold text-blue-600">
                 {transactionStats.total}
               </div>
-              <div className="text-sm text-gray-500">Total Transactions</div>
+              <div className="text-sm text-gray-500">{t('stats.totalTransactions')}</div>
             </div>
           </Col>
           <Col xs={12} sm={6}>
@@ -268,7 +279,7 @@ const AllTransactionsPage = () => {
               <div className="text-2xl font-bold text-green-600">
                 {transactionStats.completed}
               </div>
-              <div className="text-sm text-gray-500">Completed</div>
+              <div className="text-sm text-gray-500">{t('stats.completed')}</div>
             </div>
           </Col>
           <Col xs={12} sm={6}>
@@ -276,7 +287,7 @@ const AllTransactionsPage = () => {
               <div className="text-2xl font-bold text-orange-600">
                 {transactionStats.pending}
               </div>
-              <div className="text-sm text-gray-500">Pending</div>
+              <div className="text-sm text-gray-500">{t('stats.pending')}</div>
             </div>
           </Col>
           <Col xs={12} sm={6}>
@@ -284,18 +295,18 @@ const AllTransactionsPage = () => {
               <div className="text-xl font-bold text-purple-600">
                 ${transactionStats.totalAmount.toFixed(2)}
               </div>
-              <div className="text-sm text-gray-500">Total Amount</div>
+              <div className="text-sm text-gray-500">{t('stats.totalAmount')}</div>
             </div>
           </Col>
         </Row>
       </Card>
 
       {/* Filters Card */}
-      <Card className="mb-6" title="Filters">
+      <Card className="mb-6" title={t('filters.title')}>
         <Row gutter={[16, 16]}>
           <Col xs={24} md={8}>
             <SearchInput
-              placeholder="Search by customer name or order ID..."
+              placeholder={t('search.placeholder')}
               onSearch={handleSearch}
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
@@ -307,44 +318,44 @@ const AllTransactionsPage = () => {
           <Col xs={24} sm={12} md={4}>
             <Select
               mode="multiple"
-              placeholder="Filter by status"
+              placeholder={t('filters.statusPlaceholder')}
               value={statusFilter}
               onChange={handleStatusFilterChange}
               className="w-full"
               allowClear
             >
-              <Option value="Completed">Completed</Option>
-              <Option value="Pending">Pending</Option>
-              <Option value="Failed">Failed</Option>
-              <Option value="Refunded">Refunded</Option>
+              <Option value="Completed">{t('status.completed')}</Option>
+              <Option value="Pending">{t('status.pending')}</Option>
+              <Option value="Failed">{t('status.failed')}</Option>
+              <Option value="Refunded">{t('status.refunded')}</Option>
             </Select>
           </Col>
 
           <Col xs={24} sm={12} md={4}>
             <Select
               mode="multiple"
-              placeholder="Filter by payment method"
+              placeholder={t('filters.paymentMethodPlaceholder')}
               value={paymentMethodFilter}
               onChange={handlePaymentMethodFilterChange}
               className="w-full"
               allowClear
             >
-              <Option value="Visa">Visa</Option>
-              <Option value="Mastercard">Mastercard</Option>
-              <Option value="American Express">American Express</Option>
-              <Option value="Discover">Discover</Option>
-              <Option value="UnionPay">UnionPay</Option>
-              <Option value="JCB">JCB</Option>
+              <Option value="Visa">{t('paymentMethods.visa')}</Option>
+              <Option value="Mastercard">{t('paymentMethods.mastercard')}</Option>
+              <Option value="American Express">{t('paymentMethods.americanExpress')}</Option>
+              <Option value="Discover">{t('paymentMethods.discover')}</Option>
+              <Option value="UnionPay">{t('paymentMethods.unionPay')}</Option>
+              <Option value="JCB">{t('paymentMethods.jcb')}</Option>
             </Select>
           </Col>
 
           <Col xs={24} sm={12} md={4}>
             <DatePicker
-              placeholder="Select date"
+              placeholder={t('filters.datePlaceholder')}
               value={dateFilter}
               onChange={handleDateFilterChange}
               className="w-full"
-              format="YYYY-MM-DD"
+              format={isRTL ? "YYYY/MM/DD" : "YYYY-MM-DD"}
             />
           </Col>
 
@@ -354,7 +365,7 @@ const AllTransactionsPage = () => {
               className="w-full"
               disabled={loading}
             >
-              Reset Filters
+              {t('buttons.resetFilters')}
             </Button>
           </Col>
         </Row>
@@ -362,17 +373,21 @@ const AllTransactionsPage = () => {
 
       {/* Transactions Table */}
       {loading ? (
-        <LoadingSpinner text="Loading transactions..." />
+        <LoadingSpinner text={t('loading.transactions')} />
       ) : (
         <Card
           title={
             <div className="flex justify-between items-center">
-              <span>Transactions ({transactions.items?.length || 0})</span>
+              <span>{t('card.transactionsCount', { count: transactions.items?.length || 0 })}</span>
               <span className="text-sm text-gray-500">
-                Page {transactions?.pageNumber || 1} of {transactions?.totalPages || 1}
+                {t('pagination.pageInfo', {
+                  current: transactions?.pageNumber || 1,
+                  total: transactions?.totalPages || 1
+                })}
               </span>
             </div>
           }
+          className={isRTL ? "rtl-card" : ""}
         >
           <TableWrapper
             dataSource={transactions.items || []}
@@ -384,11 +399,13 @@ const AllTransactionsPage = () => {
               total: (transactions?.totalPages || 1) * pageSize,
               showSizeChanger: true,
               pageSizeOptions: ['10', '20', '50', '100'],
-              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} transactions`,
+              showTotal: (total, range) => t('pagination.showTotal', { start: range[0], end: range[1], total }),
               showQuickJumper: true,
             }}
             onChange={handleTableChange}
             scroll={{ x: 'max-content' }}
+            className={isRTL ? "rtl-table" : ""}
+            dir={direction}
           />
         </Card>
       )}

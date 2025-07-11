@@ -16,6 +16,7 @@ import {
 } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllUsers, clearError } from '../redux/slices/adminSlice';
+import { useTranslation } from 'react-i18next';
 
 // Import reusable components
 import PageHeader from '../components/common/PageHeader';
@@ -26,6 +27,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useNavigate } from 'react-router-dom';
 
 const UsersPage = () => {
+  const { t, i18n } = useTranslation('users');
   const dispatch = useDispatch();
   const { users, loading, error } = useSelector(state => state.admin);
 
@@ -38,6 +40,8 @@ const UsersPage = () => {
   const [dateFilter, setDateFilter] = useState(null);
 
   const navigate = useNavigate();
+  const direction = i18n.dir();
+  const isRTL = direction === "rtl";
 
   // Load users data
   useEffect(() => {
@@ -49,15 +53,15 @@ const UsersPage = () => {
       sortDirection: sortDirection,
       DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined,
     }));
-    
+
   }, [dispatch, currentPage, pageSize, searchValue, sortColumn, sortDirection, dateFilter]);
   // Handle errors
   useEffect(() => {
     if (error) {
-      ToastNotifier.error('Failed to load users', error);
+      ToastNotifier.error(t('errors.loadFailed'), error);
       dispatch(clearError());
     }
-  }, [error, dispatch]);
+  }, [error, dispatch, t]);
 
   // Search function
   const handleSearch = (value) => {
@@ -96,7 +100,7 @@ const UsersPage = () => {
       DateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : undefined,
     }));
 
-    ToastNotifier.success('Users list refreshed');
+    ToastNotifier.success(t('notifications.refreshSuccess'));
   };
 
   // Table change handler for sorting and pagination
@@ -116,7 +120,7 @@ const UsersPage = () => {
   // Table columns
   const columns = [
     {
-      title: 'User',
+      title: t('table.columns.user'),
       key: 'user',
       render: (_, record) => (
         <div className="flex items-center">
@@ -124,7 +128,7 @@ const UsersPage = () => {
             src={`https://service-provider.runasp.net${record.imageUrl}`}
             icon={<UserOutlined />}
             size={40}
-            className="mr-4"
+            className={isRTL ? "ml-4" : "mr-4"}
           />
           <div>
             <div className="font-medium">{record.fullName}</div>
@@ -138,36 +142,36 @@ const UsersPage = () => {
       width: 200,
     },
     {
-      title: 'ID',
+      title: t('table.columns.id'),
       dataIndex: 'id',
       key: 'id',
-      render: (id) => id || 'Not found',
+      render: (id) => id || t('table.notFound'),
       width: 200,
     },
     {
-      title: 'Phone',
+      title: t('table.columns.phone'),
       dataIndex: 'phoneNumber',
       key: 'phoneNumber',
-      render: (phoneNumber) => phoneNumber || 'Not found',
+      render: (phoneNumber) => phoneNumber || t('table.notFound'),
       responsive: ['md'],
       width: 150,
     },
     {
-      title: 'Registration Date',
+      title: t('table.columns.registrationDate'),
       dataIndex: 'registrationDate',
       key: 'registrationDate',
       sorter: true,
-      render: (date) => date ? new Date(date).toLocaleDateString() : 'Not found',
+      render: (date) => date ? new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US') : t('table.notFound'),
       responsive: ['lg'],
       width: 150,
     },
     {
-      title: 'Actions',
+      title: t('table.columns.actions'),
       key: 'actions',
       width: 80,
       render: (_, record) => (
         <Space size="middle">
-          <Tooltip title="View User Details">
+          <Tooltip title={t('tooltips.viewUserDetails')}>
             <Button
               icon={<InfoCircleOutlined />}
               size="middle"
@@ -185,11 +189,11 @@ const UsersPage = () => {
   const displayData = users?.items || [];
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="p-6 min-h-screen" dir={direction}>
       {/* Page Header */}
       <PageHeader
-        title="User Management"
-        subtitle="View users and their details"
+        title={t('pageHeader.title')}
+        subtitle={t('pageHeader.subtitle')}
         actions={
           <Button
             icon={<ReloadOutlined />}
@@ -198,7 +202,7 @@ const UsersPage = () => {
             size="large"
             type="primary"
           >
-            Refresh
+            {t('buttons.refresh')}
           </Button>
         }
       />
@@ -208,7 +212,7 @@ const UsersPage = () => {
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} md={12} lg={8}>
             <SearchInput
-              placeholder="Search by name or email..."
+              placeholder={t('search.placeholder')}
               onSearch={handleSearch}
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
@@ -220,11 +224,11 @@ const UsersPage = () => {
 
           <Col xs={24} sm={12} md={4}>
             <DatePicker
-              placeholder="Select date"
+              placeholder={t('filters.datePlaceholder')}
               value={dateFilter}
               onChange={handleDateFilterChange}
               className="w-full"
-              format="YYYY-MM-DD"
+              format={isRTL ? "YYYY/MM/DD" : "YYYY-MM-DD"}
             />
           </Col>
 
@@ -234,7 +238,7 @@ const UsersPage = () => {
               size="large"
               className="w-full"
             >
-              Reset Filters
+              {t('buttons.resetFilters')}
             </Button>
           </Col>
         </Row>
@@ -242,14 +246,17 @@ const UsersPage = () => {
 
       {/* Users Table */}
       {loading ? (
-        <LoadingSpinner text="Loading users..." />
+        <LoadingSpinner text={t('loading.users')} />
       ) : (
         <Card
-          title={`Users (${displayData.length})`}
+          title={t('card.usersCount', { count: displayData.length })}
           className="mb-6"
           extra={
             <div className="text-sm text-gray-500">
-              {`Page ${users?.pageNumber || 1} of ${users?.totalPages || 1}`}
+              {t('pagination.pageInfo', {
+                current: users?.pageNumber || 1,
+                total: users?.totalPages || 1
+              })}
             </div>
           }
         >
@@ -263,10 +270,12 @@ const UsersPage = () => {
               total: (users?.totalPages || 1) * pageSize,
               showSizeChanger: true,
               pageSizeOptions: ['8', '16', '32', '50'],
-              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
+              showTotal: (total, range) => t('pagination.showTotal', { start: range[0], end: range[1], total }),
             }}
             onChange={handleTableChange}
             scroll={{ x: 'max-content' }}
+            className={isRTL ? 'rtl-table' : ''}
+            dir={direction}
           />
         </Card>
       )}

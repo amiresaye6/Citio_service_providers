@@ -1,0 +1,67 @@
+{
+    "pageHeader": {
+        "title": "جميع المعاملات",
+        "subtitle": "عرض وإدارة جميع المعاملات في النظام"
+    },
+    "buttons": {
+        "refresh": "تحديث",
+        "resetFilters": "إعادة تعيين الفلاتر"
+    },
+    "stats": {
+        "totalTransactions": "إجمالي المعاملات",
+        "completed": "مكتملة",
+        "pending": "قيد الانتظار",
+        "totalAmount": "إجمالي المبلغ"
+    },
+    "filters": {
+        "title": "الفلاتر",
+        "statusPlaceholder": "تصفية حسب الحالة",
+        "paymentMethodPlaceholder": "تصفية حسب طريقة الدفع",
+        "datePlaceholder": "اختر التاريخ"
+    },
+    "search": {
+        "placeholder": "البحث عن طريق اسم العميل أو رقم الطلب..."
+    },
+    "status": {
+        "completed": "مكتملة",
+        "pending": "قيد الانتظار",
+        "failed": "فشلت",
+        "processing": "قيد المعالجة",
+        "refunded": "مستردة"
+    },
+    "paymentMethods": {
+        "visa": "فيزا",
+        "mastercard": "ماستركارد",
+        "americanExpress": "أمريكان إكسبرس",
+        "discover": "ديسكفر",
+        "unionPay": "يونيون باي",
+        "jcb": "جي سي بي"
+    },
+    "table": {
+        "columns": {
+            "transactionId": "رقم المعاملة",
+            "customer": "العميل",
+            "orderId": "رقم الطلب",
+            "amount": "المبلغ",
+            "paymentMethod": "طريقة الدفع",
+            "transactionDate": "تاريخ المعاملة",
+            "status": "الحالة"
+        }
+    },
+    "card": {
+        "transactionsCount": "المعاملات ({{count}})"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} معاملة",
+        "pageInfo": "صفحة {{current}} من {{total}}"
+    },
+    "loading": {
+        "transactions": "جاري تحميل المعاملات..."
+    },
+    "notifications": {
+        "refreshed": "تم تحديث المعاملات"
+    },
+    "errors": {
+        "loadFailed": "فشل تحميل المعاملات"
+    }
+}

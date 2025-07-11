@@ -1,0 +1,67 @@
+{
+    "pageHeader": {
+        "title": "All Transactions",
+        "subtitle": "View and manage all transactions in the system"
+    },
+    "buttons": {
+        "refresh": "Refresh",
+        "resetFilters": "Reset Filters"
+    },
+    "stats": {
+        "totalTransactions": "Total Transactions",
+        "completed": "Completed",
+        "pending": "Pending",
+        "totalAmount": "Total Amount"
+    },
+    "filters": {
+        "title": "Filters",
+        "statusPlaceholder": "Filter by status",
+        "paymentMethodPlaceholder": "Filter by payment method",
+        "datePlaceholder": "Select date"
+    },
+    "search": {
+        "placeholder": "Search by customer name or order ID..."
+    },
+    "status": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "failed": "Failed",
+        "processing": "Processing",
+        "refunded": "Refunded"
+    },
+    "paymentMethods": {
+        "visa": "Visa",
+        "mastercard": "Mastercard",
+        "americanExpress": "American Express",
+        "discover": "Discover",
+        "unionPay": "UnionPay",
+        "jcb": "JCB"
+    },
+    "table": {
+        "columns": {
+            "transactionId": "Transaction ID",
+            "customer": "Customer",
+            "orderId": "Order ID",
+            "amount": "Amount",
+            "paymentMethod": "Payment Method",
+            "transactionDate": "Transaction Date",
+            "status": "Status"
+        }
+    },
+    "card": {
+        "transactionsCount": "Transactions ({{count}})"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} of {{total}} transactions",
+        "pageInfo": "Page {{current}} of {{total}}"
+    },
+    "loading": {
+        "transactions": "Loading transactions..."
+    },
+    "notifications": {
+        "refreshed": "Transactions refreshed"
+    },
+    "errors": {
+        "loadFailed": "Failed to load transactions"
+    }
+}

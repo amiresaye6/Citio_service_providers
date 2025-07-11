@@ -1,0 +1,45 @@
+{
+    "pageHeader": {
+        "title": "إدارة المستخدمين",
+        "subtitle": "عرض المستخدمين وتفاصيلهم"
+    },
+    "buttons": {
+        "refresh": "تحديث",
+        "resetFilters": "إعادة تعيين الفلاتر"
+    },
+    "search": {
+        "placeholder": "البحث بالاسم أو البريد الإلكتروني..."
+    },
+    "filters": {
+        "datePlaceholder": "اختر التاريخ"
+    },
+    "table": {
+        "columns": {
+            "user": "المستخدم",
+            "id": "المعرف",
+            "phone": "الهاتف",
+            "registrationDate": "تاريخ التسجيل",
+            "actions": "الإجراءات"
+        },
+        "notFound": "غير موجود"
+    },
+    "tooltips": {
+        "viewUserDetails": "عرض تفاصيل المستخدم"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} مستخدم",
+        "pageInfo": "صفحة {{current}} من {{total}}"
+    },
+    "card": {
+        "usersCount": "المستخدمين ({{count}})"
+    },
+    "loading": {
+        "users": "جاري تحميل المستخدمين..."
+    },
+    "notifications": {
+        "refreshSuccess": "تم تحديث قائمة المستخدمين"
+    },
+    "errors": {
+        "loadFailed": "فشل تحميل المستخدمين"
+    }
+}
