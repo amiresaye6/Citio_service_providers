@@ -1,12 +1,19 @@
 @import "tailwindcss";
+
 [dir="rtl"] {
     text-align: right;
+}
+
+body {
+    font-family: "Cairo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* Other styles */
 }
 
 /* global-styles.css */
 :root {
     /* Default light theme variables will be set by ThemeProvider */
-    --color-primary: #2973B2;
+    --font-family: "Cairo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --color-primary: #129990;
     --color-text: #777777;
     --color-text-secondary: #54595F;
     --color-success: #17B978;
@@ -17,6 +24,10 @@
     --color-bg-base: #F2EFE7;
     --color-accent: #61CE70;
     --color-error: #CF2E2E;
+}
+
+* {
+    font-family: inherit;
 }
 
 /* For any custom components that don't use Ant Design */

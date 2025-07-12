@@ -1,0 +1,21 @@
+/* AntdOverrides.css - Import this in your main.jsx after antd styles */
+.ant-btn,
+.ant-typography,
+.ant-input,
+.ant-select,
+.ant-dropdown-menu-item,
+.ant-menu-item,
+.ant-tabs-tab,
+.ant-modal-title,
+.ant-form-item-label > label,
+.ant-form-item,
+.ant-table,
+.ant-pagination,
+.ant-tag,
+.ant-alert,
+.ant-notification-notice-message,
+.ant-notification-notice-description,
+.ant-message,
+.ant-drawer-title {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
