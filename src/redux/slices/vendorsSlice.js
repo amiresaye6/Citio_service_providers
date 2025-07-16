@@ -251,6 +251,110 @@ export const respondToRating = createAsyncThunk(
     }
 );
 
+
+export const fetchVendorOffers = createAsyncThunk(
+    'vendors/fetchVendorOffers',
+    async ({ PageNumer = 1, PageSize = 10, SearchValue = '', SortColumn = '', SortDirection = '', Status = null }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const params = { PageNumer, PageSize };
+            if (SearchValue) params.SearchValue = SearchValue;
+            if (SortColumn) params.SortColumn = SortColumn;
+            if (SortDirection) params.SortDirection = SortDirection;
+            if (Status !== null) params.Status = Status;
+
+            const response = await axios.get(`${API_BASE_URL}/Banners/vendor/banners`, {
+                params,
+                headers: {
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            console.log('fetchVendorOffers API response:', response.data); // DEBUG
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to fetch vendor Offers');
+        }
+    }
+);
+export const addOffer = createAsyncThunk(
+    'vendors/addOffer',
+    async (offer, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+            formData.append('ProductId', offer.ProductId);
+            formData.append('Description', offer.Description);
+            formData.append('DiscountPercentage', offer.DiscountPercentage);
+            formData.append('DiscountCode', offer.DiscountCode);
+            console.log('addOffer thunk file object:', offer.image, offer.image instanceof File);
+            formData.append('ImageUrl', offer.image); // <-- FIXED KEY
+            const response = await axios.post(`${API_BASE_URL}/Banners/vendor/banners`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to add Offer');
+        }
+    }
+);
+
+export const UpdateOffer = createAsyncThunk(
+    'vendors/updateOffer',
+    async ({ vendorId, ProductId, item }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+            
+            // Add form fields to match BannerRequest2
+            formData.append('ProductId', ProductId);
+            formData.append('Description', item.Description || '');
+            formData.append('DiscountPercentage', item.DiscountPercentage || 0);
+            formData.append('DiscountCode', item.DiscountCode || '');
+            
+            // Add image if present
+            if (item.image) {
+                formData.append('ImageUrl', item.image);
+            }
+            
+            const response = await axios.put(`${API_BASE_URL}/Banners/update`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    accept: '*/*',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return { vendorId, ProductId, item: response.data };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to update Offer');
+        }
+    }
+);
+
+export const deleteOffer = createAsyncThunk(
+    'vendors/deleteOffer',
+    async ({ productId, discountPercentage }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${API_BASE_URL}/Banners/${productId}`, {
+                params: { DiscountPercentage: discountPercentage },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return { productId, discountPercentage };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Failed to delete offer');
+        }
+    }
+);
+
+
 export const deactivateVendor = createAsyncThunk(
     'vendors/deactivateVendor',
     async (vendorId, { rejectWithValue }) => {
@@ -511,6 +615,14 @@ const vendorsSlice = createSlice({
             hasPreviousPage: false,
             hasNextPage: false,
         },
+        vendorOffers: {
+            items: [],
+            pageNumber: 1,
+            totalPages: 0,
+            totalCount: 0,
+            hasPreviousPage: false,
+            hasNextPage: false,
+        },
         vendorOrders: {
             items: [],
             pageNumber: 1,
@@ -657,6 +769,18 @@ const vendorsSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
+            .addCase(addOffer.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(addOffer.fulfilled, (state, action) => {
+                state.loading = false;
+                state.vendorOffers.items.push(action.payload);
+            })
+            .addCase(addOffer.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
             .addCase(updateMenuItem.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -672,6 +796,36 @@ const vendorsSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
+            .addCase(UpdateOffer.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(UpdateOffer.fulfilled, (state, action) => {
+                state.loading = false;
+                const { ProductId, item } = action.payload;
+                state.vendorOffers.items = state.vendorOffers.items.map((Item) =>
+                    Item.id === ProductId ? { ...Item, ...item } : Item
+                );
+            })
+            .addCase(UpdateOffer.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(deleteOffer.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteOffer.fulfilled, (state, action) => {
+                state.loading = false;
+                const { productId, discountPercentage } = action.payload;
+                state.vendorOffers.items = state.vendorOffers.items.filter(
+                    (offer) => offer.productId !== productId || offer.discountPercentage !== discountPercentage
+                );
+            })
+            .addCase(deleteOffer.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
             .addCase(fetchVendorRatings.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -683,6 +837,35 @@ const vendorsSlice = createSlice({
             .addCase(fetchVendorRatings.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+            .addCase(fetchVendorOffers.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchVendorOffers.fulfilled, (state, action) => {
+                state.loading = false;
+                const data = action.payload;
+                state.vendorOffers = {
+                    items: data.items || data.Items || [],
+                    pageNumber: data.pageNumber ?? data.PageNumer ?? 1,
+                    totalPages: data.totalPages ?? data.TotalPages ?? 1,
+                    totalCount: data.totalCount ?? data.TotalCount ?? (data.items ? data.items.length : 0),
+                    hasPreviousPage: data.hasPreviousPage ?? data.HasPreviousPage ?? false,
+                    hasNextPage: data.hasNextPage ?? data.HasNextPage ?? false,
+                };
+            })
+            .addCase(fetchVendorOffers.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+                // Clear offers on error
+                state.vendorOffers = {
+                    items: [],
+                    pageNumber: 1,
+                    totalPages: 0,
+                    totalCount: 0,
+                    hasPreviousPage: false,
+                    hasNextPage: false,
+                };
             })
             .addCase(flagRating.pending, (state) => {
                 state.loading = true;

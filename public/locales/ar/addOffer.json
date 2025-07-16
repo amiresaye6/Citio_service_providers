@@ -1,0 +1,33 @@
+{
+  "pageHeader": {
+    "title": "إضافة عرض"
+  },
+  "cardHeader": {
+    "title": "إضافة عرض"
+  },
+  "product": "المنتج",
+  "productPlaceholder": "اختر منتجًا",
+  "productRequired": "المنتج مطلوب",
+  "description": "الوصف",
+  "descriptionRequired": "الوصف مطلوب",
+  "discountPercentage": "نسبة الخصم",
+  "discountRequired": "نسبة الخصم مطلوبة",
+  "discountCode": "كود الخصم",
+  "image": "الصورة",
+  "submit": "إضافة عرض",
+  "validation": {
+    "imageRequired": "الصورة مطلوبة",
+    "imageTypeInvalid": "نوع الصورة غير صالح",
+    "imageSizeInvalid": "يجب أن يكون حجم الصورة أقل من 2 ميجابايت"
+  },
+  "upload": {
+    "button": "رفع"
+  },
+  "notifications": {
+    "addOfferSuccess": "تمت إضافة العرض بنجاح!",
+    "addOfferFailed": "فشل في إضافة العرض."
+  },
+  "buttons": {
+    "backToMenu": "العودة إلى القائمة"
+  }
+} 

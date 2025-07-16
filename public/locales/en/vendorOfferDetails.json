@@ -1,0 +1,65 @@
+{
+  "pageHeader": {
+    "title": "Offer Details",
+    "subtitle": "View and edit offer information"
+  },
+  "breadcrumb": {
+    "offers": "Offers"
+  },
+  "buttons": {
+    "backToOffers": "Back to Offers",
+    "editOffer": "Edit Offer",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "changeImage": "Change Image",
+    "addImage": "Add Image"
+  },
+  "tabs": {
+    "details": "Details"
+  },
+  "editForm": {
+    "offerInformation": "Offer Information",
+    "description": "Description",
+    "discountPercentage": "Discount Percentage",
+    "discountCode": "Discount Code"
+  },
+  "placeholders": {
+    "description": "Enter offer description",
+    "discountCode": "Enter discount code (optional)"
+  },
+  "validation": {
+    "descriptionRequired": "Please enter a description",
+    "discountPercentageRequired": "Please enter discount percentage"
+  },
+  "offerDetails": {
+    "product": "Product",
+    "description": "Description",
+    "noDescription": "No description provided",
+    "discountCode": "Discount Code",
+    "noCode": "No discount code"
+  },
+  "modal": {
+    "imagePreview": "Image Preview",
+    "preview": "Preview"
+  },
+  "loading": {
+    "offerDetails": "Loading offer details..."
+  },
+  "errors": {
+    "loadingOffer": "Error Loading Offer",
+    "failedToLoad": "Failed to load offer details. Please try again.",
+    "loadFailed": "Failed to load offer: {{error}}",
+    "updateFailed": "Failed to update offer: {{error}}",
+    "unknown": "Unknown error"
+  },
+  "notifications": {
+    "updateSuccess": "Offer updated successfully!",
+    "duplicateOffer": "This offer already exists with the same details."
+  },
+  "emptyState": {
+    "noOffer": "No offer found"
+  },
+  "image": {
+    "noImage": "No Image Available"
+  }
+} 

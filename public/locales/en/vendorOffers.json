@@ -1,0 +1,58 @@
+{
+    "pageHeader": {
+        "title": "Vendor Offers",
+        "subtitle": "Display and manage offers and discounts provided by the seller"
+    },
+    "buttons": {
+        "refresh": "Refresh" ,
+        "view": "View" ,
+        "delete": "Delete" ,
+        "edit": "Edit",
+        "addOffer": "Add Offer"
+    },
+    "actions": {
+        "viewEdit": "View & Edit",
+        "delete": "Delete"
+    },
+    "search": {
+        "placeholder": "Search By Discription Or Code..."
+    },
+    "filters": {
+        "placeholder": "Filter by Discount",
+        "allDiscounts": "All Discounts",
+        "above50%": "above 50%",
+        "above40%": "above 40%",
+        "above30%": "above 30%",
+        "above20%": "above 20%",
+        "below20%": "below 20%"
+    },
+    "table": {
+        "image": "Image",
+        "product": "Product",
+        "discount": "Discount",
+        "discription": "Discription",
+        "code": "Code" , 
+        "actions": "Actions"
+    },
+    "Offers": {
+        "noComment": "No Content"
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} From {{total}} Discount"
+    },
+    "notifications": {
+        "loadFailed": "Failed to load Discounts",
+        "refreshTitle": "Refresh",
+        "refreshMessage": "Ratings refreshed."
+    },
+    "loading": "Loading Discounts...",
+    "empty": {
+        "noRatings": "No Discounts found"
+    },
+    "modal": {
+        "confirmDeleteTitle": "Confirm Deletion",
+        "confirmDeleteMessage": "Are you sure you want to delete this offer? This action cannot be undone.",
+        "yesDelete": "Delete",
+        "cancel": "Cancel"
+    }
+}

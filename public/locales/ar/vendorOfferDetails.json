@@ -1,0 +1,65 @@
+{
+  "pageHeader": {
+    "title": "تفاصيل العرض",
+    "subtitle": "عرض وتعديل معلومات العرض"
+  },
+  "breadcrumb": {
+    "offers": "العروض"
+  },
+  "buttons": {
+    "backToOffers": "العودة إلى العروض",
+    "editOffer": "تعديل العرض",
+    "saveChanges": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "changeImage": "تغيير الصورة",
+    "addImage": "إضافة صورة"
+  },
+  "tabs": {
+    "details": "التفاصيل"
+  },
+  "editForm": {
+    "offerInformation": "معلومات العرض",
+    "description": "الوصف",
+    "discountPercentage": "نسبة الخصم",
+    "discountCode": "كود الخصم"
+  },
+  "placeholders": {
+    "description": "أدخل وصف العرض",
+    "discountCode": "أدخل كود الخصم (اختياري)"
+  },
+  "validation": {
+    "descriptionRequired": "يرجى إدخال وصف",
+    "discountPercentageRequired": "يرجى إدخال نسبة الخصم"
+  },
+  "offerDetails": {
+    "product": "المنتج",
+    "description": "الوصف",
+    "noDescription": "لا يوجد وصف",
+    "discountCode": "كود الخصم",
+    "noCode": "لا يوجد كود خصم"
+  },
+  "modal": {
+    "imagePreview": "معاينة الصورة",
+    "preview": "معاينة"
+  },
+  "loading": {
+    "offerDetails": "جاري تحميل تفاصيل العرض..."
+  },
+  "errors": {
+    "loadingOffer": "خطأ في تحميل العرض",
+    "failedToLoad": "فشل تحميل تفاصيل العرض. الرجاء المحاولة مرة أخرى.",
+    "loadFailed": "فشل تحميل العرض: {{error}}",
+    "updateFailed": "فشل تحديث العرض: {{error}}",
+    "unknown": "خطأ غير معروف"
+  },
+  "notifications": {
+    "updateSuccess": "تم تحديث العرض بنجاح!",
+    "duplicateOffer": "هذا العرض موجود بالفعل بنفس التفاصيل."
+  },
+  "emptyState": {
+    "noOffer": "لم يتم العثور على عرض"
+  },
+  "image": {
+    "noImage": "لا توجد صورة متاحة"
+  }
+} 

@@ -8,7 +8,8 @@ import {
     PlusOutlined,
     InfoCircleOutlined,
     ExclamationCircleOutlined,
-    WarningOutlined
+    WarningOutlined,
+    TagOutlined
 } from '@ant-design/icons';
 import PageHeader from '../components/common/PageHeader';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -349,7 +350,7 @@ const VendorMenuPage = () => {
                         icon={<PlusOutlined />}
                         onClick={() => navigate('/vendor/menu/add')}
                     >
-                        {t('buttons.addProduct')}
+                        {t('buttons.addProduct', 'Add Product')}
                     </Button>
                 }
             />

@@ -1,0 +1,33 @@
+{
+  "pageHeader": {
+    "title": "Add Offer"
+  },
+  "cardHeader": {
+    "title": "Add Offer"
+  },
+  "product": "Product",
+  "productPlaceholder": "Select a product",
+  "productRequired": "Product is required",
+  "description": "Description",
+  "descriptionRequired": "Description is required",
+  "discountPercentage": "Discount Percentage",
+  "discountRequired": "Discount is required",
+  "discountCode": "Discount Code",
+  "image": "Image",
+  "submit": "Add Offer",
+  "validation": {
+    "imageRequired": "Image is required",
+    "imageTypeInvalid": "Invalid image type",
+    "imageSizeInvalid": "Image must be smaller than 2MB"
+  },
+  "upload": {
+    "button": "Upload"
+  },
+  "notifications": {
+    "addOfferSuccess": "Offer added successfully!",
+    "addOfferFailed": "Failed to add offer."
+  },
+  "buttons": {
+    "backToMenu": "Back to Menu"
+  }
+} 

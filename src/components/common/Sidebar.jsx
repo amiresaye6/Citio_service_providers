@@ -12,7 +12,8 @@ import {
     IdcardOutlined,
     BookOutlined,
     PlusCircleOutlined,
-    DollarOutlined
+    DollarOutlined,
+    TagOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -195,6 +196,16 @@ const SideBar = ({ collapsed, visible = false, onClose = () => { }, isMobile = f
             },
             type: 'vendor',
         },
+        {
+            key: '17',
+            icon: <TagOutlined/>,
+            label: t('sidebar.vendorOffers'),
+            onClick: () => {
+                navigate('/vendor/Offers');
+                if (isMobile) onClose();
+            },
+            type: 'vendor',
+        }
     ];
 
     // Filter menu items based on roles from the token

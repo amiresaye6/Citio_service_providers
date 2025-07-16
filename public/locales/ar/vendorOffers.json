@@ -1,0 +1,58 @@
+{
+    "pageHeader": {
+        "title": "عروض البائع",
+        "subtitle": "عرض وإدارة العروض والخصومات المقدمه من البائع"
+    },
+    "buttons": {
+        "refresh": "تحديث",
+        "view": "عرض",
+        "delete": "حذف",
+        "edit": "تعديل",
+        "addOffer": "إضافة عرض"
+    },
+    "actions": {
+        "viewEdit": "عرض وتعديل",
+        "delete": "حذف"
+    },
+    "search": {
+        "placeholder": " البحث حسب الوصف او الكود..."
+    },
+    "filters": {
+        "placeholder": "تصفية حسب التقييم",
+        "allDiscounts": "جميع الخصومات",
+        "above50%": "اعلى من %50",
+        "above40%": "اعلى من %40",
+        "above30%": "اعلى من %30",
+        "above20%": "اعلى من %20",
+        "below20%": "  اقل من %20"
+    },
+    "table": {
+        "image": "الصوره",
+        "product": "المنتج",
+        "discount": "الخصم",
+        "discription": "الوصف",
+        "code": "الكود" , 
+        "actions": "الإجراءات"
+    },
+    "Offers": {
+        "noComment": "لا يوجد."
+    },
+    "pagination": {
+        "showTotal": "{{start}}-{{end}} من {{total}} خصم"
+    },
+    "notifications": {
+        "loadFailed": "فشل تحميل الخصومات",
+        "refreshTitle": "تحديث",
+        "refreshMessage": "تم تحديث الخصومات."
+    },
+    "loading": "جاري تحميل الخصومات...",
+    "empty": {
+        "noOffers": "لم يتم العثور على خصومات"
+    },
+    "modal": {
+        "confirmDeleteTitle": "تأكيد الحذف",
+        "confirmDeleteMessage": "هل أنت متأكد أنك تريد حذف هذا العرض؟ هذا الإجراء لا يمكن التراجع عنه.",
+        "yesDelete": "حذف",
+        "cancel": "إلغاء"
+    }
+}

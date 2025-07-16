@@ -12,6 +12,8 @@ import UsersPage from '../pages/UsersPage';
 import AllTransactionsPage from '../pages/AllTransactionsPage';
 import VendorManagementPage from '../pages/VendorManagementPage';
 import VendorRatingsPage from '../pages/VendorRatingsPage';
+import VendorOffersPage from '../pages/VendorOffersPage';
+import AddOfferPage from '../pages/AddOfferPage';
 import AdminRatingsPage from '../pages/AdminRatingsPage';
 import AdminOrdersPage from '../pages/AdminOrdersPage';
 import VendorDashboardPage from '../pages/VendorDashboardPage';
@@ -24,6 +26,7 @@ import VendorMenuItemPage from '../pages/VendorMenuItemPage';
 import SecuritySettingsPage from '../pages/SecuritySettingsPage';
 import SettingsPage from '../pages/SettingsPage';
 import VendorTransactionsPage from '../pages/VendorTransactionsPage';
+import VendorOfferDetailsPage from '../pages/VendorOfferDetailsPage';
 
 const AppRoutes = () => (
     <Routes>
@@ -170,6 +173,34 @@ const AppRoutes = () => (
                     <ProtectedRoute>
                         {/* <AdminRatingsPage /> */}
                         <VendorRatingsPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/vendor/Offers"
+                element={
+                    <ProtectedRoute>
+                        {/* <AdminRatingsPage /> */}
+                        <VendorOffersPage/>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/vendor/offers/add"
+                element={
+                    <ProtectedRoute>
+                        <AddOfferPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/vendor/offers/:productId/:discountPercentage"
+                element={
+                    <ProtectedRoute>
+                        <VendorOfferDetailsPage />
                     </ProtectedRoute>
                 }
             />
